@@ -34,7 +34,7 @@
         .progress-ring circle{fill:none;stroke-width:4}
         .progress-ring .bg{stroke:rgba(255,255,255,.1)}
         .progress-ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .5s ease}
-        .progress-ring .txt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.75rem;font-weight:700;color:var(--accent)}
+        .progress-ring .txt{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--accent)}
         
         .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center}
         .search{flex:1;min-width:140px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:var(--card);color:var(--text);font-size:.9rem}
@@ -91,13 +91,14 @@
         .item:hover{border-color:rgba(255,255,255,.15)}
         .item.done{border-color:var(--accent);background:rgba(74,222,128,.05)}
         .item.done .item-name::after{content:' ✓';color:var(--accent)}
-        .item-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-        .item-icon{font-size:1.3rem}
-        .item-name{font-weight:600;font-size:.95rem}
+        .item-row{display:flex;align-items:center;gap:8px}
+        .item-icon{font-size:1.2rem}
+        .item-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+        .item-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .item-sub{font-size:.75rem;color:var(--muted)}
-        .item-prog{margin-left:auto;color:var(--accent);font-weight:600;font-size:.85rem}
-        .item-btns{display:flex;gap:4px;margin-left:8px}
-        .item-btns button{padding:4px 8px;font-size:.7rem;border-radius:4px;background:rgba(0,0,0,.3);color:var(--muted);border:none;cursor:pointer;transition:all .15s}
+        .item-prog{color:var(--accent);font-weight:600;font-size:.8rem;white-space:nowrap}
+        .item-btns{display:flex;gap:4px}
+        .item-btns button{padding:5px 10px;font-size:.7rem;border-radius:4px;background:rgba(0,0,0,.3);color:var(--muted);border:none;cursor:pointer;transition:all .15s}
         .item-btns button:hover{color:var(--accent);background:rgba(74,222,128,.1)}
         
         .piks{display:flex;gap:5px;flex-wrap:wrap}
@@ -140,10 +141,10 @@
         .empty{text-align:center;padding:32px;color:var(--muted)}
         
         /* 浮動按鈕組 */
-        .float-btns{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
-        .float-btns.show{opacity:1;pointer-events:auto}
-        .float-btn{width:52px;height:52px;border-radius:50%;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.1);cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:all .2s}
+        .float-btns{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:12px;z-index:99}
+        .float-btn{width:56px;height:56px;border-radius:50%;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.15);cursor:pointer;font-size:1.5rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:all .2s}
         .float-btn:hover{transform:scale(1.1);border-color:var(--accent)}
+        .float-btn:active{transform:scale(0.95)}
         .float-btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
         .hide-mobile{display:inline-flex}
@@ -175,16 +176,17 @@
             .event-chip{padding:5px 8px;font-size:.75rem}
             .event-tag{padding:4px 8px;font-size:.75rem}
             .item{padding:10px 12px;margin-bottom:5px}
-            .item-top{flex-wrap:wrap;gap:8px}
-            .item-icon{font-size:1.2rem}
-            .item-name{font-size:.9rem}
-            .item-btns{margin-left:0;margin-top:6px;width:100%;justify-content:flex-end}
+            .item-row{flex-wrap:nowrap}
+            .item-icon{font-size:1.1rem}
+            .item-name{font-size:.85rem}
+            .item-prog{font-size:.75rem}
+            .item-btns button{padding:4px 8px;font-size:.65rem}
             .piks{gap:4px}
             .pik{width:34px;height:34px}
             .miss-chip{padding:5px 10px;font-size:.75rem}
             .cat-head h3{font-size:.85rem}
             .float-btns{bottom:16px;right:16px}
-            .float-btn{width:48px;height:48px;font-size:1.2rem}
+            .float-btn{width:52px;height:52px;font-size:1.4rem}
         }
     </style>
 </head>
@@ -574,7 +576,7 @@ function renderItem(d){
     const cnt=d.c.filter(c=>own[key(d.id,c)]).length;
     const done=cnt===d.c.length;
     const cols=JSON.stringify(d.c).replace(/"/g,"'");
-    return `<div class="item ${done?'done':''}"><div class="item-top"><span class="item-icon">${d.i}</span><div><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub"> ${d.note}</span>`:''}</div><span class="item-prog">${cnt}/${d.c.length}</span><div class="item-btns"><button onclick="event.stopPropagation();fillD('${d.id}',${cols})">全選</button><button onclick="event.stopPropagation();clearD('${d.id}',${cols})">清空</button></div></div><div class="piks">${C.map(c=>{const av=d.c.includes(c);const has=av&&own[key(d.id,c)];return`<div class="pik ${has?'own':''} ${!av?'na':''}" ${av?`onclick="toggle('${d.id}','${c}')"`:''}title="${CN[c]}"><div class="d dot ${c}"></div></div>`;}).join('')}</div></div>`;
+    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${d.c.length}</span></div><div class="item-btns"><button onclick="event.stopPropagation();fillD('${d.id}',${cols})">全選</button><button onclick="event.stopPropagation();clearD('${d.id}',${cols})">清空</button></div></div><div class="piks">${C.map(c=>{const av=d.c.includes(c);const has=av&&own[key(d.id,c)];return`<div class="pik ${has?'own':''} ${!av?'na':''}" ${av?`onclick="toggle('${d.id}','${c}')"`:''}title="${CN[c]}"><div class="d dot ${c}"></div></div>`;}).join('')}</div></div>`;
 }
 
 function renderMiss(){
@@ -715,10 +717,7 @@ document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.datase
 
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('show');};
 
-// 浮動按鈕顯示
-window.onscroll=()=>{
-    document.getElementById('floatBtns').classList.toggle('show',window.scrollY>200);
-};
+
 
 // 快捷鍵：/ 聚焦搜索
 document.onkeydown=e=>{
