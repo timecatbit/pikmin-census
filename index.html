@@ -598,7 +598,7 @@ function renderMiss(){
         const miss=decors.filter(d=>d.c.includes(c)&&!own[key(d.id,c)]&&(!searchQ||d.n.includes(searchQ)));
         const total=decors.filter(d=>d.c.includes(c)).length;
         return {c, miss, total, owned:total-miss.length};
-    }).sort((a,b)=>b.miss.length-a.miss.length); // 按缺失數量排序
+    }); // 固定顏色順序：紅→黃→藍→紫→白→岩→翼→冰
     
     let h='';
     colorData.forEach(({c,miss,total,owned})=>{
