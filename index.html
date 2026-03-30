@@ -52,24 +52,20 @@
         .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
         
         .event-section{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
-        .event-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;user-select:none}
+        .event-header{display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;user-select:none;padding:4px 0}
+        .event-section:has(.event-selected:empty) .event-header{margin-bottom:0}
         .event-header h3{font-size:.9rem;color:var(--muted)}
         .event-header .arr{transition:transform .2s;font-size:.8rem}
         .event-header.shut .arr{transform:rotate(-90deg)}
         .event-header.shut + .event-grid{display:none}
-        .event-hint{font-size:.75rem;color:var(--muted);margin-left:auto;text-align:right}
-        .event-grid{max-height:300px;overflow-y:auto;padding:4px 0}
-        .event-group{margin-bottom:8px}
-        .event-group:last-child{margin-bottom:0}
-        .event-group-title{font-size:.65rem;color:var(--muted);margin-bottom:4px;padding-left:2px}
-        .event-group-items{display:flex;flex-wrap:wrap;gap:4px}
-        .event-chip{padding:4px 8px;border-radius:12px;background:#f0f0f0;font-size:.7rem;cursor:pointer;border:1px solid transparent;transition:all .15s}
+        .event-hint{font-size:.75rem;color:var(--muted)}
+        .event-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:280px;overflow-y:auto;padding:4px 0}
+        .event-chip{padding:5px 10px;border-radius:16px;background:#f0f0f0;font-size:.75rem;cursor:pointer;transition:all .15s}
         .event-chip:hover{background:#e0e0e0}
         .event-chip.on{background:var(--accent);color:#fff}
         
         .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
-        .event-selected.empty{display:flex;align-items:center;justify-content:center;min-height:40px}
-        .event-empty-hint{font-size:.75rem;color:var(--muted)}
+        .event-selected:empty{display:none}
         .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:95px;overflow-y:auto}
         .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
         .event-tag:hover{background:#c8e6c9}
@@ -513,28 +509,11 @@ function colorStats(){
 }
 
 function renderEvents(){
-    // 分類活動
-    const annual = EVENTS.slice(0,15); // 每年都有的
-    const y2026 = EVENTS.slice(15,19);
-    const y2025 = EVENTS.slice(19,34);
-    const y2024 = EVENTS.slice(34,44);
-    const older = EVENTS.slice(44);
-    
-    function renderGroup(title, events){
-        if(!events.length) return '';
-        let chips = events.map(ev=>{
-            const on = selectedEvents.includes(ev.id);
-            return `<div class="event-chip ${on?'on':''}" onclick="toggleEvent('${ev.id}')">${ev.i}${ev.n}</div>`;
-        }).join('');
-        return `<div class="event-group"><div class="event-group-title">${title}</div><div class="event-group-items">${chips}</div></div>`;
-    }
-    
-    let h = renderGroup('🔄 每年活動', annual);
-    h += renderGroup('2026', y2026);
-    h += renderGroup('2025', y2025);
-    h += renderGroup('2024', y2024);
-    h += renderGroup('2021-2023', older);
-    
+    let h='';
+    EVENTS.forEach(ev=>{
+        const on = selectedEvents.includes(ev.id);
+        h+=`<div class="event-chip ${on?'on':''}" onclick="toggleEvent('${ev.id}')">${ev.i} ${ev.n}</div>`;
+    });
     document.getElementById('eventGrid').innerHTML=h;
     // 計算已選活動的總裝飾數
     let totalSelected=0;
@@ -552,10 +531,8 @@ function renderEvents(){
             if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')">${ev.i}${ev.n}<span class="x">✕</span></div>`;
         });
         selBox.innerHTML=`<div class="event-selected-list">${tags}</div>`;
-        selBox.classList.remove('empty');
     }else{
-        selBox.innerHTML=`<span class="event-empty-hint">點擊上方展開選擇特殊活動</span>`;
-        selBox.classList.add('empty');
+        selBox.innerHTML='';
     }
 }
 
