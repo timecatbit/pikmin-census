@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pikmin Bloom 人口普查 🌱</title>
+    <meta name="description" content="追蹤你的 Pikmin Bloom Decor 收集進度">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
     <style>
         :root {
             --red:#ff6b6b; --yellow:#ffd93d; --blue:#4dabf7; --purple:#cc5de8;
@@ -19,34 +22,44 @@
         .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
         .logo{font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:6px}
         .stats{display:flex;gap:12px;margin-left:auto}
-        .stat{text-align:center}
+        .stat{text-align:center;position:relative}
         .stat b{color:var(--accent);font-size:1.2rem}
         .stat small{display:block;font-size:.7rem;color:var(--muted)}
+        
+        /* 進度環 */
+        .progress-ring{width:50px;height:50px;position:relative}
+        .progress-ring svg{transform:rotate(-90deg)}
+        .progress-ring circle{fill:none;stroke-width:4}
+        .progress-ring .bg{stroke:rgba(255,255,255,.1)}
+        .progress-ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+        .progress-ring .txt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.75rem;font-weight:700;color:var(--accent)}
         
         /* 工具列 */
         .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
         .search{flex:1;min-width:140px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:var(--card);color:var(--text);font-size:.9rem}
         .search:focus{outline:none;border-color:var(--accent)}
-        .btn{padding:10px 14px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.1)}
-        .btn:hover{border-color:var(--accent)}
+        .btn{padding:10px 14px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.1);transition:all .15s}
+        .btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+        .btn:active{transform:translateY(0)}
         .btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+        .btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
         /* 活動選擇區 */
         .event-section{background:var(--card);border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08)}
-        .event-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer}
+        .event-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;user-select:none}
         .event-header h3{font-size:.9rem;color:var(--muted)}
         .event-header .arr{transition:transform .2s;font-size:.8rem}
         .event-header.shut .arr{transform:rotate(-90deg)}
+        .event-header.shut + .event-grid{display:none}
         .event-hint{font-size:.75rem;color:var(--muted);margin-left:auto}
-        .event-grid{display:flex;flex-wrap:wrap;gap:6px}
-        .event-grid.hide{display:none}
-        .event-chip{padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.2);font-size:.8rem;cursor:pointer;border:1px solid transparent;transition:all .15s}
-        .event-chip:hover{border-color:var(--muted)}
+        .event-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:300px;overflow-y:auto}
+        .event-chip{padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.2);font-size:.8rem;cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap}
+        .event-chip:hover{border-color:var(--muted);transform:scale(1.02)}
         .event-chip.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
         /* 篩選列 */
         .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
-        .chip{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:15px;background:var(--card);font-size:.8rem;cursor:pointer;border:1px solid transparent}
+        .chip{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:15px;background:var(--card);font-size:.8rem;cursor:pointer;border:1px solid transparent;transition:all .15s}
         .chip:hover{border-color:var(--muted)}
         .chip.on{border-color:var(--accent);color:var(--accent)}
         .dot{width:12px;height:12px;border-radius:50%}
@@ -57,12 +70,12 @@
         
         /* 視圖切換 */
         .views{display:flex;gap:6px;margin-bottom:12px}
-        .view-btn{padding:8px 16px;border-radius:8px;background:var(--card);border:1px solid rgba(255,255,255,.1);color:var(--text);font-weight:600;cursor:pointer;font-size:.85rem}
+        .view-btn{padding:8px 16px;border-radius:8px;background:var(--card);border:1px solid rgba(255,255,255,.1);color:var(--text);font-weight:600;cursor:pointer;font-size:.85rem;transition:all .15s}
         .view-btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
         /* 分類標題 */
         .cat{margin-top:12px}
-        .cat-head{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer}
+        .cat-head{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none}
         .cat-head h3{font-size:.9rem;color:var(--muted)}
         .cat-head .arr{transition:transform .2s}
         .cat-head.shut .arr{transform:rotate(-90deg)}
@@ -71,7 +84,8 @@
         .cat-body.hide{display:none}
         
         /* 裝飾項目 */
-        .item{background:var(--card);border-radius:10px;padding:10px 14px;margin-bottom:6px;border:1px solid rgba(255,255,255,.08)}
+        .item{background:var(--card);border-radius:10px;padding:10px 14px;margin-bottom:6px;border:1px solid rgba(255,255,255,.08);transition:all .15s}
+        .item:hover{border-color:rgba(255,255,255,.15)}
         .item.done{border-color:var(--accent);background:rgba(74,222,128,.05)}
         .item-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
         .item-icon{font-size:1.3rem}
@@ -79,46 +93,67 @@
         .item-sub{font-size:.75rem;color:var(--muted)}
         .item-prog{margin-left:auto;color:var(--accent);font-weight:600;font-size:.85rem}
         .item-btns{display:flex;gap:4px;margin-left:8px}
-        .item-btns button{padding:4px 8px;font-size:.7rem;border-radius:4px;background:rgba(0,0,0,.3);color:var(--muted);border:none;cursor:pointer}
-        .item-btns button:hover{color:var(--accent)}
+        .item-btns button{padding:4px 8px;font-size:.7rem;border-radius:4px;background:rgba(0,0,0,.3);color:var(--muted);border:none;cursor:pointer;transition:all .15s}
+        .item-btns button:hover{color:var(--accent);background:rgba(74,222,128,.1)}
         
         .piks{display:flex;gap:5px;flex-wrap:wrap}
-        .pik{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);border:2px solid transparent;cursor:pointer;position:relative}
-        .pik:hover{transform:scale(1.08)}
-        .pik.own{border-color:var(--accent);box-shadow:0 0 8px rgba(74,222,128,.3)}
-        .pik.own::after{content:'✓';position:absolute;top:-4px;right:-4px;width:14px;height:14px;background:var(--accent);border-radius:50%;font-size:.55rem;color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:bold}
-        .pik.na{opacity:.15;cursor:default}
-        .pik .d{width:18px;height:18px;border-radius:50%}
+        .pik{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);border:2px solid transparent;cursor:pointer;position:relative;transition:all .15s}
+        .pik:hover{transform:scale(1.1)}
+        .pik:active{transform:scale(0.95)}
+        .pik.own{border-color:var(--accent);box-shadow:0 0 10px rgba(74,222,128,.4)}
+        .pik.own::after{content:'✓';position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:var(--accent);border-radius:50%;font-size:.6rem;color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:bold}
+        .pik.na{opacity:.15;cursor:default;pointer-events:none}
+        .pik .d{width:20px;height:20px;border-radius:50%}
         
         /* 缺失視圖 */
         .miss-sec{margin-bottom:16px}
         .miss-head{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
         .miss-head h4{font-size:.9rem}
         .miss-grid{display:flex;flex-wrap:wrap;gap:6px}
-        .miss-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;background:var(--card);font-size:.8rem;cursor:pointer;border:1px solid rgba(255,255,255,.08)}
-        .miss-chip:hover{border-color:var(--accent)}
+        .miss-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;background:var(--card);font-size:.8rem;cursor:pointer;border:1px solid rgba(255,255,255,.08);transition:all .15s}
+        .miss-chip:hover{border-color:var(--accent);transform:scale(1.02)}
         .miss-none{color:var(--accent);font-size:.85rem}
         
         /* Modal */
-        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
         .modal.show{display:flex}
-        .modal-box{background:var(--card);padding:24px;border-radius:16px;max-width:380px;width:90%}
-        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-        .modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer}
-        .drop{border:2px dashed rgba(255,255,255,.15);border-radius:10px;padding:36px;text-align:center;cursor:pointer}
-        .drop:hover{border-color:var(--accent)}
+        .modal-box{background:var(--card);padding:24px;border-radius:16px;max-width:420px;width:90%;animation:modalIn .2s ease}
+        @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+        .modal-head h3{font-size:1.1rem}
+        .modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:4px 8px;border-radius:4px}
+        .modal-close:hover{background:rgba(255,255,255,.1)}
+        .drop{border:2px dashed rgba(255,255,255,.15);border-radius:10px;padding:36px;text-align:center;cursor:pointer;transition:all .15s}
+        .drop:hover{border-color:var(--accent);background:rgba(74,222,128,.05)}
         .drop input{display:none}
         
-        .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--accent);color:var(--bg);padding:10px 22px;border-radius:20px;font-weight:600;font-size:.9rem;transition:transform .3s;z-index:1001}
+        /* 分享連結 */
+        .share-section{margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+        .share-section h4{font-size:.9rem;margin-bottom:8px;color:var(--muted)}
+        .share-row{display:flex;gap:8px}
+        .share-input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);color:var(--text);font-size:.8rem;font-family:monospace}
+        .share-input:focus{outline:none;border-color:var(--accent)}
+        
+        .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--accent);color:var(--bg);padding:10px 22px;border-radius:20px;font-weight:600;font-size:.9rem;transition:transform .3s cubic-bezier(.68,-.55,.265,1.55);z-index:1001}
         .toast.show{transform:translateX(-50%) translateY(0)}
         
         .empty{text-align:center;padding:32px;color:var(--muted)}
+        
+        /* 說明提示 */
+        .tip{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.8rem;color:var(--accent);display:flex;align-items:center;gap:8px}
+        .tip-close{background:none;border:none;color:var(--accent);cursor:pointer;margin-left:auto;font-size:1.1rem}
         
         @media(max-width:600px){
             .item-top{flex-wrap:wrap}
             .item-btns{margin-left:0;margin-top:6px;width:100%}
             .stats{gap:8px}
+            .pik{width:38px;height:38px}
         }
+        
+        /* 撤銷按鈕 */
+        .undo-btn{position:fixed;bottom:70px;right:20px;background:var(--card);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:10px 16px;border-radius:20px;cursor:pointer;font-size:.85rem;display:none;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:999}
+        .undo-btn.show{display:flex}
+        .undo-btn:hover{border-color:var(--accent)}
     </style>
 </head>
 <body>
@@ -129,26 +164,34 @@
             <div class="stats">
                 <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
                 <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
-                <div class="stat"><b id="sPct">0%</b><small>完成度</small></div>
+                <div class="progress-ring">
+                    <svg width="50" height="50"><circle class="bg" cx="25" cy="25" r="20"/><circle class="fg" id="progressCircle" cx="25" cy="25" r="20" stroke-dasharray="125.6" stroke-dashoffset="125.6"/></svg>
+                    <span class="txt" id="sPct">0%</span>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="toolbar">
-        <input class="search" placeholder="🔍 搜尋裝飾..." id="search">
-        <button class="btn" id="btnImport">📥 匯入</button>
-        <button class="btn" id="btnExport">📤 匯出</button>
-        <button class="btn" id="btnReset">🔄 重置</button>
+    <div id="tipBox" class="tip" style="display:none">
+        💡 資料自動儲存於瀏覽器。點擊「🔗 分享」可產生連結，跨裝置同步或分享給朋友！
+        <button class="tip-close" onclick="closeTip()">×</button>
     </div>
     
-    <!-- 特殊活動選擇 -->
+    <div class="toolbar">
+        <input class="search" placeholder="🔍 搜尋裝飾..." id="search">
+        <button class="btn" id="btnShare">🔗 分享</button>
+        <button class="btn" id="btnImport">📥 匯入</button>
+        <button class="btn" id="btnExport">📤 匯出</button>
+        <button class="btn" id="btnReset">🔄</button>
+    </div>
+    
     <div class="event-section">
-        <div class="event-header" id="eventHeader">
+        <div class="event-header shut" id="eventHeader">
             <span class="arr">▼</span>
             <h3>🎉 特殊活動</h3>
             <span class="event-hint" id="eventHint">已選 0 個活動</span>
         </div>
-        <div class="event-grid" id="eventGrid"></div>
+        <div class="event-grid" id="eventGrid" style="display:none"></div>
     </div>
     
     <div class="views">
@@ -162,10 +205,14 @@
     <div id="missView" style="display:none"></div>
 </div>
 
+<button class="undo-btn" id="undoBtn" onclick="undo()">↩️ 撤銷</button>
+
 <div class="modal" id="modal">
     <div class="modal-box">
-        <div class="modal-head"><h3>📥 匯入資料</h3><button class="modal-close" id="modalClose">×</button></div>
-        <div class="drop" id="drop"><p style="font-size:1.8rem">📁</p><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>
+        <div class="modal-head"><h3 id="modalTitle">📥 匯入資料</h3><button class="modal-close" id="modalClose">×</button></div>
+        <div id="modalContent">
+            <div class="drop" id="drop"><p style="font-size:1.8rem">📁</p><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>
+        </div>
     </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -176,7 +223,6 @@ const CN = {red:'紅',yellow:'黃',blue:'藍',purple:'紫',white:'白',rock:'岩
 const C7 = ['red','yellow','blue','purple','white','rock','winged'];
 const C8 = C;
 
-// 常駐 Decor
 const REGULAR = [
   {id:'restaurant',n:'餐廳',i:'🍽️',c:C8},
   {id:'cafe',n:'咖啡廳',i:'☕',c:C7},
@@ -246,9 +292,7 @@ const REGULAR = [
   {id:'snowy',n:'雪天',i:'❄️',c:C8},
 ];
 
-// 特殊活動 - 按時間從新到舊排列，每年都有的活動放前面
 const EVENTS = [
-  // ===== 每年都有的活動 =====
   {id:'ev_spring',n:'春季貼紙',i:'🌸',items:[{id:'spring',n:'春季貼紙',i:'🌸',c:C7}]},
   {id:'ev_summer',n:'夏季貼紙',i:'🌻',items:[{id:'summer',n:'夏季貼紙',i:'🌻',c:C7}]},
   {id:'ev_fall',n:'秋季貼紙',i:'🍂',items:[{id:'fall',n:'秋季貼紙',i:'🍂',c:C7}]},
@@ -264,12 +308,10 @@ const EVENTS = [
   {id:'ev_halloween_light',n:'萬聖節燈',i:'🔮',items:[{id:'halloween_light',n:'萬聖節燈',i:'🔮',c:C7}]},
   {id:'ev_mitten',n:'聖誕手套',i:'🧤',items:[{id:'mitten',n:'聖誕手套',i:'🧤',c:C7}]},
   {id:'ev_ball_ornament',n:'聖誕球形吊飾',i:'🔴',items:[{id:'ball_ornament',n:'聖誕球形吊飾',i:'🔴',c:C7}]},
-  // ===== 2026 =====
   {id:'ev_color_powder',n:'彩色粉末（灑紅節）',i:'🎨',items:[{id:'color_powder',n:'彩色粉末',i:'🎨',c:C7}]},
   {id:'ev_golden_plane',n:'金色玩具飛機',i:'✈️',items:[{id:'golden_plane',n:'金色玩具飛機',i:'✈️',c:C7}]},
   {id:'ev_chocolate_2026',n:'2026巧克力',i:'🍫',items:[{id:'chocolate_2026',n:'2026巧克力',i:'🍫',c:C8}]},
   {id:'ev_osechi',n:'御節料理',i:'🍱',items:[{id:'osechi',n:'御節料理',i:'🍱',c:C8}]},
-  // ===== 2025 =====
   {id:'ev_popper_2025',n:'2025派對彩炮',i:'🎉',items:[{id:'popper_2025',n:'2025派對彩炮',i:'🎉',c:C7}]},
   {id:'ev_ornament_2025',n:'2025吊飾',i:'🎄',items:[{id:'ornament_2025',n:'2025吊飾',i:'🎄',c:C8}]},
   {id:'ev_pacifier',n:'奶嘴',i:'🍼',items:[{id:'pacifier',n:'奶嘴',i:'🍼',c:C8}]},
@@ -285,7 +327,6 @@ const EVENTS = [
   {id:'ev_afternoon_tea',n:'下午茶',i:'🫖',items:[{id:'afternoon_tea',n:'下午茶',i:'🫖',c:C8}]},
   {id:'ev_rio',n:'里約嘉年華',i:'🎭',items:[{id:'rio',n:'里約嘉年華',i:'🎭',c:C7}]},
   {id:'ev_chocolate',n:'巧克力',i:'🍫',items:[{id:'chocolate',n:'巧克力',i:'🍫',c:C8}]},
-  // ===== 2024 =====
   {id:'ev_glasses_2024',n:'2024眼鏡',i:'👓',items:[{id:'glasses_2024',n:'2024眼鏡',i:'👓',c:C7}]},
   {id:'ev_puzzle_2024fall',n:'拼圖 2024秋',i:'🧩',items:[{id:'puzzle_2024fall',n:'拼圖 2024秋',i:'🧩',c:C8}]},
   {id:'ev_rosette_red',n:'紅色緞帶勳章',i:'🎖️',items:[{id:'rosette_red',n:'紅色緞帶勳章',i:'🎖️',c:C7}]},
@@ -296,42 +337,24 @@ const EVENTS = [
   {id:'ev_coral',n:'珊瑚',i:'🪸',items:[{id:'coral',n:'珊瑚',i:'🪸',c:C7}]},
   {id:'ev_paint',n:'油漆',i:'🎨',items:[{id:'paint',n:'油漆',i:'🎨',c:C7}]},
   {id:'ev_present_gold',n:'禮物貼紙（金）',i:'🎁',items:[{id:'present_gold',n:'禮物貼紙（金）',i:'🎁',c:C7}]},
-  // ===== 2023 =====
   {id:'ev_glasses_2023',n:'2023眼鏡',i:'👓',items:[{id:'glasses_2023',n:'2023眼鏡',i:'👓',c:C7}]},
   {id:'ev_puzzle_2023sum',n:'拼圖 2023夏',i:'🧩',items:[{id:'puzzle_2023sum',n:'拼圖 2023夏',i:'🧩',c:C7}]},
   {id:'ev_pikmin4_ship',n:'Pikmin 4太空船',i:'🛸',items:[{id:'pikmin4_ship',n:'Pikmin 4太空船',i:'🛸',c:C8}]},
   {id:'ev_pikmin4_toy',n:'Pikmin 4玩具',i:'🧸',items:[{id:'pikmin4_toy',n:'Pikmin 4玩具',i:'🧸',c:C8}]},
-  {id:'ev_mahjong',n:'麻將牌',i:'🀄',items:[
-    {id:'mahjong_upper',n:'麻將牌（上排）',i:'🀄',c:C7},
-    {id:'mahjong_lower',n:'麻將牌（下排）',i:'🀄',c:C7},
-  ]},
+  {id:'ev_mahjong',n:'麻將牌',i:'🀄',items:[{id:'mahjong_upper',n:'麻將牌（上排）',i:'🀄',c:C7},{id:'mahjong_lower',n:'麻將牌（下排）',i:'🀄',c:C7}]},
   {id:'ev_icecream_classic',n:'冰淇淋（經典）',i:'🍦',items:[{id:'icecream_classic',n:'冰淇淋（經典）',i:'🍦',c:['red','yellow','blue','purple','white','winged']}]},
   {id:'ev_cheese',n:'起司',i:'🧀',items:[{id:'cheese',n:'起司',i:'🧀',c:C7}]},
   {id:'ev_playing_card',n:'撲克牌',i:'🃏',items:[{id:'playing_card',n:'撲克牌',i:'🃏',c:C7}]},
   {id:'ev_sneaker',n:'運動鞋鑰匙圈',i:'👟',items:[{id:'sneaker',n:'運動鞋鑰匙圈',i:'👟',c:C7}]},
-  {id:'ev_koppaite',n:'科巴派太空衣',i:'🚀',items:[
-    {id:'koppaite_brittany',n:'科巴派太空衣（紅）',i:'🚀',c:['red']},
-    {id:'koppaite_charlie',n:'科巴派太空衣（黃）',i:'🚀',c:['yellow']},
-    {id:'koppaite_alph',n:'科巴派太空衣（藍）',i:'🚀',c:['blue']},
-  ]},
-  // ===== 2022 =====
+  {id:'ev_koppaite',n:'科巴派太空衣',i:'🚀',items:[{id:'koppaite_brittany',n:'科巴派太空衣（紅）',i:'🚀',c:['red']},{id:'koppaite_charlie',n:'科巴派太空衣（黃）',i:'🚀',c:['yellow']},{id:'koppaite_alph',n:'科巴派太空衣（藍）',i:'🚀',c:['blue']}]},
   {id:'ev_puzzle_2022sum',n:'拼圖 2022夏',i:'🧩',items:[{id:'puzzle_2022sum',n:'拼圖 2022夏',i:'🧩',c:C7}]},
   {id:'ev_anniv1',n:'一週年零食',i:'🍪',items:[{id:'anniv1_snack',n:'一週年零食',i:'🍪',c:['red','yellow','blue']}]},
   {id:'ev_fingerboard',n:'指板滑板',i:'🛹',items:[{id:'fingerboard',n:'指板滑板',i:'🛹',c:C7}]},
-  {id:'ev_chess',n:'西洋棋',i:'♟️',items:[
-    {id:'chess_black',n:'西洋棋（黑）',i:'♟️',c:C7},
-    {id:'chess_white',n:'西洋棋（白）',i:'♙',c:C7},
-  ]},
+  {id:'ev_chess',n:'西洋棋',i:'♟️',items:[{id:'chess_black',n:'西洋棋（黑）',i:'♟️',c:C7},{id:'chess_white',n:'西洋棋（白）',i:'♙',c:C7}]},
   {id:'ev_hanafuda1',n:'花札（第一輯）',i:'🎴',items:[{id:'hanafuda_v1',n:'花札（第一輯）',i:'🎴',c:['red','yellow','blue','purple']}]},
   {id:'ev_hanafuda2',n:'花札（第二輯）',i:'🎴',items:[{id:'hanafuda_v2',n:'花札（第二輯）',i:'🎴',c:['red','yellow','blue','white','rock','winged']}]},
-  // ===== 2021 =====
   {id:'ev_puzzle_2021fall',n:'拼圖 2021秋',i:'🧩',items:[{id:'puzzle_2021fall',n:'拼圖 2021秋',i:'🧩',c:C7}]},
-  // ===== 常駐特殊 =====
-  {id:'ev_mario',n:'Mario 系列',i:'🎩',items:[
-    {id:'mario_cap',n:'瑪利歐紅帽',i:'🎩',c:['blue']},
-    {id:'mario_mushroom',n:'超級蘑菇',i:'🍄',c:['blue']},
-    {id:'mario_star',n:'超級星星',i:'⭐',c:['blue']},
-  ]},
+  {id:'ev_mario',n:'Mario 系列',i:'🎩',items:[{id:'mario_cap',n:'瑪利歐紅帽',i:'🎩',c:['blue']},{id:'mario_mushroom',n:'超級蘑菇',i:'🍄',c:['blue']},{id:'mario_star',n:'超級星星',i:'⭐',c:['blue']}]},
 ];
 
 let own = {};
@@ -341,16 +364,72 @@ let colorF = 'all';
 let statusF = 'all';
 let searchQ = '';
 let shut = {};
-let eventShut = true; // 預設折疊
+let history = []; // 撤銷歷史
 
 const key = (d,c) => d+'_'+c;
-const load = () => { 
-    const s=localStorage.getItem('pik_v6'); 
-    if(s){const d=JSON.parse(s);own=d.own||{};selectedEvents=d.events||[];}
-};
-const save = () => localStorage.setItem('pik_v6',JSON.stringify({own,events:selectedEvents}));
 
-// 獲取當前應顯示的所有裝飾
+// 資料壓縮/解壓（用於 URL 分享）
+function compress(data){
+    const j = JSON.stringify(data);
+    return btoa(encodeURIComponent(j).replace(/%([0-9A-F]{2})/g,(_,p1)=>String.fromCharCode('0x'+p1)));
+}
+function decompress(str){
+    try{
+        const j = decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(j);
+    }catch(e){return null;}
+}
+
+function load(){
+    // 先檢查 URL 是否有資料
+    const hash = location.hash.slice(1);
+    if(hash){
+        const data = decompress(hash);
+        if(data){
+            own = data.own || data.o || {};
+            selectedEvents = data.events || data.e || [];
+            save(); // 存到 localStorage
+            history.push({own:{...own},events:[...selectedEvents]});
+            // 清除 URL hash（保持乾淨）
+            history.pushState('','',location.pathname);
+            toast('📥 已從連結載入資料');
+            return;
+        }
+    }
+    // 從 localStorage 載入
+    const s = localStorage.getItem('pik_v7');
+    if(s){const d=JSON.parse(s);own=d.own||{};selectedEvents=d.events||[];}
+    history.push({own:{...own},events:[...selectedEvents]});
+    // 顯示提示
+    if(!localStorage.getItem('pik_tip_closed')) document.getElementById('tipBox').style.display='flex';
+}
+function save(){
+    localStorage.setItem('pik_v7',JSON.stringify({own,events:selectedEvents}));
+}
+function closeTip(){
+    document.getElementById('tipBox').style.display='none';
+    localStorage.setItem('pik_tip_closed','1');
+}
+
+function saveHistory(){
+    history.push({own:{...own},events:[...selectedEvents]});
+    if(history.length > 50) history.shift();
+    document.getElementById('undoBtn').classList.add('show');
+    clearTimeout(window.undoTimer);
+    window.undoTimer = setTimeout(()=>document.getElementById('undoBtn').classList.remove('show'),5000);
+}
+function undo(){
+    if(history.length > 1){
+        history.pop();
+        const prev = history[history.length-1];
+        own = {...prev.own};
+        selectedEvents = [...prev.events];
+        save(); render();
+        toast('↩️ 已撤銷');
+    }
+    document.getElementById('undoBtn').classList.remove('show');
+}
+
 function getActiveDecors(){
     const list = [...REGULAR];
     selectedEvents.forEach(eid=>{
@@ -361,20 +440,19 @@ function getActiveDecors(){
 }
 
 function toggle(did,col){
+    saveHistory();
     const k=key(did,col);
     own[k]=!own[k];
     if(!own[k]) delete own[k];
     save(); render();
 }
-function fillD(did,cols){ cols.forEach(c=>own[key(did,c)]=true); save(); render(); toast('✅ 已全選'); }
-function clearD(did,cols){ cols.forEach(c=>delete own[key(did,c)]); save(); render(); toast('🗑️ 已清空'); }
+function fillD(did,cols){saveHistory();cols.forEach(c=>own[key(did,c)]=true);save();render();toast('✅ 已全選');}
+function clearD(did,cols){saveHistory();cols.forEach(c=>delete own[key(did,c)]);save();render();toast('🗑️ 已清空');}
 
 function toggleEvent(eid){
-    if(selectedEvents.includes(eid)){
-        selectedEvents = selectedEvents.filter(e=>e!==eid);
-    }else{
-        selectedEvents.push(eid);
-    }
+    saveHistory();
+    if(selectedEvents.includes(eid)) selectedEvents=selectedEvents.filter(e=>e!==eid);
+    else selectedEvents.push(eid);
     save(); render();
 }
 
@@ -415,15 +493,15 @@ function renderFilters(){
     h+=`<div class="chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">已完成</div>`;
     document.getElementById('filters').innerHTML=h;
 }
-function setColorF(c){ colorF=c; render(); }
-function setStatusF(s){ statusF=s; render(); }
+function setColorF(c){colorF=c;render();}
+function setStatusF(s){statusF=s;render();}
 
 function filterD(d){
-    if(searchQ && !d.n.includes(searchQ)) return false;
-    if(colorF!=='all' && !d.c.includes(colorF)) return false;
+    if(searchQ&&!d.n.includes(searchQ))return false;
+    if(colorF!=='all'&&!d.c.includes(colorF))return false;
     const cnt=d.c.filter(c=>own[key(d.id,c)]).length;
-    if(statusF==='done' && cnt!==d.c.length) return false;
-    if(statusF==='miss' && cnt===d.c.length) return false;
+    if(statusF==='done'&&cnt!==d.c.length)return false;
+    if(statusF==='miss'&&cnt===d.c.length)return false;
     return true;
 }
 
@@ -431,10 +509,7 @@ function renderList(){
     const decors = getActiveDecors();
     const regular = REGULAR.filter(filterD);
     const special = decors.filter(d=>!REGULAR.find(r=>r.id===d.id)).filter(filterD);
-    
     let h='';
-    
-    // 常駐 Decor
     if(regular.length){
         const cO=regular.reduce((s,d)=>s+d.c.filter(c=>own[key(d.id,c)]).length,0);
         const cT=regular.reduce((s,d)=>s+d.c.length,0);
@@ -443,8 +518,6 @@ function renderList(){
         regular.forEach(d=>h+=renderItem(d));
         h+=`</div></div>`;
     }
-    
-    // 特殊活動 Decor
     if(special.length){
         const cO=special.reduce((s,d)=>s+d.c.filter(c=>own[key(d.id,c)]).length,0);
         const cT=special.reduce((s,d)=>s+d.c.length,0);
@@ -453,8 +526,7 @@ function renderList(){
         special.forEach(d=>h+=renderItem(d));
         h+=`</div></div>`;
     }
-    
-    if(!h) h='<div class="empty">沒有匹配項</div>';
+    if(!h)h='<div class="empty">沒有匹配項</div>';
     document.getElementById('listView').innerHTML=h;
 }
 
@@ -468,26 +540,24 @@ function renderItem(d){
 function renderMiss(){
     const decors = getActiveDecors();
     let h='';
-    
     C.forEach(c=>{
-        if(colorF!=='all' && colorF!==c) return;
-        if(statusF==='done') return;
-        
+        if(colorF!=='all'&&colorF!==c)return;
+        if(statusF==='done')return;
         const miss=decors.filter(d=>d.c.includes(c)&&!own[key(d.id,c)]&&(!searchQ||d.n.includes(searchQ)));
         const total=decors.filter(d=>d.c.includes(c)).length;
         const owned=total-miss.length;
-        
         h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">${owned}/${total}</span></div><div class="miss-grid">${miss.length?miss.map(d=>`<div class="miss-chip" onclick="toggle('${d.id}','${c}')">${d.i} ${d.n}</div>`).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
     });
-    if(!h) h='<div class="empty">沒有匹配項</div>';
+    if(!h)h='<div class="empty">沒有匹配項</div>';
     document.getElementById('missView').innerHTML=h;
 }
 
-function toggleCat(cat){ shut[cat]=!shut[cat]; render(); }
+function toggleCat(cat){shut[cat]=!shut[cat];render();}
 function toggleEventPanel(){
-    eventShut=!eventShut;
-    document.getElementById('eventHeader').classList.toggle('shut',eventShut);
-    document.getElementById('eventGrid').classList.toggle('hide',eventShut);
+    const h=document.getElementById('eventHeader');
+    const g=document.getElementById('eventGrid');
+    h.classList.toggle('shut');
+    g.style.display=h.classList.contains('shut')?'none':'flex';
 }
 
 function render(){
@@ -495,6 +565,10 @@ function render(){
     document.getElementById('sOwn').textContent=st.o;
     document.getElementById('sTotal').textContent=st.t;
     document.getElementById('sPct').textContent=st.p+'%';
+    // 進度環
+    const pct = parseFloat(st.p);
+    const offset = 125.6 - (pct/100)*125.6;
+    document.getElementById('progressCircle').style.strokeDashoffset = offset;
     renderEvents();
     renderFilters();
     renderList();
@@ -508,9 +582,48 @@ function setView(v){
     document.getElementById('missView').style.display=v==='miss'?'':'none';
 }
 
+function showShareModal(){
+    const data = {o:own,e:selectedEvents};
+    const encoded = compress(data);
+    const url = location.origin + location.pathname + '#' + encoded;
+    document.getElementById('modalTitle').textContent = '🔗 分享連結';
+    document.getElementById('modalContent').innerHTML = `
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">複製此連結，可在其他裝置開啟，或分享給朋友：</p>
+        <div class="share-row">
+            <input class="share-input" id="shareUrl" value="${url}" readonly onclick="this.select()">
+            <button class="btn primary" onclick="copyShare()">複製</button>
+        </div>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:12px">💡 連結包含你的所有收集資料與選擇的活動</p>
+    `;
+    document.getElementById('modal').classList.add('show');
+}
+function copyShare(){
+    const input = document.getElementById('shareUrl');
+    input.select();
+    document.execCommand('copy');
+    toast('✅ 已複製連結');
+}
+
+function showImportModal(){
+    document.getElementById('modalTitle').textContent = '📥 匯入資料';
+    document.getElementById('modalContent').innerHTML = `<div class="drop" id="drop"><p style="font-size:1.8rem">📁</p><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>`;
+    document.getElementById('modal').classList.add('show');
+    setupDrop();
+}
+
+function setupDrop(){
+    const drop=document.getElementById('drop'),fi=document.getElementById('fileIn');
+    if(!drop||!fi)return;
+    drop.onclick=()=>fi.click();
+    fi.onchange=e=>e.target.files[0]&&importFile(e.target.files[0]);
+    drop.ondragover=e=>{e.preventDefault();drop.style.borderColor='var(--accent)';};
+    drop.ondragleave=()=>drop.style.borderColor='';
+    drop.ondrop=e=>{e.preventDefault();drop.style.borderColor='';e.dataTransfer.files[0]&&importFile(e.dataTransfer.files[0]);};
+}
+
 function exportData(){
-    const d={v:6,date:new Date().toISOString(),own,events:selectedEvents};
-    const b=new Blob([JSON.stringify(d)],{type:'application/json'});
+    const d={v:7,date:new Date().toISOString(),own,events:selectedEvents};
+    const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(b);
     a.download='pikmin_'+new Date().toISOString().slice(0,10)+'.json';a.click();
     toast('📤 已匯出');
@@ -519,6 +632,7 @@ function exportData(){
 function importFile(f){
     const r=new FileReader();
     r.onload=e=>{try{
+        saveHistory();
         const j=JSON.parse(e.target.result);
         own=j.own||j.data||j.collection||j;
         selectedEvents=j.events||[];
@@ -531,26 +645,22 @@ function importFile(f){
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-// 事件
+// 事件綁定
 document.getElementById('search').oninput=e=>{searchQ=e.target.value;render();};
+document.getElementById('btnShare').onclick=showShareModal;
+document.getElementById('btnImport').onclick=showImportModal;
 document.getElementById('btnExport').onclick=exportData;
-document.getElementById('btnImport').onclick=()=>document.getElementById('modal').classList.add('show');
+document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){saveHistory();own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
 document.getElementById('modalClose').onclick=()=>document.getElementById('modal').classList.remove('show');
-document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
 document.getElementById('eventHeader').onclick=toggleEventPanel;
 document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
-const drop=document.getElementById('drop'),fi=document.getElementById('fileIn');
-drop.onclick=()=>fi.click();
-fi.onchange=e=>e.target.files[0]&&importFile(e.target.files[0]);
-drop.ondragover=e=>{e.preventDefault();drop.style.borderColor='var(--accent)';};
-drop.ondragleave=()=>drop.style.borderColor='';
-drop.ondrop=e=>{e.preventDefault();drop.style.borderColor='';e.dataTransfer.files[0]&&importFile(e.dataTransfer.files[0]);};
-document.onkeydown=e=>{if(e.key==='Escape')document.getElementById('modal').classList.remove('show');};
+document.onkeydown=e=>{
+    if(e.key==='Escape')document.getElementById('modal').classList.remove('show');
+    if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo();}
+};
+document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('show');};
 
 load();render();
-// 初始化時套用折疊狀態
-document.getElementById('eventHeader').classList.add('shut');
-document.getElementById('eventGrid').classList.add('hide');
 </script>
 </body>
 </html>
