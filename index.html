@@ -16,14 +16,14 @@
         :root {
             --red:#ff6b6b; --yellow:#ffd93d; --blue:#4dabf7; --purple:#cc5de8;
             --white:#f5f5f5; --rock:#868e96; --winged:#f783ac; --ice:#66d9e8;
-            --bg:#f8faf8; --card:#ffffff; --accent:#4caf50; --accent2:#81c784; --text:#222; --muted:#777;
+            --bg:#f9fdf9; --card:#ffffff; --accent:#66bb6a; --accent2:#a5d6a7; --text:#222; --muted:#777;
             --shadow:0 2px 8px rgba(0,0,0,.05);
         }
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
         .app{max-width:1100px;margin:0 auto;padding:12px}
         
-        .header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#43a047,#66bb6a);padding:12px 16px;border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(67,160,71,.25)}
+        .header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#66bb6a,#81c784);padding:12px 16px;border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(102,187,106,.2)}
         .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
         .logo{font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:6px;color:#fff}
         .stats{display:flex;gap:12px;margin-left:auto}
@@ -32,12 +32,12 @@
         .stat b{color:#fff;font-size:1.2rem;font-weight:800}
         .stat small{display:block;font-size:.7rem;color:rgba(255,255,255,.8)}
         
-        .progress-ring{width:44px;height:44px;position:relative;flex-shrink:0}
-        .progress-ring svg{display:block;transform:rotate(-90deg)}
-        .progress-ring circle{fill:none;stroke-width:4}
+        .progress-ring{position:relative;flex-shrink:0}
+        .progress-ring svg{display:block;width:42px;height:42px;transform:rotate(-90deg)}
+        .progress-ring circle{fill:none;stroke-width:3}
         .progress-ring .bg{stroke:rgba(255,255,255,.3)}
         .progress-ring .fg{stroke:#fff;stroke-linecap:round;transition:stroke-dashoffset .5s ease}
-        .progress-ring span{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:#fff}
+        .progress-ring span{position:absolute;top:0;left:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
         
         .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center}
         .search{flex:1;min-width:140px;padding:10px 14px;border-radius:12px;border:2px solid #e0e0e0;background:var(--card);color:var(--text);font-size:.9rem;box-shadow:var(--shadow)}
@@ -111,7 +111,8 @@
         .pik.own{background:#c8e6c9;box-shadow:0 0 0 2px var(--accent);animation:popIn .3s ease}
         .pik.own::after{content:'✓';position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:var(--accent);border-radius:50%;font-size:.6rem;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
         @keyframes popIn{0%{transform:scale(1.3)}50%{transform:scale(0.9)}100%{transform:scale(1)}}
-        .pik.na{opacity:.25;cursor:default;pointer-events:none;background:#e8e8e8}
+        .pik.na{cursor:default;pointer-events:none;background:#eee;position:relative}
+        .pik.na::before{content:'';position:absolute;width:70%;height:2px;background:#bbb;transform:rotate(-45deg)}
         .pik .d{width:20px;height:20px;border-radius:50%}
         
         .miss-sec{margin-bottom:16px}
@@ -150,15 +151,14 @@
         .float-btn:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(0,0,0,.18)}
         .float-btn:active{transform:scale(0.95)}
         .float-btn.primary{background:var(--accent);color:#fff}
-        .float-btn.share{background:var(--accent2);color:#fff}
+        .float-btn.share{background:var(--accent);color:#fff}
         
         .hide-mobile{display:inline-flex}
         @media(max-width:600px){.hide-mobile{display:none}}
         
         /* 快捷鍵提示 */
         .kbd{display:inline-block;padding:2px 6px;background:rgba(255,255,255,.1);border-radius:4px;font-size:.7rem;color:var(--muted);margin-left:6px}
-        .tip{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.8rem;color:var(--accent);display:flex;align-items:center;gap:8px}
-        .tip-close{background:none;border:none;color:var(--accent);cursor:pointer;margin-left:auto;font-size:1.1rem}
+        
         
         @media(max-width:600px){
             .app{padding:0}
@@ -168,9 +168,8 @@
             .stats{gap:6px}
             .stat b{font-size:1rem}
             .stat small{font-size:.65rem}
-            .progress-ring{width:38px;height:38px}
-            .progress-ring svg{width:38px;height:38px}
-            .progress-ring span{font-size:10px}
+            .progress-ring svg{width:36px;height:36px}
+            .progress-ring span{width:36px;height:36px;font-size:9px}
             .toolbar{gap:6px;margin:8px 10px;padding:0}
             .search{padding:8px 12px;font-size:.85rem}
             .btn{padding:8px 10px;font-size:.8rem}
@@ -207,17 +206,14 @@
                 <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
                 <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
                 <div class="progress-ring">
-                    <svg width="44" height="44"><circle class="bg" cx="22" cy="22" r="18"/><circle class="fg" id="progressCircle" cx="22" cy="22" r="18" stroke-dasharray="113" stroke-dashoffset="113"/></svg>
+                    <svg viewBox="0 0 42 42"><circle class="bg" cx="21" cy="21" r="18"/><circle class="fg" id="progressCircle" cx="21" cy="21" r="18" stroke-dasharray="113" stroke-dashoffset="113"/></svg>
                     <span id="sPct">0%</span>
                 </div>
             </div>
         </div>
     </div>
     
-    <div id="tipBox" class="tip" style="display:none">
-        💡 資料自動儲存於瀏覽器。點擊「🔗 分享」可產生連結，跨裝置同步！
-        <button class="tip-close" onclick="closeTip()">×</button>
-    </div>
+    
     
     <div class="toolbar">
         <input class="search" placeholder="🔍 搜尋..." id="search">
@@ -455,14 +451,9 @@ function load(){
     // 從 localStorage 載入
     const s = localStorage.getItem('pik_v7');
     if(s){const d=JSON.parse(s);own=d.own||{};selectedEvents=d.events||[];}
-    if(!localStorage.getItem('pik_tip_closed')) document.getElementById('tipBox').style.display='flex';
-}
+    }
 function save(){
     localStorage.setItem('pik_v7',JSON.stringify({own,events:selectedEvents}));
-}
-function closeTip(){
-    document.getElementById('tipBox').style.display='none';
-    localStorage.setItem('pik_tip_closed','1');
 }
 
 function getActiveDecors(){
