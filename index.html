@@ -17,16 +17,14 @@
         body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
         .app{max-width:1100px;margin:0 auto;padding:12px}
         
-        /* 頂欄 */
         .header{position:sticky;top:0;z-index:100;background:var(--bg);padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1)}
         .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
         .logo{font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:6px}
         .stats{display:flex;gap:12px;margin-left:auto}
-        .stat{text-align:center;position:relative}
+        .stat{text-align:center}
         .stat b{color:var(--accent);font-size:1.2rem}
         .stat small{display:block;font-size:.7rem;color:var(--muted)}
         
-        /* 進度環 */
         .progress-ring{width:50px;height:50px;position:relative}
         .progress-ring svg{transform:rotate(-90deg)}
         .progress-ring circle{fill:none;stroke-width:4}
@@ -34,7 +32,6 @@
         .progress-ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .5s ease}
         .progress-ring .txt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.75rem;font-weight:700;color:var(--accent)}
         
-        /* 工具列 */
         .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
         .search{flex:1;min-width:140px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:var(--card);color:var(--text);font-size:.9rem}
         .search:focus{outline:none;border-color:var(--accent)}
@@ -44,7 +41,6 @@
         .btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         .btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
-        /* 活動選擇區 */
         .event-section{background:var(--card);border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08)}
         .event-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;user-select:none}
         .event-header h3{font-size:.9rem;color:var(--muted)}
@@ -57,7 +53,6 @@
         .event-chip:hover{border-color:var(--muted);transform:scale(1.02)}
         .event-chip.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
-        /* 篩選列 */
         .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
         .chip{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:15px;background:var(--card);font-size:.8rem;cursor:pointer;border:1px solid transparent;transition:all .15s}
         .chip:hover{border-color:var(--muted)}
@@ -68,12 +63,10 @@
         .dot.winged{background:var(--winged)}.dot.ice{background:var(--ice)}
         .spacer{flex:1}
         
-        /* 視圖切換 */
         .views{display:flex;gap:6px;margin-bottom:12px}
         .view-btn{padding:8px 16px;border-radius:8px;background:var(--card);border:1px solid rgba(255,255,255,.1);color:var(--text);font-weight:600;cursor:pointer;font-size:.85rem;transition:all .15s}
         .view-btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
-        /* 分類標題 */
         .cat{margin-top:12px}
         .cat-head{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none}
         .cat-head h3{font-size:.9rem;color:var(--muted)}
@@ -83,7 +76,6 @@
         .cat-body{padding-top:6px}
         .cat-body.hide{display:none}
         
-        /* 裝飾項目 */
         .item{background:var(--card);border-radius:10px;padding:10px 14px;margin-bottom:6px;border:1px solid rgba(255,255,255,.08);transition:all .15s}
         .item:hover{border-color:rgba(255,255,255,.15)}
         .item.done{border-color:var(--accent);background:rgba(74,222,128,.05)}
@@ -105,7 +97,6 @@
         .pik.na{opacity:.15;cursor:default;pointer-events:none}
         .pik .d{width:20px;height:20px;border-radius:50%}
         
-        /* 缺失視圖 */
         .miss-sec{margin-bottom:16px}
         .miss-head{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
         .miss-head h4{font-size:.9rem}
@@ -114,7 +105,6 @@
         .miss-chip:hover{border-color:var(--accent);transform:scale(1.02)}
         .miss-none{color:var(--accent);font-size:.85rem}
         
-        /* Modal */
         .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
         .modal.show{display:flex}
         .modal-box{background:var(--card);padding:24px;border-radius:16px;max-width:420px;width:90%;animation:modalIn .2s ease}
@@ -127,19 +117,14 @@
         .drop:hover{border-color:var(--accent);background:rgba(74,222,128,.05)}
         .drop input{display:none}
         
-        /* 分享連結 */
-        .share-section{margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
-        .share-section h4{font-size:.9rem;margin-bottom:8px;color:var(--muted)}
         .share-row{display:flex;gap:8px}
-        .share-input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);color:var(--text);font-size:.8rem;font-family:monospace}
+        .share-input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);color:var(--text);font-size:.75rem;font-family:monospace}
         .share-input:focus{outline:none;border-color:var(--accent)}
         
         .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--accent);color:var(--bg);padding:10px 22px;border-radius:20px;font-weight:600;font-size:.9rem;transition:transform .3s cubic-bezier(.68,-.55,.265,1.55);z-index:1001}
         .toast.show{transform:translateX(-50%) translateY(0)}
         
         .empty{text-align:center;padding:32px;color:var(--muted)}
-        
-        /* 說明提示 */
         .tip{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.8rem;color:var(--accent);display:flex;align-items:center;gap:8px}
         .tip-close{background:none;border:none;color:var(--accent);cursor:pointer;margin-left:auto;font-size:1.1rem}
         
@@ -149,11 +134,6 @@
             .stats{gap:8px}
             .pik{width:38px;height:38px}
         }
-        
-        /* 撤銷按鈕 */
-        .undo-btn{position:fixed;bottom:70px;right:20px;background:var(--card);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:10px 16px;border-radius:20px;cursor:pointer;font-size:.85rem;display:none;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:999}
-        .undo-btn.show{display:flex}
-        .undo-btn:hover{border-color:var(--accent)}
     </style>
 </head>
 <body>
@@ -173,7 +153,7 @@
     </div>
     
     <div id="tipBox" class="tip" style="display:none">
-        💡 資料自動儲存於瀏覽器。點擊「🔗 分享」可產生連結，跨裝置同步或分享給朋友！
+        💡 資料自動儲存於瀏覽器。點擊「🔗 分享」可產生連結，跨裝置同步！
         <button class="tip-close" onclick="closeTip()">×</button>
     </div>
     
@@ -205,14 +185,10 @@
     <div id="missView" style="display:none"></div>
 </div>
 
-<button class="undo-btn" id="undoBtn" onclick="undo()">↩️ 撤銷</button>
-
 <div class="modal" id="modal">
     <div class="modal-box">
         <div class="modal-head"><h3 id="modalTitle">📥 匯入資料</h3><button class="modal-close" id="modalClose">×</button></div>
-        <div id="modalContent">
-            <div class="drop" id="drop"><p style="font-size:1.8rem">📁</p><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>
-        </div>
+        <div id="modalContent"></div>
     </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -364,43 +340,43 @@ let colorF = 'all';
 let statusF = 'all';
 let searchQ = '';
 let shut = {};
-let history = []; // 撤銷歷史
 
 const key = (d,c) => d+'_'+c;
 
-// 資料壓縮/解壓（用於 URL 分享）
-function compress(data){
+// URL-safe Base64 編碼/解碼
+function encode(data){
     const j = JSON.stringify(data);
-    return btoa(encodeURIComponent(j).replace(/%([0-9A-F]{2})/g,(_,p1)=>String.fromCharCode('0x'+p1)));
+    const b = btoa(unescape(encodeURIComponent(j)));
+    return b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
-function decompress(str){
+function decode(str){
     try{
-        const j = decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        let b = str.replace(/-/g,'+').replace(/_/g,'/');
+        while(b.length % 4) b += '=';
+        const j = decodeURIComponent(escape(atob(b)));
         return JSON.parse(j);
     }catch(e){return null;}
 }
 
 function load(){
-    // 先檢查 URL 是否有資料
-    const hash = location.hash.slice(1);
-    if(hash){
-        const data = decompress(hash);
+    // 先檢查 URL 參數
+    const params = new URLSearchParams(location.search);
+    const d = params.get('d');
+    if(d){
+        const data = decode(d);
         if(data){
-            own = data.own || data.o || {};
-            selectedEvents = data.events || data.e || [];
-            save(); // 存到 localStorage
-            history.push({own:{...own},events:[...selectedEvents]});
-            // 清除 URL hash（保持乾淨）
-            history.pushState('','',location.pathname);
+            own = data.o || {};
+            selectedEvents = data.e || [];
+            save();
             toast('📥 已從連結載入資料');
+            // 清除 URL 參數
+            history.replaceState(null,'',location.pathname);
             return;
         }
     }
     // 從 localStorage 載入
     const s = localStorage.getItem('pik_v7');
     if(s){const d=JSON.parse(s);own=d.own||{};selectedEvents=d.events||[];}
-    history.push({own:{...own},events:[...selectedEvents]});
-    // 顯示提示
     if(!localStorage.getItem('pik_tip_closed')) document.getElementById('tipBox').style.display='flex';
 }
 function save(){
@@ -409,25 +385,6 @@ function save(){
 function closeTip(){
     document.getElementById('tipBox').style.display='none';
     localStorage.setItem('pik_tip_closed','1');
-}
-
-function saveHistory(){
-    history.push({own:{...own},events:[...selectedEvents]});
-    if(history.length > 50) history.shift();
-    document.getElementById('undoBtn').classList.add('show');
-    clearTimeout(window.undoTimer);
-    window.undoTimer = setTimeout(()=>document.getElementById('undoBtn').classList.remove('show'),5000);
-}
-function undo(){
-    if(history.length > 1){
-        history.pop();
-        const prev = history[history.length-1];
-        own = {...prev.own};
-        selectedEvents = [...prev.events];
-        save(); render();
-        toast('↩️ 已撤銷');
-    }
-    document.getElementById('undoBtn').classList.remove('show');
 }
 
 function getActiveDecors(){
@@ -440,17 +397,15 @@ function getActiveDecors(){
 }
 
 function toggle(did,col){
-    saveHistory();
     const k=key(did,col);
     own[k]=!own[k];
     if(!own[k]) delete own[k];
     save(); render();
 }
-function fillD(did,cols){saveHistory();cols.forEach(c=>own[key(did,c)]=true);save();render();toast('✅ 已全選');}
-function clearD(did,cols){saveHistory();cols.forEach(c=>delete own[key(did,c)]);save();render();toast('🗑️ 已清空');}
+function fillD(did,cols){cols.forEach(c=>own[key(did,c)]=true);save();render();toast('✅ 已全選');}
+function clearD(did,cols){cols.forEach(c=>delete own[key(did,c)]);save();render();toast('🗑️ 已清空');}
 
 function toggleEvent(eid){
-    saveHistory();
     if(selectedEvents.includes(eid)) selectedEvents=selectedEvents.filter(e=>e!==eid);
     else selectedEvents.push(eid);
     save(); render();
@@ -565,7 +520,6 @@ function render(){
     document.getElementById('sOwn').textContent=st.o;
     document.getElementById('sTotal').textContent=st.t;
     document.getElementById('sPct').textContent=st.p+'%';
-    // 進度環
     const pct = parseFloat(st.p);
     const offset = 125.6 - (pct/100)*125.6;
     document.getElementById('progressCircle').style.strokeDashoffset = offset;
@@ -584,24 +538,26 @@ function setView(v){
 
 function showShareModal(){
     const data = {o:own,e:selectedEvents};
-    const encoded = compress(data);
-    const url = location.origin + location.pathname + '#' + encoded;
+    const encoded = encode(data);
+    const url = location.origin + location.pathname + '?d=' + encoded;
     document.getElementById('modalTitle').textContent = '🔗 分享連結';
     document.getElementById('modalContent').innerHTML = `
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">複製此連結，可在其他裝置開啟，或分享給朋友：</p>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">複製此連結，可在其他裝置開啟：</p>
         <div class="share-row">
             <input class="share-input" id="shareUrl" value="${url}" readonly onclick="this.select()">
             <button class="btn primary" onclick="copyShare()">複製</button>
         </div>
-        <p style="font-size:.75rem;color:var(--muted);margin-top:12px">💡 連結包含你的所有收集資料與選擇的活動</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:12px">💡 連結包含所有收集資料與已選活動</p>
     `;
     document.getElementById('modal').classList.add('show');
 }
 function copyShare(){
     const input = document.getElementById('shareUrl');
     input.select();
-    document.execCommand('copy');
-    toast('✅ 已複製連結');
+    navigator.clipboard.writeText(input.value).then(()=>toast('✅ 已複製連結')).catch(()=>{
+        document.execCommand('copy');
+        toast('✅ 已複製連結');
+    });
 }
 
 function showImportModal(){
@@ -632,7 +588,6 @@ function exportData(){
 function importFile(f){
     const r=new FileReader();
     r.onload=e=>{try{
-        saveHistory();
         const j=JSON.parse(e.target.result);
         own=j.own||j.data||j.collection||j;
         selectedEvents=j.events||[];
@@ -650,14 +605,11 @@ document.getElementById('search').oninput=e=>{searchQ=e.target.value;render();};
 document.getElementById('btnShare').onclick=showShareModal;
 document.getElementById('btnImport').onclick=showImportModal;
 document.getElementById('btnExport').onclick=exportData;
-document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){saveHistory();own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
+document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
 document.getElementById('modalClose').onclick=()=>document.getElementById('modal').classList.remove('show');
 document.getElementById('eventHeader').onclick=toggleEventPanel;
 document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
-document.onkeydown=e=>{
-    if(e.key==='Escape')document.getElementById('modal').classList.remove('show');
-    if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo();}
-};
+document.onkeydown=e=>{if(e.key==='Escape')document.getElementById('modal').classList.remove('show');};
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('show');};
 
 load();render();
