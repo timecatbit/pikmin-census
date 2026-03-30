@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pikmin Bloom 人口普查 🌱</title>
+    <title>pi-census</title>
     <meta name="description" content="追蹤你的 Pikmin Bloom Decor 收集進度">
     <meta name="theme-color" content="#5cb860">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
-    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Pikmin%20%E6%99%AE%E6%9F%A5%22%2C%22short_name%22%3A%22Pikmin%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
+    <link rel="icon" href="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22pi-census%22%2C%22short_name%22%3A%22pi-census%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%235cb860%22%2C%22theme_color%22%3A%22%235cb860%22%7D">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,22 +57,23 @@
         .event-header .arr{transition:transform .2s;font-size:.8rem}
         .event-header.shut .arr{transform:rotate(-90deg)}
         .event-header.shut + .event-grid{display:none}
-        .event-hint{font-size:.75rem;color:var(--muted);margin-left:auto}
-        .event-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:300px;overflow-y:auto}
-        .event-chip{padding:6px 12px;border-radius:20px;background:#f5f5f5;font-size:.8rem;cursor:pointer;border:2px solid transparent;transition:all .15s;white-space:nowrap}
-        .event-chip:hover{border-color:var(--accent2);transform:scale(1.02)}
+        .event-hint{font-size:.75rem;color:var(--muted);margin-left:auto;text-align:right}
+        .event-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;max-height:280px;overflow-y:auto;padding:4px 0}
+        .event-chip{padding:6px 10px;border-radius:8px;background:#f5f5f5;font-size:.75rem;cursor:pointer;border:2px solid transparent;transition:all .15s;text-align:center}
+        .event-chip:hover{border-color:var(--accent2);background:#eee}
         .event-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
         
-        .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
+        .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd;text-align:center}
         .event-selected:empty{display:none}
+        .event-selected-empty{color:var(--muted);font-size:.75rem;padding:8px 0}
         .event-selected-label{font-size:.7rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px}
         .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:95px;overflow-y:auto}
         .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
         .event-tag:hover{background:#c8e6c9}
         .event-tag .x{margin-left:3px;opacity:.6}
         
-        .filters{display:flex;gap:6px;margin-bottom:10px;align-items:center;justify-content:center}
-        .filter-grp{display:flex;gap:2px;align-items:center;background:var(--card);padding:2px;border-radius:8px;box-shadow:var(--shadow)}
+        .filters{display:flex;margin-bottom:10px;align-items:center;justify-content:center}
+        .filter-grp{display:flex;align-items:center;background:var(--card);padding:3px;border-radius:10px;box-shadow:var(--shadow);justify-content:space-between;width:100%;max-width:600px}
         .f-chip{display:flex;align-items:center;gap:2px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
         .f-chip:hover{background:#f0f0f0}
         .f-chip.on{background:var(--accent);color:#fff}
@@ -531,7 +533,7 @@ function renderEvents(){
         });
         document.getElementById('eventSelected').innerHTML=`<div class="event-selected-label">已選 ${selectedEvents.length} 個活動（${totalSelected} 裝飾）：</div><div class="event-selected-list">${tags}</div>`;
     }else{
-        document.getElementById('eventSelected').innerHTML='';
+        document.getElementById('eventSelected').innerHTML=`<div class="event-selected-empty">點擊上方展開選擇特殊活動</div>`;
     }
 }
 
