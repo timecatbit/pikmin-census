@@ -80,6 +80,10 @@
         .pik .d{width:18px;height:18px;border-radius:50%}
         
         /* 缺失視圖 */
+        .miss-filter{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+        .miss-filter label{font-size:.85rem;color:var(--muted)}
+        .miss-filter select{padding:8px 12px;border-radius:8px;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.1);font-size:.85rem;cursor:pointer}
+        .miss-filter select:focus{outline:none;border-color:var(--accent)}
         .miss-sec{margin-bottom:16px}
         .miss-head{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
         .miss-head h4{font-size:.9rem}
@@ -339,7 +343,10 @@ function colorStats(){
 function renderFilters(){
     const cs=colorStats();
     let h=`<div class="chip ${colorF==='all'?'on':''}" onclick="setColorF('all')">全部</div>`;
-    C.forEach(c=>h+=`<div class="chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><div class="dot ${c}"></div>${cs[c].m}缺</div>`);
+    C.forEach(c=>{
+        const pct=cs[c].o+cs[c].m>0?Math.round(cs[c].o/(cs[c].o+cs[c].m)*100):0;
+        h+=`<div class="chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><div class="dot ${c}"></div>${pct}%</div>`;
+    });
     h+=`<div class="spacer"></div>`;
     h+=`<div class="chip ${statusF==='all'?'on':''}" onclick="setStatusF('all')">全部</div>`;
     h+=`<div class="chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">未完成</div>`;
@@ -379,16 +386,88 @@ function renderList(){
     document.getElementById('listView').innerHTML=h;
 }
 
+// 特殊活動列表（用於下拉選擇）
+const SPECIAL_EVENTS = [
+    {id:'mario',n:'Mario 系列',items:['mario_cap','mario_mushroom','mario_star']},
+    {id:'lunar',n:'農曆新年',items:['lunar_red','lunar_gold']},
+    {id:'chess',n:'西洋棋',items:['chess_black','chess_white']},
+    {id:'hanafuda',n:'花札',items:['hanafuda_v1','hanafuda_v2']},
+    {id:'halloween',n:'萬聖節',items:['halloween_lantern','halloween_treat','halloween_light']},
+    {id:'koppaite',n:'科巴派太空衣',items:['koppaite_brittany','koppaite_charlie','koppaite_alph']},
+    {id:'pikmin4',n:'Pikmin 4',items:['pikmin4_ship','pikmin4_toy']},
+    {id:'mahjong',n:'麻將',items:['mahjong_upper','mahjong_lower']},
+    {id:'icecream',n:'冰淇淋',items:['icecream_classic','icecream_2024','icecream_extra']},
+    {id:'puzzle',n:'拼圖',items:['puzzle_2021fall','puzzle_2022sum','puzzle_2023sum','puzzle_2024fall']},
+    {id:'season',n:'四季貼紙',items:['spring','summer','fall','winter']},
+    {id:'anniv',n:'週年慶',items:['anniv1_snack','anniv3_cupcake','anniv4_flower','anniv4_snack']},
+    {id:'valentine',n:'情人節',items:['valentine','rev_valentine']},
+    {id:'easter',n:'復活節',items:['easter','bunny']},
+    {id:'xmas',n:'聖誕節',items:['mitten','ball_ornament','ornament_2025']},
+    {id:'newyear',n:'新年',items:['glasses_2023','glasses_2024','popper_2025']},
+    {id:'other',n:'其他活動',items:['fingerboard','present_gold','sneaker','playing_card','cheese','coral','paint','rosette_red','rosette_yellow','chocolate','rio','afternoon_tea','nintendo','instrument','surfboard','shaved_ice','mooncake','photo_badge','calavera','pacifier','osechi','chocolate_2026','color_powder','golden_plane']},
+];
+let selectedEvents = []; // 預設不顯示任何特殊活動
+
 function renderMiss(){
-    let h='';
+    // 特殊活動選擇器
+    let h=`<div class="miss-filter">
+        <label>顯示特殊活動：</label>
+        <select id="eventSelect" onchange="addEvent(this.value)">
+            <option value="">+ 選擇要加入的活動...</option>
+            ${SPECIAL_EVENTS.filter(e=>!selectedEvents.includes(e.id)).map(e=>`<option value="${e.id}">${e.n}</option>`).join('')}
+        </select>
+    </div>`;
+    
+    // 已選擇的活動標籤
+    if(selectedEvents.length){
+        h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">`;
+        selectedEvents.forEach(eid=>{
+            const ev=SPECIAL_EVENTS.find(e=>e.id===eid);
+            if(ev) h+=`<div class="chip on" onclick="removeEvent('${eid}')" style="cursor:pointer">${ev.n} ✕</div>`;
+        });
+        h+=`</div>`;
+    }
+    
+    // 獲取要顯示的特殊活動項目 ID
+    const showSpecialIds = new Set();
+    selectedEvents.forEach(eid=>{
+        const ev=SPECIAL_EVENTS.find(e=>e.id===eid);
+        if(ev) ev.items.forEach(id=>showSpecialIds.add(id));
+    });
+    
     C.forEach(c=>{
         if(colorF!=='all' && colorF!==c) return;
-        const miss=allDecors().filter(d=>d.c.includes(c)&&!own[key(d.id,c)]&&(!searchQ||d.n.includes(searchQ)));
         if(statusF==='done') return;
-        h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">缺 ${miss.length} 個</span></div><div class="miss-grid">${miss.length?miss.map(d=>`<div class="miss-chip" onclick="toggle('${d.id}','${c}')">${d.i} ${d.n}</div>`).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
+        
+        // 篩選：常駐 Decor 全部顯示，特殊活動只顯示已選擇的
+        const miss=allDecors().filter(d=>{
+            if(!d.c.includes(c)) return false;
+            if(own[key(d.id,c)]) return false;
+            if(searchQ && !d.n.includes(searchQ)) return false;
+            // 如果是特殊活動，檢查是否在已選擇的列表中
+            if(d.cat==='特殊活動 Decor' && !showSpecialIds.has(d.id)) return false;
+            return true;
+        });
+        
+        const total=allDecors().filter(d=>d.c.includes(c)&&(d.cat!=='特殊活動 Decor'||showSpecialIds.has(d.id))).length;
+        const owned=total-miss.length;
+        
+        h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">${owned}/${total}</span></div><div class="miss-grid">${miss.length?miss.map(d=>`<div class="miss-chip" onclick="toggle('${d.id}','${c}')">${d.i} ${d.n}</div>`).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
     });
     if(!h) h='<div class="empty">沒有匹配項</div>';
     document.getElementById('missView').innerHTML=h;
+}
+
+function addEvent(eid){
+    if(eid && !selectedEvents.includes(eid)){
+        selectedEvents.push(eid);
+        render();
+    }
+    document.getElementById('eventSelect').value='';
+}
+function removeEvent(eid){
+    selectedEvents=selectedEvents.filter(e=>e!==eid);
+    render();
 }
 
 function toggleCat(cat){ shut[cat]=!shut[cat]; render(); }
