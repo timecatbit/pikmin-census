@@ -66,17 +66,18 @@
         .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
         .event-selected:empty{display:none}
         .event-selected-label{font-size:.7rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px}
-        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:72px;overflow-y:auto}
+        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:90px;overflow-y:auto}
         .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
         .event-tag:hover{background:#c8e6c9}
         .event-tag .x{margin-left:3px;opacity:.6}
         
-        .filters{display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
-        .filter-grp{display:flex;gap:3px;align-items:center;background:var(--card);padding:3px;border-radius:8px;box-shadow:var(--shadow)}
-        .f-chip{display:flex;align-items:center;gap:3px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
+        .filters{display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+        .filter-grp{display:flex;gap:2px;align-items:center;background:var(--card);padding:2px;border-radius:8px;box-shadow:var(--shadow)}
+        .f-chip{display:flex;align-items:center;gap:2px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
         .f-chip:hover{background:#f0f0f0}
         .f-chip.on{background:var(--accent);color:#fff}
         .f-chip .cdot{width:10px;height:10px;border-radius:50%}
+        .f-sep{width:1px;height:16px;background:#ddd;margin:0 2px}
         .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
         .dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}.dot.blue{background:var(--blue)}
         .dot.purple{background:var(--purple)}.dot.white{background:var(--white)}.dot.rock{background:var(--rock)}
@@ -182,10 +183,11 @@
             .btn{padding:8px 10px;font-size:.8rem}
             .views{margin:0 10px 10px}
             .view-btn{padding:10px 8px;font-size:.8rem}
-            .filters{margin:0 10px 8px;gap:6px}
-            .filter-grp{padding:2px}
-            .f-chip{padding:3px 5px;font-size:.65rem}
+            .filters{margin:0 10px 8px;justify-content:center}
+            .filter-grp{padding:2px;flex-wrap:wrap;justify-content:center}
+            .f-chip{padding:3px 4px;font-size:.6rem}
             .f-chip .cdot{width:8px;height:8px}
+            .f-sep{display:none}
             .chip{padding:5px 8px;font-size:.75rem;flex-shrink:0}
             .event-section{margin:0 10px 10px;padding:10px}
             .event-chip{padding:5px 8px;font-size:.75rem}
@@ -211,7 +213,7 @@
 <div class="app">
     <div class="header">
         <div class="header-row">
-            <div class="logo"><img src="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200" class="logo-img">普查</div>
+            <div class="logo"><img src="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200" class="logo-img">皮克敏普查</div>
             <div class="stats" onclick="showStatsModal()">
                 <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
                 <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
@@ -536,15 +538,14 @@ function renderEvents(){
 
 function renderFilters(){
     const cs=colorStats();
-    let colors=`<div class="f-chip ${colorF==='all'?'on':''}" onclick="setColorF('all')">全部</div>`;
+    let colors='';
     C.forEach(c=>{
         const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
         colors+=`<div class="f-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct}%</div>`;
     });
-    let status=`<div class="f-chip ${statusF==='all'?'on':''}" onclick="setStatusF('all')">全部</div>`;
-    status+=`<div class="f-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">未完成</div>`;
-    status+=`<div class="f-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">已完成</div>`;
-    document.getElementById('filters').innerHTML=`<div class="filter-grp">${colors}</div><div class="filter-grp">${status}</div>`;
+    let status=`<div class="f-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">❌</div>`;
+    status+=`<div class="f-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">✅</div>`;
+    document.getElementById('filters').innerHTML=`<div class="filter-grp"><div class="f-chip ${colorF==='all'&&statusF==='all'?'on':''}" onclick="setColorF('all');setStatusF('all')">全部</div><div class="f-sep"></div>${colors}<div class="f-sep"></div>${status}</div>`;
 }
 function setColorF(c){colorF=c;render();}
 function setStatusF(s){statusF=s;render();}
