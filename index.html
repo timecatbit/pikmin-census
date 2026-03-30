@@ -15,29 +15,29 @@
     <style>
         :root {
             --red:#ff6b6b; --yellow:#ffd93d; --blue:#4dabf7; --purple:#cc5de8;
-            --white:#f0f0f0; --rock:#868e96; --winged:#f783ac; --ice:#66d9e8;
-            --bg:#e8f5e9; --card:#ffffff; --accent:#0A9474; --accent2:#47C9B2; --text:#2d3436; --muted:#636e72;
-            --shadow:0 2px 8px rgba(0,0,0,.08);
+            --white:#e8e8e8; --rock:#868e96; --winged:#f783ac; --ice:#66d9e8;
+            --bg:#f5f7f5; --card:#ffffff; --accent:#2e7d32; --accent2:#66bb6a; --text:#1a1a1a; --muted:#666;
+            --shadow:0 2px 8px rgba(0,0,0,.06);
         }
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:linear-gradient(180deg,#c8e6c9 0%,#e8f5e9 30%,#f1f8e9 100%)}
+        body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
         .app{max-width:1100px;margin:0 auto;padding:12px}
         
-        .header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0A9474,#47C9B2);padding:12px;border-radius:0 0 20px 20px;margin:-12px -12px 12px;box-shadow:0 4px 12px rgba(10,148,116,.2)}
+        .header{position:sticky;top:0;z-index:100;background:var(--accent);padding:12px 16px;border-radius:0 0 16px 16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
         .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-        .logo{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:6px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.1)}
+        .logo{font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:6px;color:#fff}
         .stats{display:flex;gap:12px;margin-left:auto}
         .stat{text-align:center;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .15s}
         .stat:hover{background:rgba(255,255,255,.15)}
         .stat b{color:#fff;font-size:1.2rem;font-weight:800}
         .stat small{display:block;font-size:.7rem;color:rgba(255,255,255,.8)}
         
-        .progress-ring{width:50px;height:50px;position:relative}
-        .progress-ring svg{transform:rotate(-90deg)}
+        .progress-ring{width:46px;height:46px;position:relative;flex-shrink:0}
+        .progress-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
         .progress-ring circle{fill:none;stroke-width:4}
         .progress-ring .bg{stroke:rgba(255,255,255,.3)}
         .progress-ring .fg{stroke:#fff;stroke-linecap:round;transition:stroke-dashoffset .5s ease}
-        .progress-ring .txt{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff}
+        .progress-ring .txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;line-height:1}
         
         .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center}
         .search{flex:1;min-width:140px;padding:10px 14px;border-radius:12px;border:2px solid #e0e0e0;background:var(--card);color:var(--text);font-size:.9rem;box-shadow:var(--shadow)}
@@ -92,7 +92,7 @@
         
         .item{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);transition:all .15s}
         .item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
-        .item.done{border:2px solid var(--accent);background:linear-gradient(135deg,#e8f5e9,#c8e6c9)}
+        .item.done{border:2px solid var(--accent2);background:#f0fff0}
         .item.done .item-name::after{content:' ✓';color:var(--accent)}
         .item-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
         .item-icon{font-size:1.2rem}
@@ -144,12 +144,13 @@
         .empty{text-align:center;padding:32px;color:var(--muted)}
         
         /* 浮動按鈕組 */
-        .float-btns{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:99}
-        .float-btn{width:48px;height:48px;border-radius:50%;background:var(--card);color:var(--text);border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:all .2s}
-        .float-btn:hover{transform:scale(1.1)}
+        .float-btns{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
+        .float-btns.show{opacity:1;pointer-events:auto}
+        .float-btn{width:46px;height:46px;border-radius:50%;background:var(--card);color:var(--text);border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.12);transition:all .2s}
+        .float-btn:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(0,0,0,.18)}
         .float-btn:active{transform:scale(0.95)}
         .float-btn.primary{background:var(--accent);color:#fff}
-        .float-btn.share{background:linear-gradient(135deg,#E56124,#FAB900);color:#fff}
+        .float-btn.share{background:var(--accent2);color:#fff}
         
         .hide-mobile{display:inline-flex}
         @media(max-width:600px){.hide-mobile{display:none}}
@@ -161,14 +162,14 @@
         
         @media(max-width:600px){
             .app{padding:0}
-            .header{padding:10px 12px;margin:0 0 10px;border-radius:0 0 16px 16px}
+            .header{padding:10px 12px;border-radius:0 0 12px 12px}
             .header-row{gap:8px}
             .logo{font-size:1.1rem}
             .stats{gap:6px}
             .stat b{font-size:1rem}
             .stat small{font-size:.65rem}
             .progress-ring{width:40px;height:40px}
-            .progress-ring .txt{font-size:.6rem}
+            .progress-ring .txt{font-size:10px}
             .toolbar{gap:6px;margin:8px 10px;padding:0}
             .search{padding:8px 12px;font-size:.85rem}
             .btn{padding:8px 10px;font-size:.8rem}
@@ -724,6 +725,11 @@ document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.datase
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('show');};
 
 
+
+// 浮動按鈕滾動顯示
+window.onscroll=()=>{
+    document.getElementById('floatBtns').classList.toggle('show',window.scrollY>200);
+};
 
 // 快捷鍵：/ 聚焦搜索
 document.onkeydown=e=>{
