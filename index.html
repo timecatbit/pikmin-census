@@ -1,539 +1,452 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pikmin Bloom 人口普查 🌱</title>
     <style>
         :root {
-            --red: #ff6b6b;
-            --yellow: #ffd93d;
-            --blue: #4dabf7;
-            --purple: #cc5de8;
-            --white: #f8f9fa;
-            --rock: #868e96;
-            --winged: #f783ac;
-            --ice: #66d9e8;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #4ade80;
-            --text: #f1f5f9;
-            --muted: #64748b;
-            --border: rgba(255,255,255,0.1);
+            --red:#ff6b6b; --yellow:#ffd93d; --blue:#4dabf7; --purple:#cc5de8;
+            --white:#f8f9fa; --rock:#868e96; --winged:#f783ac; --ice:#66d9e8;
+            --bg:#0f172a; --card:#1e293b; --accent:#4ade80; --text:#f1f5f9; --muted:#64748b;
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
         
-        .app { max-width: 1000px; margin: 0 auto; padding: 15px; }
+        .app{max-width:1100px;margin:0 auto;padding:12px}
         
-        /* 顶栏 */
-        .topbar {
-            position: sticky; top: 0; z-index: 100;
-            background: var(--bg); padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 15px; flex-wrap: wrap;
-        }
-        .logo { font-size: 1.4rem; font-weight: 700; }
-        .stats { display: flex; gap: 15px; margin-left: auto; align-items: center; }
-        .stat-box { text-align: center; }
-        .stat-num { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
-        .stat-lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+        /* 頂欄 */
+        .header{position:sticky;top:0;z-index:100;background:var(--bg);padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+        .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .logo{font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:6px}
+        .stats{display:flex;gap:12px;margin-left:auto}
+        .stat{text-align:center}
+        .stat b{color:var(--accent);font-size:1.2rem}
+        .stat small{display:block;font-size:.7rem;color:var(--muted)}
         
-        /* 工具栏 */
-        .toolbar { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
-        .search { flex:1; min-width:150px; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:0.9rem; }
-        .search:focus { outline:none; border-color:var(--accent); }
-        .btn { padding:10px 16px; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; background:var(--card); color:var(--text); border:1px solid var(--border); }
-        .btn:hover { border-color:var(--accent); }
-        .btn.active { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+        /* 工具列 */
+        .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+        .search{flex:1;min-width:140px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:var(--card);color:var(--text);font-size:.9rem}
+        .search:focus{outline:none;border-color:var(--accent)}
+        .btn{padding:10px 14px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.1)}
+        .btn:hover{border-color:var(--accent)}
+        .btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
         
-        /* 视图切换 */
-        .views { display: flex; gap: 8px; margin-bottom: 15px; }
-        .view-btn { padding: 10px 20px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: var(--text); font-weight: 600; cursor: pointer; }
-        .view-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+        /* 篩選列 */
+        .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+        .chip{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:15px;background:var(--card);font-size:.8rem;cursor:pointer;border:1px solid transparent}
+        .chip:hover{border-color:var(--muted)}
+        .chip.on{border-color:var(--accent);color:var(--accent)}
+        .dot{width:12px;height:12px;border-radius:50%}
+        .dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}.dot.blue{background:var(--blue)}
+        .dot.purple{background:var(--purple)}.dot.white{background:var(--white)}.dot.rock{background:var(--rock)}
+        .dot.winged{background:var(--winged)}.dot.ice{background:var(--ice)}
+        .spacer{flex:1}
         
-        /* 缺失视图 */
-        .missing-view { display: none; }
-        .missing-view.active { display: block; }
-        .missing-section { margin-bottom: 20px; }
-        .missing-title { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-        .missing-title h3 { font-size: 1rem; }
-        .missing-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-        .missing-chip {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 14px; border-radius: 20px;
-            background: var(--card); border: 1px solid var(--border);
-            cursor: pointer; font-size: 0.85rem;
-            transition: all 0.15s;
-        }
-        .missing-chip:hover { border-color: var(--accent); transform: scale(1.02); }
-        .missing-chip .dot { width: 14px; height: 14px; border-radius: 50%; }
-        .missing-chip.owned { opacity: 0.3; text-decoration: line-through; }
+        /* 視圖切換 */
+        .views{display:flex;gap:6px;margin-bottom:12px}
+        .view-btn{padding:8px 16px;border-radius:8px;background:var(--card);border:1px solid rgba(255,255,255,.1);color:var(--text);font-weight:600;cursor:pointer;font-size:.85rem}
+        .view-btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+        .view-hint{font-size:.75rem;color:var(--muted);margin-left:8px;align-self:center}
         
-        /* 列表视图 */
-        .list-view { display: none; }
-        .list-view.active { display: block; }
+        /* 分類標題 */
+        .cat{margin-top:12px}
+        .cat-head{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer}
+        .cat-head h3{font-size:.9rem;color:var(--muted)}
+        .cat-head .arr{transition:transform .2s}
+        .cat-head.shut .arr{transform:rotate(-90deg)}
+        .cat-cnt{margin-left:auto;font-size:.8rem;color:var(--accent)}
+        .cat-body{padding-top:6px}
+        .cat-body.hide{display:none}
         
-        .decor-item {
-            background: var(--card); border-radius: 10px; padding: 12px 16px;
-            margin-bottom: 8px; border: 1px solid var(--border);
-        }
-        .decor-item.complete { border-color: var(--accent); background: rgba(74,222,128,0.05); }
-        .decor-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .decor-icon { font-size: 1.4rem; }
-        .decor-name { font-weight: 600; }
-        .decor-progress { margin-left: auto; color: var(--accent); font-weight: 600; font-size: 0.9rem; }
-        .decor-btns { display: flex; gap: 6px; margin-left: 10px; }
-        .decor-btns button { padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; background: rgba(0,0,0,0.3); color: var(--muted); border: none; cursor: pointer; }
-        .decor-btns button:hover { color: var(--accent); }
+        /* 裝飾項目 */
+        .item{background:var(--card);border-radius:10px;padding:10px 14px;margin-bottom:6px;border:1px solid rgba(255,255,255,.08)}
+        .item.done{border-color:var(--accent);background:rgba(74,222,128,.05)}
+        .item-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+        .item-icon{font-size:1.3rem}
+        .item-name{font-weight:600;font-size:.95rem}
+        .item-sub{font-size:.75rem;color:var(--muted)}
+        .item-prog{margin-left:auto;color:var(--accent);font-weight:600;font-size:.85rem}
+        .item-btns{display:flex;gap:4px;margin-left:8px}
+        .item-btns button{padding:4px 8px;font-size:.7rem;border-radius:4px;background:rgba(0,0,0,.3);color:var(--muted);border:none;cursor:pointer}
+        .item-btns button:hover{color:var(--accent)}
         
-        .pikmin-grid { display: flex; gap: 6px; flex-wrap: wrap; }
-        .pik {
-            width: 36px; height: 36px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.2); border: 2px solid transparent;
-            cursor: pointer; position: relative; transition: all 0.1s;
-        }
-        .pik:hover { transform: scale(1.1); }
-        .pik.owned { border-color: var(--accent); box-shadow: 0 0 10px rgba(74,222,128,0.3); }
-        .pik.owned::after {
-            content: '✓'; position: absolute; top: -5px; right: -5px;
-            width: 14px; height: 14px; background: var(--accent);
-            border-radius: 50%; font-size: 0.55rem; color: var(--bg);
-            display: flex; align-items: center; justify-content: center; font-weight: bold;
-        }
-        .pik.na { opacity: 0.15; cursor: default; }
-        .pik .dot { width: 20px; height: 20px; border-radius: 50%; }
+        .piks{display:flex;gap:5px;flex-wrap:wrap}
+        .pik{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);border:2px solid transparent;cursor:pointer;position:relative}
+        .pik:hover{transform:scale(1.08)}
+        .pik.own{border-color:var(--accent);box-shadow:0 0 8px rgba(74,222,128,.3)}
+        .pik.own::after{content:'✓';position:absolute;top:-4px;right:-4px;width:14px;height:14px;background:var(--accent);border-radius:50%;font-size:.55rem;color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:bold}
+        .pik.na{opacity:.15;cursor:default}
+        .pik .d{width:18px;height:18px;border-radius:50%}
         
-        .dot.red { background: var(--red); }
-        .dot.yellow { background: var(--yellow); }
-        .dot.blue { background: var(--blue); }
-        .dot.purple { background: var(--purple); }
-        .dot.white { background: var(--white); }
-        .dot.rock { background: var(--rock); }
-        .dot.winged { background: var(--winged); }
-        .dot.ice { background: var(--ice); }
-        
-        /* 筛选栏 */
-        .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
-        .filter-chip {
-            display: flex; align-items: center; gap: 5px;
-            padding: 6px 12px; border-radius: 15px;
-            background: var(--card); border: 1px solid var(--border);
-            font-size: 0.8rem; cursor: pointer;
-        }
-        .filter-chip:hover { border-color: var(--muted); }
-        .filter-chip.active { border-color: var(--accent); color: var(--accent); }
-        .filter-chip .fdot { width: 10px; height: 10px; border-radius: 50%; }
-        
-        .spacer { flex: 1; }
-        
-        /* 分类 */
-        .cat-header {
-            display: flex; align-items: center; gap: 8px;
-            padding: 10px 0; cursor: pointer; border-bottom: 1px solid var(--border);
-            margin-top: 15px;
-        }
-        .cat-header h3 { font-size: 0.95rem; color: var(--muted); }
-        .cat-header .arrow { transition: transform 0.2s; }
-        .cat-header.closed .arrow { transform: rotate(-90deg); }
-        .cat-content { padding-top: 8px; }
-        .cat-content.hidden { display: none; }
-        .cat-count { margin-left: auto; font-size: 0.85rem; color: var(--accent); }
+        /* 缺失視圖 */
+        .miss-sec{margin-bottom:16px}
+        .miss-head{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+        .miss-head h4{font-size:.9rem}
+        .miss-grid{display:flex;flex-wrap:wrap;gap:6px}
+        .miss-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;background:var(--card);font-size:.8rem;cursor:pointer;border:1px solid rgba(255,255,255,.08)}
+        .miss-chip:hover{border-color:var(--accent)}
+        .miss-chip.own{opacity:.3;text-decoration:line-through}
+        .miss-none{color:var(--accent);font-size:.85rem}
         
         /* Modal */
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; }
-        .modal.show { display: flex; }
-        .modal-box { background:var(--card); padding:25px; border-radius:16px; max-width:400px; width:90%; }
-        .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
-        .modal-head h2 { font-size:1.1rem; }
-        .modal-close { background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer; }
-        .drop-zone { border:2px dashed var(--border); border-radius:10px; padding:40px; text-align:center; cursor:pointer; }
-        .drop-zone:hover { border-color:var(--accent); }
-        .drop-zone input { display:none; }
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center}
+        .modal.show{display:flex}
+        .modal-box{background:var(--card);padding:24px;border-radius:16px;max-width:380px;width:90%}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer}
+        .drop{border:2px dashed rgba(255,255,255,.15);border-radius:10px;padding:36px;text-align:center;cursor:pointer}
+        .drop:hover{border-color:var(--accent)}
+        .drop input{display:none}
         
-        .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--accent); color:var(--bg); padding:12px 24px; border-radius:20px; font-weight:600; transition:transform 0.3s; z-index:1001; }
-        .toast.show { transform:translateX(-50%) translateY(0); }
+        .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--accent);color:var(--bg);padding:10px 22px;border-radius:20px;font-weight:600;font-size:.9rem;transition:transform .3s;z-index:1001}
+        .toast.show{transform:translateX(-50%) translateY(0)}
         
-        .empty { text-align:center; padding:40px; color:var(--muted); }
+        .empty{text-align:center;padding:32px;color:var(--muted)}
+        
+        @media(max-width:600px){
+            .item-top{flex-wrap:wrap}
+            .item-btns{margin-left:0;margin-top:6px;width:100%}
+            .stats{gap:8px}
+        }
     </style>
 </head>
 <body>
 <div class="app">
-    <div class="topbar">
-        <div class="logo">🌱 Pikmin 普查</div>
-        <div class="stats">
-            <div class="stat-box"><div class="stat-num" id="s-owned">0</div><div class="stat-lbl">已有</div></div>
-            <div class="stat-box"><div class="stat-num" id="s-missing">0</div><div class="stat-lbl">缺少</div></div>
-            <div class="stat-box"><div class="stat-num" id="s-pct">0%</div><div class="stat-lbl">完成</div></div>
+    <div class="header">
+        <div class="header-row">
+            <div class="logo">🌱 Pikmin 普查</div>
+            <div class="stats">
+                <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
+                <div class="stat"><b id="sMiss">0</b><small>缺少</small></div>
+                <div class="stat"><b id="sPct">0%</b><small>完成度</small></div>
+            </div>
         </div>
     </div>
     
     <div class="toolbar">
-        <input class="search" placeholder="🔍 搜索..." id="search">
-        <button class="btn" id="btn-import">📥 导入</button>
-        <button class="btn" id="btn-export">📤 导出</button>
-        <button class="btn" id="btn-reset">🔄 重置</button>
+        <input class="search" placeholder="🔍 搜尋裝飾..." id="search">
+        <button class="btn" id="btnImport">📥 匯入</button>
+        <button class="btn" id="btnExport">📤 匯出</button>
+        <button class="btn" id="btnReset">🔄 重置</button>
     </div>
     
     <div class="views">
-        <button class="view-btn active" data-view="missing">📋 缺失清单</button>
-        <button class="view-btn" data-view="list">📝 完整列表</button>
+        <button class="view-btn on" data-v="list">📝 完整列表</button>
+        <button class="view-btn" data-v="miss">📋 缺失清單</button>
+        <span class="view-hint">按地點分類 | 點擊顏色可篩選</span>
     </div>
     
     <div class="filters" id="filters"></div>
     
-    <div id="missing-view" class="missing-view active"></div>
-    <div id="list-view" class="list-view"></div>
+    <div id="listView"></div>
+    <div id="missView" style="display:none"></div>
 </div>
 
 <div class="modal" id="modal">
     <div class="modal-box">
-        <div class="modal-head">
-            <h2>📥 导入数据</h2>
-            <button class="modal-close" id="modal-close">×</button>
-        </div>
-        <div class="drop-zone" id="drop-zone">
-            <p style="font-size:2rem">📁</p>
-            <p>点击或拖拽 JSON 文件</p>
-            <input type="file" id="file-input" accept=".json">
-        </div>
+        <div class="modal-head"><h3>📥 匯入資料</h3><button class="modal-close" id="modalClose">×</button></div>
+        <div class="drop" id="drop"><p style="font-size:1.8rem">📁</p><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>
     </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-const COLORS = ['red','yellow','blue','purple','white','rock','winged','ice'];
-const NAMES = {red:'红',yellow:'黄',blue:'蓝',purple:'紫',white:'白',rock:'岩',winged:'飞',ice:'冰'};
-const ALL7 = ['red','yellow','blue','purple','white','rock','winged'];
-const ALL8 = COLORS;
+const C = ['red','yellow','blue','purple','white','rock','winged','ice'];
+const CN = {red:'紅',yellow:'黃',blue:'藍',purple:'紫',white:'白',rock:'岩',winged:'翼',ice:'冰'};
+const C7 = ['red','yellow','blue','purple','white','rock','winged'];
+const C8 = C;
 
+// 資料根據 Excel 整理
 const DATA = {
-    "常规地点": [
-        {id:'roadside_sticker',name:'路边(贴纸)',icon:'🛣️',t:ALL8},
-        {id:'roadside_coin',name:'路边(硬币)',icon:'🪙',t:ALL8},
-        {id:'restaurant',name:'餐厅',icon:'🍽️',t:ALL8},
-        {id:'cafe',name:'咖啡馆',icon:'☕',t:ALL7},
-        {id:'sweetshop',name:'甜品店',icon:'🍰',t:ALL7},
-        {id:'movie',name:'电影院',icon:'🎬',t:ALL7},
-        {id:'pharmacy',name:'药房',icon:'💊',t:ALL7},
-        {id:'zoo',name:'动物园',icon:'🦁',t:ALL7},
-        {id:'forest',name:'森林',icon:'🌲',t:ALL8},
-        {id:'waterside',name:'水边',icon:'🌊',t:ALL7},
-        {id:'postoffice',name:'邮局',icon:'📮',t:ALL7},
-        {id:'artgallery',name:'美术馆',icon:'🎨',t:ALL7},
-        {id:'airport',name:'机场',icon:'✈️',t:ALL7},
-        {id:'station',name:'车站',icon:'🚉',t:ALL7},
-        {id:'beach',name:'海滩',icon:'🏖️',t:ALL7},
-        {id:'burger',name:'汉堡店',icon:'🍔',t:ALL7},
-        {id:'convenience',name:'便利店',icon:'🏪',t:ALL7},
-        {id:'supermarket',name:'超市',icon:'🛒',t:ALL7},
-        {id:'bakery',name:'面包店',icon:'🥐',t:ALL7},
-        {id:'hairsalon',name:'发廊',icon:'💇',t:ALL7},
-        {id:'clothes',name:'服装店',icon:'👗',t:ALL7},
-        {id:'park3',name:'公园(三叶草)',icon:'☘️',t:ALL7},
-        {id:'park4',name:'公园(四叶草)',icon:'🍀',t:ALL7},
-        {id:'library',name:'图书馆',icon:'📚',t:ALL7},
-        {id:'stadium',name:'体育场',icon:'🏟️',t:ALL7},
-        {id:'mountain',name:'山',icon:'⛰️',t:ALL7},
-        {id:'hotel',name:'酒店',icon:'🏨',t:ALL7},
-        {id:'temple',name:'寺庙/神社',icon:'⛩️',t:ALL7},
-    ],
-    "餐厅类型": [
-        {id:'italian',name:'意大利餐厅',icon:'🍝',t:ALL7},
-        {id:'ramen',name:'拉面店',icon:'🍜',t:ALL7},
-        {id:'sushi',name:'寿司店',icon:'🍣',t:ALL7},
-    ],
-    "特殊地点": [
-        {id:'themepark',name:'主题公园',icon:'🎢',t:['red','yellow','blue']},
-        {id:'appliance',name:'电器店',icon:'📺',t:['yellow']},
-        {id:'university',name:'大学',icon:'🎓',t:['red','yellow','blue']},
-    ],
-    "天气": [
-        {id:'rainy',name:'雨天',icon:'🌧️',t:ALL8},
-        {id:'snowy',name:'雪天',icon:'❄️',t:ALL8},
-    ],
-    "活动限定": [
-        {id:'lunar',name:'农历新年',icon:'🧧',t:ALL7},
-        {id:'chess',name:'国际象棋',icon:'♟️',t:ALL7},
-        {id:'hanafuda',name:'花札',icon:'🎴',t:ALL7},
-        {id:'mahjong',name:'麻将',icon:'🀄',t:ALL8},
-        {id:'kopparite',name:'Kopparite',icon:'💎',t:ALL7},
-        {id:'fingerboard',name:'滑板',icon:'🛹',t:ALL7},
-        {id:'mitten',name:'手套',icon:'🧤',t:ALL7},
-        {id:'present',name:'礼物',icon:'🎁',t:ALL7},
-        {id:'spring',name:'春季',icon:'🌸',t:ALL7},
-        {id:'summer',name:'夏季',icon:'🌻',t:ALL7},
-        {id:'autumn',name:'秋季',icon:'🍂',t:ALL7},
-        {id:'halloween',name:'万圣节',icon:'🎃',t:ALL7},
-        {id:'winter',name:'冬季',icon:'⛄',t:ALL7},
-    ]
+"常駐 Decor": [
+  {id:'restaurant',n:'餐廳',en:'Restaurant',i:'🍽️',c:C8},
+  {id:'cafe',n:'咖啡廳',en:'Café',i:'☕',c:C7},
+  {id:'sweetshop_macaron',n:'甜品店（馬卡龍）',en:'Sweetshop Macaron',i:'🍰',c:C7},
+  {id:'sweetshop_donut',n:'甜品店（甜甜圈）',en:'Sweetshop Donut',i:'🍩',c:C7},
+  {id:'movie',n:'電影院',en:'Movie Theater',i:'🎬',c:C7},
+  {id:'pharmacy_toothbrush',n:'藥局（牙刷）',en:'Pharmacy Toothbrush',i:'🪥',c:C7},
+  {id:'pharmacy_floss',n:'藥局（牙線棒）',en:'Pharmacy Floss',i:'🦷',c:C7},
+  {id:'pharmacy_paste',n:'藥局（牙膏）',en:'Pharmacy Toothpaste',i:'💊',c:C7},
+  {id:'zoo',n:'動物園',en:'Zoo',i:'🦁',c:C7},
+  {id:'forest_beetle',n:'森林（鍬形蟲）',en:'Forest Beetle',i:'🪲',c:C8},
+  {id:'forest_acorn',n:'森林（橡果）',en:'Forest Acorn',i:'🌰',c:C8},
+  {id:'waterside',n:'水邊',en:'Waterside',i:'🎣',c:C7},
+  {id:'postoffice',n:'郵局',en:'Post Office',i:'📮',c:C7},
+  {id:'artgallery',n:'美術館',en:'Art Gallery',i:'🖼️',c:C7},
+  {id:'airport',n:'機場',en:'Airport',i:'✈️',c:C7},
+  {id:'station_train',n:'車站（紙火車）',en:'Station Train',i:'🚂',c:C7},
+  {id:'station_ticket',n:'車站（車票）',en:'Station Ticket',i:'🎫',c:C7},
+  {id:'beach',n:'海灘',en:'Beach',i:'🏖️',c:C7},
+  {id:'burger',n:'漢堡店',en:'Burger Place',i:'🍔',c:C7},
+  {id:'convenience_cap',n:'便利商店（瓶蓋）',en:'Corner Store Cap',i:'🧢',c:C7},
+  {id:'convenience_snack',n:'便利商店（零食）',en:'Corner Store Snack',i:'🍫',c:C7},
+  {id:'supermarket_mushroom',n:'超市（蘑菇）',en:'Supermarket Mushroom',i:'🍄',c:C7},
+  {id:'supermarket_banana',n:'超市（香蕉）',en:'Supermarket Banana',i:'🍌',c:C7},
+  {id:'bakery',n:'麵包店',en:'Bakery',i:'🥖',c:C7},
+  {id:'hairsalon',n:'美髮沙龍',en:'Hair Salon',i:'💇',c:C7},
+  {id:'clothes',n:'服飾店',en:'Clothes Store',i:'👗',c:C7},
+  {id:'park_clover3',n:'公園（三葉草）',en:'Park Clover',i:'☘️',c:C7},
+  {id:'park_clover4',n:'公園（四葉草）',en:'Park 4-Leaf',i:'🍀',c:C7},
+  {id:'library',n:'圖書館',en:'Library',i:'📚',c:C7},
+  {id:'sushi',n:'壽司店',en:'Sushi Restaurant',i:'🍣',c:C7},
+  {id:'mountain',n:'山',en:'Mountain',i:'⛰️',c:C7},
+  {id:'stadium',n:'體育場',en:'Stadium',i:'🏟️',c:C7},
+  {id:'themepark_ferris',n:'遊樂園（摩天輪）',en:'Theme Park Ferris',i:'🎡',c:['red','yellow','blue']},
+  {id:'themepark_pirate',n:'遊樂園（海盜船）',en:'Theme Park Pirate',i:'🏴‍☠️',c:['red','yellow','blue']},
+  {id:'busstop',n:'公車站',en:'Bus Stop',i:'🚌',c:C7},
+  {id:'italian_pizza',n:'義式餐廳（披薩）',en:'Italian Pizza',i:'🍕',c:C7},
+  {id:'italian_pasta',n:'義式餐廳（義大利麵）',en:'Italian Pasta',i:'🍝',c:C7},
+  {id:'ramen',n:'拉麵店',en:'Ramen Restaurant',i:'🍜',c:C7},
+  {id:'bridge',n:'橋',en:'Bridge',i:'🌉',c:C7},
+  {id:'hotel',n:'飯店',en:'Hotel',i:'🏨',c:C7},
+  {id:'makeup',n:'化妝品店',en:'Makeup Store',i:'💄',c:C7},
+  {id:'shrine_daikichi',n:'神社（大吉）',en:'Shrine Daikichi',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_kichi',n:'神社（吉）',en:'Shrine Kichi',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_chukichi',n:'神社（中吉）',en:'Shrine Chukichi',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_shokichi',n:'神社（小吉）',en:'Shrine Shokichi',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_suekichi',n:'神社（末吉）',en:'Shrine Suekichi',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'appliance_bat_yr',n:'電器行（大電池黃紅）',en:'Battery Yellow/Red',i:'🔋',c:['yellow']},
+  {id:'appliance_bat_br',n:'電器行（大電池藍紅）',en:'Battery Blue/Red',i:'🔋',c:['yellow']},
+  {id:'appliance_bat_g',n:'電器行（大電池綠）',en:'Battery Green',i:'🔋',c:['yellow']},
+  {id:'appliance_sbat_yr',n:'電器行（小電池黃紅）',en:'Small Battery Y/R',i:'🔋',c:['yellow']},
+  {id:'appliance_sbat_br',n:'電器行（小電池藍紅）',en:'Small Battery B/R',i:'🔋',c:['yellow']},
+  {id:'appliance_sbat_g',n:'電器行（小電池綠）',en:'Small Battery Green',i:'🔋',c:['yellow']},
+  {id:'appliance_light1',n:'電器行（仙女燈單燈）',en:'Fairy Light Single',i:'💡',c:['yellow']},
+  {id:'appliance_light2',n:'電器行（仙女燈多色）',en:'Fairy Light Multi',i:'💡',c:['yellow']},
+  {id:'curry',n:'咖哩餐廳',en:'Curry Restaurant',i:'🍛',c:C7},
+  {id:'diy',n:'DIY商店',en:'DIY Store',i:'🔧',c:C7},
+  {id:'university',n:'大學',en:'University',i:'🎓',c:['red','yellow','blue']},
+  {id:'mexican',n:'墨西哥餐廳',en:'Mexican Restaurant',i:'🌮',c:C7},
+  {id:'laundry',n:'洗衣店',en:'Laundromat',i:'🧺',c:C7},
+  {id:'korean',n:'韓式餐廳',en:'Korean Restaurant',i:'🥬',c:C8},
+  {id:'roadside_green',n:'路邊（綠貼紙）',en:'Roadside Green',i:'🟢',c:C7},
+  {id:'roadside_blue',n:'路邊（藍貼紙）',en:'Roadside Blue',i:'🔵',c:C7},
+  {id:'roadside_orange',n:'路邊（橘貼紙）',en:'Roadside Orange',i:'🟠',c:C7},
+  {id:'roadside_coin',n:'路邊（金幣）',en:'Roadside Coin',i:'🪙',c:C7},
+  {id:'rainy',n:'雨天',en:'Rainy Day',i:'🌧️',c:C7},
+  {id:'snowy',n:'雪天',en:'Snowy Day',i:'❄️',c:C8},
+],
+"特殊活動 Decor": [
+  {id:'mario_cap',n:'瑪利歐紅帽',en:'Mario Cap',i:'🎩',c:['blue']},
+  {id:'mario_mushroom',n:'超級蘑菇',en:'Super Mushroom',i:'🍄',c:['blue']},
+  {id:'mario_star',n:'超級星星',en:'Super Star',i:'⭐',c:['blue']},
+  {id:'lunar_red',n:'農曆新年（紅）',en:'Lunar NY Red',i:'🧧',c:C7},
+  {id:'lunar_gold',n:'農曆新年（金）',en:'Lunar NY Gold',i:'🧧',c:C7},
+  {id:'chess_black',n:'西洋棋（黑）',en:'Chess Black',i:'♟️',c:C7},
+  {id:'chess_white',n:'西洋棋（白）',en:'Chess White',i:'♙',c:C7},
+  {id:'fingerboard',n:'指板滑板',en:'Fingerboard',i:'🛹',c:C7},
+  {id:'hanafuda_v1',n:'花札（第一輯）',en:'Hanafuda Vol.1',i:'🎴',c:['red','yellow','blue','purple']},
+  {id:'hanafuda_v2',n:'花札（第二輯）',en:'Hanafuda Vol.2',i:'🎴',c:['red','yellow','blue','white','rock','winged']},
+  {id:'halloween_lantern',n:'南瓜燈',en:'Jack-o-Lantern',i:'🎃',c:C7},
+  {id:'halloween_treat',n:'萬聖節糖果',en:'Halloween Treat',i:'🍬',c:C7},
+  {id:'halloween_light',n:'萬聖節燈',en:'Halloween Light',i:'🔮',c:C7},
+  {id:'anniv1_snack',n:'一週年零食',en:'1st Anniv Snack',i:'🍪',c:['red','yellow','blue']},
+  {id:'koppaite_brittany',n:'科巴派太空衣（紅）',en:'Koppaite Brittany',i:'🚀',c:['red']},
+  {id:'koppaite_charlie',n:'科巴派太空衣（黃）',en:'Koppaite Charlie',i:'🚀',c:['yellow']},
+  {id:'koppaite_alph',n:'科巴派太空衣（藍）',en:'Koppaite Alph',i:'🚀',c:['blue']},
+  {id:'mitten',n:'手套',en:'Mitten',i:'🧤',c:C7},
+  {id:'glasses_2023',n:'2023眼鏡',en:'2023 Glasses',i:'👓',c:C7},
+  {id:'glasses_2024',n:'2024眼鏡',en:'2024 Glasses',i:'👓',c:C7},
+  {id:'valentine',n:'情人節貼紙',en:'Valentine Sticker',i:'💝',c:C7},
+  {id:'rev_valentine',n:'反情人節貼紙',en:'Reverse Valentine',i:'💔',c:C7},
+  {id:'present_gold',n:'禮物貼紙（金）',en:'Present Gold',i:'🎁',c:C7},
+  {id:'easter',n:'復活節蛋',en:'Easter Egg',i:'🥚',c:C7},
+  {id:'bunny',n:'兔子蛋',en:'Bunny Egg',i:'🐰',c:C7},
+  {id:'sneaker',n:'運動鞋鑰匙圈',en:'Sneaker Keychain',i:'👟',c:C7},
+  {id:'pikmin4_ship',n:'Pikmin 4太空船',en:'Pikmin 4 Ship',i:'🛸',c:C8},
+  {id:'pikmin4_toy',n:'Pikmin 4玩具',en:'Pikmin 4 Toy',i:'🧸',c:C8},
+  {id:'mahjong_upper',n:'麻將牌（上排）',en:'Mahjong Upper',i:'🀄',c:C7},
+  {id:'mahjong_lower',n:'麻將牌（下排）',en:'Mahjong Lower',i:'🀄',c:C7},
+  {id:'icecream_classic',n:'冰淇淋（經典）',en:'Ice Cream Classic',i:'🍦',c:['red','yellow','blue','purple','white','winged']},
+  {id:'icecream_2024',n:'冰淇淋（2024）',en:'Ice Cream 2024',i:'🍦',c:C7},
+  {id:'icecream_extra',n:'冰淇淋（特別）',en:'Ice Cream Extra',i:'🍦',c:['ice']},
+  {id:'puzzle_2021fall',n:'拼圖 2021秋',en:'Puzzle 2021 Fall',i:'🧩',c:C7},
+  {id:'puzzle_2022sum',n:'拼圖 2022夏',en:'Puzzle 2022 Summer',i:'🧩',c:C7},
+  {id:'puzzle_2023sum',n:'拼圖 2023夏',en:'Puzzle 2023 Summer',i:'🧩',c:C7},
+  {id:'puzzle_2024fall',n:'拼圖 2024秋',en:'Puzzle 2024 Fall',i:'🧩',c:C8},
+  {id:'spring',n:'春季貼紙',en:'Spring Sticker',i:'🌸',c:C7},
+  {id:'summer',n:'夏季貼紙',en:'Summer Sticker',i:'🌻',c:C7},
+  {id:'fall',n:'秋季貼紙',en:'Fall Sticker',i:'🍂',c:C7},
+  {id:'winter',n:'冬季貼紙',en:'Winter Sticker',i:'⛄',c:C7},
+  {id:'playing_card',n:'撲克牌',en:'Playing Card',i:'🃏',c:C7},
+  {id:'cheese',n:'起司',en:'Cheese',i:'🧀',c:C7},
+  {id:'coral',n:'珊瑚',en:'Coral',i:'🪸',c:C7},
+  {id:'paint',n:'油漆',en:'Paint',i:'🎨',c:C7},
+  {id:'rosette_red',n:'紅色緞帶勳章',en:'Red Rosette',i:'🎖️',c:C7},
+  {id:'rosette_yellow',n:'黃色緞帶勳章',en:'Yellow Rosette',i:'🎖️',c:C7},
+  {id:'anniv3_cupcake',n:'三週年杯子蛋糕',en:'3rd Anniv Cupcake',i:'🧁',c:C7},
+  {id:'ball_ornament',n:'球形吊飾',en:'Ball Ornament',i:'🔴',c:C7},
+  {id:'popper_2025',n:'2025派對彩炮',en:'Party Popper 2025',i:'🎉',c:C7},
+  {id:'chocolate',n:'巧克力',en:'Chocolate',i:'🍫',c:C8},
+  {id:'rio',n:'里約嘉年華',en:'Rio Carnival',i:'🎭',c:C7},
+  {id:'afternoon_tea',n:'下午茶',en:'Afternoon Tea',i:'🫖',c:C8},
+  {id:'nintendo',n:'任天堂主機',en:'Nintendo Consoles',i:'🎮',c:C7},
+  {id:'instrument',n:'小樂器',en:'Tiny Instrument',i:'🎵',c:C7},
+  {id:'surfboard',n:'衝浪板鑰匙圈',en:'Surfboard',i:'🏄',c:C7},
+  {id:'shaved_ice',n:'刨冰',en:'Shaved Ice',i:'🍧',c:C8},
+  {id:'mooncake',n:'月餅',en:'Mooncake',i:'🥮',c:C7},
+  {id:'photo_badge',n:'照片徽章',en:'Photo Badge',i:'📷',c:C7},
+  {id:'calavera',n:'骷髏頭',en:'Calavera',i:'💀',c:C7},
+  {id:'anniv4_flower',n:'四週年花盒',en:'4th Anniv Flower',i:'💐',c:C8},
+  {id:'anniv4_snack',n:'四週年零食',en:'4th Anniv Snack',i:'🎂',c:C8},
+  {id:'ornament_2025',n:'2025吊飾',en:'2025 Ornament',i:'🎄',c:C8},
+  {id:'pacifier',n:'奶嘴',en:'Pacifier',i:'🍼',c:C8},
+  {id:'osechi',n:'御節料理',en:'Osechi',i:'🍱',c:C8},
+  {id:'chocolate_2026',n:'2026巧克力',en:'2026 Chocolate',i:'🍫',c:C8},
+  {id:'color_powder',n:'彩色粉末',en:'Color Powder',i:'🎨',c:C7},
+  {id:'golden_plane',n:'金色玩具飛機',en:'Golden Airplane',i:'✈️',c:C7},
+]
 };
 
-let owned = {};
-let view = 'missing';
-let colorFilter = 'all';
-let statusFilter = 'all';
+let own = {};
+let view = 'list';
+let colorF = 'all';
+let statusF = 'all';
 let searchQ = '';
-let collapsed = {};
+let shut = {};
 
-function key(d,c){ return d+'_'+c; }
-function load(){ 
-    const s = localStorage.getItem('pik_v4'); 
-    owned = s ? JSON.parse(s) : {}; 
-}
-function save(){ localStorage.setItem('pik_v4', JSON.stringify(owned)); }
+const key = (d,c) => d+'_'+c;
+const load = () => { const s=localStorage.getItem('pik_v5'); own=s?JSON.parse(s):{}; };
+const save = () => localStorage.setItem('pik_v5',JSON.stringify(own));
 
-function toggle(did, color){
-    const k = key(did,color);
-    owned[k] = !owned[k];
-    if(!owned[k]) delete owned[k];
-    save();
-    render();
-}
-
-function fillDecor(did, types){
-    types.forEach(c => owned[key(did,c)] = true);
+function toggle(did,col){
+    const k=key(did,col);
+    own[k]=!own[k];
+    if(!own[k]) delete own[k];
     save(); render();
-    toast('✅ 已全选');
+}
+function fillD(did,cols){ cols.forEach(c=>own[key(did,c)]=true); save(); render(); toast('✅ 已全選'); }
+function clearD(did,cols){ cols.forEach(c=>delete own[key(did,c)]); save(); render(); toast('🗑️ 已清空'); }
+
+function allDecors(){
+    const arr=[];
+    for(const [cat,items] of Object.entries(DATA)) items.forEach(d=>arr.push({...d,cat}));
+    return arr;
 }
 
-function clearDecor(did, types){
-    types.forEach(c => delete owned[key(did,c)]);
-    save(); render();
-    toast('🗑️ 已清空');
+function stats(){
+    let o=0,m=0;
+    allDecors().forEach(d=>d.c.forEach(c=>{if(own[key(d.id,c)])o++;else m++;}));
+    return {o,m,t:o+m,p:o+m>0?(o/(o+m)*100).toFixed(1):0};
 }
-
-function getAllDecors(){
-    const list = [];
-    for(const [cat, items] of Object.entries(DATA)){
-        items.forEach(d => list.push({...d, cat}));
-    }
-    return list;
-}
-
-function getStats(){
-    let o=0, m=0;
-    getAllDecors().forEach(d => {
-        d.t.forEach(c => {
-            if(owned[key(d.id,c)]) o++; else m++;
-        });
-    });
-    return {owned:o, missing:m, total:o+m, pct: o+m>0 ? (o/(o+m)*100).toFixed(1) : 0};
-}
-
-function getColorStats(){
-    const stats = {};
-    COLORS.forEach(c => stats[c] = {o:0,m:0});
-    getAllDecors().forEach(d => {
-        d.t.forEach(c => {
-            if(owned[key(d.id,c)]) stats[c].o++; else stats[c].m++;
-        });
-    });
-    return stats;
+function colorStats(){
+    const cs={};C.forEach(c=>cs[c]={o:0,m:0});
+    allDecors().forEach(d=>d.c.forEach(c=>{if(own[key(d.id,c)])cs[c].o++;else cs[c].m++;}));
+    return cs;
 }
 
 function renderFilters(){
-    const cs = getColorStats();
-    let h = `<div class="filter-chip ${colorFilter==='all'?'active':''}" onclick="setColor('all')">全部</div>`;
-    COLORS.forEach(c => {
-        h += `<div class="filter-chip ${colorFilter===c?'active':''}" onclick="setColor('${c}')">
-            <div class="fdot dot ${c}"></div>${cs[c].m}缺
-        </div>`;
-    });
-    h += `<div class="spacer"></div>`;
-    h += `<div class="filter-chip ${statusFilter==='all'?'active':''}" onclick="setStatus('all')">全部</div>`;
-    h += `<div class="filter-chip ${statusFilter==='missing'?'active':''}" onclick="setStatus('missing')">未完成</div>`;
-    h += `<div class="filter-chip ${statusFilter==='complete'?'active':''}" onclick="setStatus('complete')">已完成</div>`;
-    $('#filters').innerHTML = h;
+    const cs=colorStats();
+    let h=`<div class="chip ${colorF==='all'?'on':''}" onclick="setColorF('all')">全部</div>`;
+    C.forEach(c=>h+=`<div class="chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><div class="dot ${c}"></div>${cs[c].m}缺</div>`);
+    h+=`<div class="spacer"></div>`;
+    h+=`<div class="chip ${statusF==='all'?'on':''}" onclick="setStatusF('all')">全部</div>`;
+    h+=`<div class="chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">未完成</div>`;
+    h+=`<div class="chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">已完成</div>`;
+    document.getElementById('filters').innerHTML=h;
 }
+function setColorF(c){ colorF=c; render(); }
+function setStatusF(s){ statusF=s; render(); }
 
-function setColor(c){ colorFilter = c; render(); }
-function setStatus(s){ statusFilter = s; render(); }
-
-function filterDecor(d){
-    if(searchQ && !d.name.includes(searchQ) && !d.icon.includes(searchQ)) return false;
-    if(colorFilter !== 'all' && !d.t.includes(colorFilter)) return false;
-    const cnt = d.t.filter(c => owned[key(d.id,c)]).length;
-    if(statusFilter === 'complete' && cnt !== d.t.length) return false;
-    if(statusFilter === 'missing' && cnt === d.t.length) return false;
+function filterD(d){
+    if(searchQ && !d.n.includes(searchQ) && !d.en.toLowerCase().includes(searchQ.toLowerCase())) return false;
+    if(colorF!=='all' && !d.c.includes(colorF)) return false;
+    const cnt=d.c.filter(c=>own[key(d.id,c)]).length;
+    if(statusF==='done' && cnt!==d.c.length) return false;
+    if(statusF==='miss' && cnt===d.c.length) return false;
     return true;
 }
 
-function renderMissing(){
-    const container = $('#missing-view');
-    let h = '';
-    
-    // 按颜色分组显示缺失
-    COLORS.forEach(color => {
-        if(colorFilter !== 'all' && colorFilter !== color) return;
-        
-        const missing = [];
-        getAllDecors().forEach(d => {
-            if(!d.t.includes(color)) return;
-            if(searchQ && !d.name.includes(searchQ)) return;
-            if(!owned[key(d.id, color)]){
-                missing.push(d);
-            }
-        });
-        
-        if(statusFilter === 'complete') return;
-        if(missing.length === 0 && statusFilter !== 'all') return;
-        
-        h += `<div class="missing-section">
-            <div class="missing-title">
-                <div class="dot ${color}" style="width:18px;height:18px"></div>
-                <h3>${NAMES[color]} Pikmin</h3>
-                <span style="color:var(--muted);font-size:0.85rem">缺 ${missing.length} 个</span>
-            </div>
-            <div class="missing-grid">`;
-        
-        if(missing.length === 0){
-            h += `<span style="color:var(--accent)">✨ 全部收集完成！</span>`;
-        } else {
-            missing.forEach(d => {
-                h += `<div class="missing-chip" onclick="toggle('${d.id}','${color}')">
-                    ${d.icon} ${d.name}
-                </div>`;
-            });
-        }
-        h += `</div></div>`;
-    });
-    
-    if(!h) h = '<div class="empty">没有匹配项</div>';
-    container.innerHTML = h;
-}
-
 function renderList(){
-    const container = $('#list-view');
-    let h = '';
-    
-    for(const [cat, items] of Object.entries(DATA)){
-        const filtered = items.filter(filterDecor);
-        if(filtered.length === 0) continue;
-        
-        const catOwned = filtered.reduce((s,d) => s + d.t.filter(c=>owned[key(d.id,c)]).length, 0);
-        const catTotal = filtered.reduce((s,d) => s + d.t.length, 0);
-        const isClosed = collapsed[cat];
-        
-        h += `<div class="cat-header ${isClosed?'closed':''}" onclick="toggleCat('${cat}')">
-            <span class="arrow">▼</span>
-            <h3>${cat}</h3>
-            <span class="cat-count">${catOwned}/${catTotal}</span>
-        </div>
-        <div class="cat-content ${isClosed?'hidden':''}">`;
-        
-        filtered.forEach(d => {
-            const cnt = d.t.filter(c => owned[key(d.id,c)]).length;
-            const done = cnt === d.t.length;
-            h += `<div class="decor-item ${done?'complete':''}">
-                <div class="decor-header">
-                    <span class="decor-icon">${d.icon}</span>
-                    <span class="decor-name">${d.name}</span>
-                    <span class="decor-progress">${cnt}/${d.t.length}</span>
-                    <div class="decor-btns">
-                        <button onclick="fillDecor('${d.id}',${JSON.stringify(d.t).replace(/"/g,"'")})">全选</button>
-                        <button onclick="clearDecor('${d.id}',${JSON.stringify(d.t).replace(/"/g,"'")})">清空</button>
-                    </div>
-                </div>
-                <div class="pikmin-grid">
-                    ${COLORS.map(c => {
-                        const avail = d.t.includes(c);
-                        const has = avail && owned[key(d.id,c)];
-                        return `<div class="pik ${has?'owned':''} ${!avail?'na':''}" 
-                            ${avail ? `onclick="toggle('${d.id}','${c}')"` : ''} title="${NAMES[c]}">
-                            <div class="dot ${c}"></div>
-                        </div>`;
-                    }).join('')}
-                </div>
-            </div>`;
+    let h='';
+    for(const [cat,items] of Object.entries(DATA)){
+        const filtered=items.filter(filterD);
+        if(!filtered.length) continue;
+        const cO=filtered.reduce((s,d)=>s+d.c.filter(c=>own[key(d.id,c)]).length,0);
+        const cT=filtered.reduce((s,d)=>s+d.c.length,0);
+        const closed=shut[cat];
+        h+=`<div class="cat"><div class="cat-head ${closed?'shut':''}" onclick="toggleCat('${cat}')"><span class="arr">▼</span><h3>${cat}</h3><span class="cat-cnt">${cO}/${cT}</span></div><div class="cat-body ${closed?'hide':''}">`;
+        filtered.forEach(d=>{
+            const cnt=d.c.filter(c=>own[key(d.id,c)]).length;
+            const done=cnt===d.c.length;
+            const cols=JSON.stringify(d.c).replace(/"/g,"'");
+            h+=`<div class="item ${done?'done':''}"><div class="item-top"><span class="item-icon">${d.i}</span><div><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub"> ${d.note}</span>`:''}</div><span class="item-prog">${cnt}/${d.c.length}</span><div class="item-btns"><button onclick="event.stopPropagation();fillD('${d.id}',${cols})">全選</button><button onclick="event.stopPropagation();clearD('${d.id}',${cols})">清空</button></div></div><div class="piks">${C.map(c=>{const av=d.c.includes(c);const has=av&&own[key(d.id,c)];return`<div class="pik ${has?'own':''} ${!av?'na':''}" ${av?`onclick="toggle('${d.id}','${c}')"`:''}title="${CN[c]}"><div class="d dot ${c}"></div></div>`;}).join('')}</div></div>`;
         });
-        h += '</div>';
+        h+=`</div></div>`;
     }
-    
-    if(!h) h = '<div class="empty">没有匹配项</div>';
-    container.innerHTML = h;
+    if(!h) h='<div class="empty">沒有匹配項</div>';
+    document.getElementById('listView').innerHTML=h;
 }
 
-function toggleCat(cat){
-    collapsed[cat] = !collapsed[cat];
-    render();
+function renderMiss(){
+    let h='';
+    C.forEach(c=>{
+        if(colorF!=='all' && colorF!==c) return;
+        const miss=allDecors().filter(d=>d.c.includes(c)&&!own[key(d.id,c)]&&(!searchQ||d.n.includes(searchQ)));
+        if(statusF==='done') return;
+        h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">缺 ${miss.length} 個</span></div><div class="miss-grid">${miss.length?miss.map(d=>`<div class="miss-chip" onclick="toggle('${d.id}','${c}')">${d.i} ${d.n}</div>`).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
+    });
+    if(!h) h='<div class="empty">沒有匹配項</div>';
+    document.getElementById('missView').innerHTML=h;
 }
+
+function toggleCat(cat){ shut[cat]=!shut[cat]; render(); }
 
 function render(){
-    const st = getStats();
-    $('#s-owned').textContent = st.owned;
-    $('#s-missing').textContent = st.missing;
-    $('#s-pct').textContent = st.pct + '%';
+    const st=stats();
+    document.getElementById('sOwn').textContent=st.o;
+    document.getElementById('sMiss').textContent=st.m;
+    document.getElementById('sPct').textContent=st.p+'%';
     renderFilters();
-    renderMissing();
     renderList();
+    renderMiss();
 }
 
 function setView(v){
-    view = v;
-    $$('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-    $('#missing-view').classList.toggle('active', v === 'missing');
-    $('#list-view').classList.toggle('active', v === 'list');
+    view=v;
+    document.querySelectorAll('.view-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+    document.getElementById('listView').style.display=v==='list'?'':'none';
+    document.getElementById('missView').style.display=v==='miss'?'':'none';
 }
 
 function exportData(){
-    const data = {v:4, date:new Date().toISOString(), data:owned};
-    const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'pikmin_'+new Date().toISOString().slice(0,10)+'.json';
-    a.click();
-    toast('📤 已导出');
+    const d={v:5,date:new Date().toISOString(),data:own};
+    const b=new Blob([JSON.stringify(d)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='pikmin_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+    toast('📤 已匯出');
 }
 
-function importFile(file){
-    const reader = new FileReader();
-    reader.onload = e => {
-        try {
-            const j = JSON.parse(e.target.result);
-            owned = j.data || j.collection || j;
-            save(); render();
-            $('#modal').classList.remove('show');
-            toast('📥 导入成功');
-        } catch(e){ toast('❌ 格式错误'); }
-    };
-    reader.readAsText(file);
+function importFile(f){
+    const r=new FileReader();
+    r.onload=e=>{try{
+        const j=JSON.parse(e.target.result);
+        own=j.data||j.collection||j;save();render();
+        document.getElementById('modal').classList.remove('show');
+        toast('📥 匯入成功');
+    }catch(e){toast('❌ 格式錯誤');}};
+    r.readAsText(f);
 }
 
-function toast(msg){
-    const t = $('#toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-function $(s){ return document.querySelector(s); }
-function $$(s){ return document.querySelectorAll(s); }
+// 事件
+document.getElementById('search').oninput=e=>{searchQ=e.target.value;render();};
+document.getElementById('btnExport').onclick=exportData;
+document.getElementById('btnImport').onclick=()=>document.getElementById('modal').classList.add('show');
+document.getElementById('modalClose').onclick=()=>document.getElementById('modal').classList.remove('show');
+document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};save();render();toast('🔄 已重置');}};
+document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+const drop=document.getElementById('drop'),fi=document.getElementById('fileIn');
+drop.onclick=()=>fi.click();
+fi.onchange=e=>e.target.files[0]&&importFile(e.target.files[0]);
+drop.ondragover=e=>{e.preventDefault();drop.style.borderColor='var(--accent)';};
+drop.ondragleave=()=>drop.style.borderColor='';
+drop.ondrop=e=>{e.preventDefault();drop.style.borderColor='';e.dataTransfer.files[0]&&importFile(e.dataTransfer.files[0]);};
+document.onkeydown=e=>{if(e.key==='Escape')document.getElementById('modal').classList.remove('show');};
 
-// 事件绑定
-$('#search').oninput = e => { searchQ = e.target.value; render(); };
-$('#btn-export').onclick = exportData;
-$('#btn-import').onclick = () => $('#modal').classList.add('show');
-$('#modal-close').onclick = () => $('#modal').classList.remove('show');
-$('#btn-reset').onclick = () => { if(confirm('确定重置？')){ owned={}; save(); render(); toast('🔄 已重置'); }};
-
-$$('.view-btn').forEach(b => b.onclick = () => setView(b.dataset.view));
-
-const dz = $('#drop-zone');
-const fi = $('#file-input');
-dz.onclick = () => fi.click();
-fi.onchange = e => e.target.files[0] && importFile(e.target.files[0]);
-dz.ondragover = e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)'; };
-dz.ondragleave = () => dz.style.borderColor = '';
-dz.ondrop = e => { e.preventDefault(); dz.style.borderColor = ''; e.dataTransfer.files[0] && importFile(e.dataTransfer.files[0]); };
-
-document.onkeydown = e => { if(e.key === 'Escape') $('#modal').classList.remove('show'); };
-
-// 初始化
-load();
-render();
+load();render();
 </script>
 </body>
 </html>
