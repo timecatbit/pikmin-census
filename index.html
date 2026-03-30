@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pikmin Bloom 人口普查 🌱</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #ff6b6b;
+            --yellow: #ffd93d;
+            --blue: #4dabf7;
+            --purple: #cc5de8;
+            --white: #f8f9fa;
+            --rock: #868e96;
+            --winged: #f783ac;
+            --ice: #66d9e8;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --accent: #4ade80;
+            --accent-glow: rgba(74, 222, 128, 0.3);
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(74, 222, 128, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 40px 30px;
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(30, 41, 59, 0.8) 100%);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), #22d3ee, var(--purple), var(--accent));
+            background-size: 300% 100%;
+            animation: gradient 3s ease infinite;
+        }
+
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            padding: 20px 30px;
+            border-radius: 16px;
+            text-align: center;
+            min-width: 140px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .color-stats {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .color-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .color-stat:hover, .color-stat.active {
+            transform: scale(1.05);
+        }
+
+        .color-stat.active {
+            border-color: currentColor;
+        }
+
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .color-dot.red { background: var(--red); }
+        .color-dot.yellow { background: var(--yellow); }
+        .color-dot.blue { background: var(--blue); }
+        .color-dot.purple { background: var(--purple); }
+        .color-dot.white { background: var(--white); }
+        .color-dot.rock { background: var(--rock); }
+        .color-dot.winged { background: var(--winged); }
+        .color-dot.ice { background: var(--ice); }
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #22d3ee);
+            color: var(--bg-dark);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .search-filter-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 350px;
+            padding: 14px 24px;
+            border-radius: 30px;
+            border: 2px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-pill {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-pill:hover {
+            color: var(--text);
+        }
+
+        .filter-pill.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .decor-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .decor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(74, 222, 128, 0.03) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .decor-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(74, 222, 128, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .decor-card:hover::before {
+            opacity: 1;
+        }
+
+        .decor-card.complete {
+            border-color: var(--accent);
+        }
+
+        .decor-card.complete::after {
+            content: '✓';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .decor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .decor-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .decor-icon {
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .decor-progress-text {
+            font-size: 1rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .pikmin-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .pikmin-cell {
+            aspect-ratio: 1;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 2px solid transparent;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .pikmin-cell.unavailable {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pikmin-cell:not(.unavailable):hover {
+            transform: scale(1.08);
+            z-index: 1;
+        }
+
+        .pikmin-cell.owned {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .pikmin-cell.owned .pikmin-check {
+            display: flex;
+        }
+
+        .pikmin-check {
+            display: none;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--bg-dark);
+            font-weight: bold;
+        }
+
+        .pikmin-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-bottom: 6px;
+            position: relative;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+
+        .pikmin-avatar.red { background: linear-gradient(135deg, var(--red), #e55555); }
+        .pikmin-avatar.yellow { background: linear-gradient(135deg, var(--yellow), #ebc934); }
+        .pikmin-avatar.blue { background: linear-gradient(135deg, var(--blue), #3d9ee0); }
+        .pikmin-avatar.purple { background: linear-gradient(135deg, var(--purple), #b84dd4); }
+        .pikmin-avatar.white { background: linear-gradient(135deg, var(--white), #dee2e6); }
+        .pikmin-avatar.rock { background: linear-gradient(135deg, var(--rock), #6c757d); }
+        .pikmin-avatar.winged { background: linear-gradient(135deg, var(--winged), #e5749a); }
+        .pikmin-avatar.ice { background: linear-gradient(135deg, var(--ice), #4dc9db); }
+
+        .pikmin-avatar::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+        }
+
+        .pikmin-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            margin-top: 18px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #22d3ee);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .rare-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .rare-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .rare-label .sparkle {
+            animation: sparkle 1.5s ease infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .rare-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .rare-cell {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .rare-cell:hover {
+            transform: scale(1.1);
+        }
+
+        .rare-cell.owned {
+            border-color: gold;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .rare-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 35px;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+            transform: rotate(90deg);
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 18px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: rgba(0,0,0,0.3);
+            color: var(--text);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, var(--accent), #22d3ee);
+            color: var(--bg-dark);
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1001;
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .quick-fill {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quick-btn {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .quick-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .logo { font-size: 2.5rem; }
+            .grid { grid-template-columns: 1fr; }
+            .stat-card { min-width: 100px; padding: 15px 20px; }
+            .stat-value { font-size: 2rem; }
+            .pikmin-grid { gap: 8px; }
+            .pikmin-avatar { width: 28px; height: 28px; }
+            header { padding: 25px 20px; }
+            .container { padding: 15px; }
+        }
+
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🌱</div>
+            <h1>Pikmin Bloom 人口普查</h1>
+            <p class="subtitle">追踪你的 Decor Pikmin 收集进度，避免培育重复！</p>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="owned-count">0</div>
+                    <div class="stat-label">已收集</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-count">0</div>
+                    <div class="stat-label">总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="progress-percent">0%</div>
+                    <div class="stat-label">完成度</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="complete-decors">0</div>
+                    <div class="stat-label">完成类别</div>
+                </div>
+            </div>
+
+            <div class="color-stats" id="color-stats"></div>
+        </header>
+
+        <div class="toolbar">
+            <button class="btn-primary" onclick="exportData()">📤 导出数据</button>
+            <button class="btn-secondary" onclick="openImportModal()">📥 导入数据</button>
+            <button class="btn-secondary" onclick="resetData()">🔄 重置全部</button>
+        </div>
+
+        <div class="search-filter-row">
+            <input type="text" class="search-box" placeholder="🔍 搜索装饰类型..." oninput="filterDecors(this.value)">
+            <div class="filter-pills">
+                <button class="filter-pill active" onclick="setFilter('all', this)">全部</button>
+                <button class="filter-pill" onclick="setFilter('incomplete', this)">未完成</button>
+                <button class="filter-pill" onclick="setFilter('complete', this)">已完成</button>
+            </div>
+        </div>
+
+        <div class="grid" id="decor-grid"></div>
+    </div>
+
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📥 导入数据</h2>
+                <button class="modal-close" onclick="closeImportModal()">×</button>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 15px;">粘贴之前导出的 JSON 数据来恢复你的收集进度。</p>
+            <textarea id="import-data" placeholder='{"roadside_red": true, ...}'></textarea>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeImportModal()">取消</button>
+                <button class="btn-primary" onclick="importData()">确认导入</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const PIKMIN_TYPES = [
+            { id: 'red', name: '红', nameEn: 'Red' },
+            { id: 'yellow', name: '黄', nameEn: 'Yellow' },
+            { id: 'blue', name: '蓝', nameEn: 'Blue' },
+            { id: 'purple', name: '紫', nameEn: 'Purple' },
+            { id: 'white', name: '白', nameEn: 'White' },
+            { id: 'rock', name: '岩', nameEn: 'Rock' },
+            { id: 'winged', name: '飞', nameEn: 'Winged' },
+            { id: 'ice', name: '冰', nameEn: 'Ice' }
+        ];
+
+        const DECOR_TYPES = [
+            { id: 'roadside_sticker', name: '路边(贴纸)', icon: '🛣️', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged','ice'] },
+            { id: 'roadside_coin', name: '路边(硬币)', icon: '🪙', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged','ice'] },
+            { id: 'restaurant', name: '餐厅', icon: '🍽️', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'cafe', name: '咖啡馆', icon: '☕', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'sweetshop', name: '甜品店', icon: '🍰', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'movie', name: '电影院', icon: '🎬', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'pharmacy', name: '药房', icon: '💊', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'zoo', name: '动物园', icon: '🦁', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'forest', name: '森林', icon: '🌲', types: ['red','yellow','blue','purple','white','rock','winged','ice'] },
+            { id: 'waterside', name: '水边', icon: '🌊', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'postoffice', name: '邮局', icon: '📮', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'artgallery', name: '美术馆', icon: '🎨', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'airport', name: '机场', icon: '✈️', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'station', name: '车站', icon: '🚉', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'beach', name: '海滩', icon: '🏖️', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'burger', name: '汉堡店', icon: '🍔', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'convenience', name: '便利店', icon: '🏪', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'supermarket', name: '超市', icon: '🛒', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'bakery', name: '面包店', icon: '🥐', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'hairsalon', name: '发廊', icon: '💇', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'clothes', name: '服装店', icon: '👗', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'park_clover', name: '公园(三叶草)', icon: '☘️', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'park_4leaf', name: '公园(四叶草)', icon: '🍀', hasRare: true, types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'library', name: '图书馆', icon: '📚', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'stadium', name: '体育场', icon: '🏟️', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'italian', name: '意大利餐厅', icon: '🍝', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'ramen', name: '拉面店', icon: '🍜', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'sushi', name: '寿司店', icon: '🍣', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'mountain', name: '山', icon: '⛰️', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'themepark', name: '主题公园', icon: '🎢', types: ['red','yellow','blue'] },
+            { id: 'appliance', name: '电器店', icon: '📺', types: ['yellow'] },
+            { id: 'university', name: '大学', icon: '🎓', types: ['red','yellow','blue'] },
+            { id: 'hotel', name: '酒店', icon: '🏨', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'temple', name: '寺庙/神社', icon: '⛩️', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'rainy', name: '雨天', icon: '🌧️', types: ['red','yellow','blue','purple','white','rock','winged','ice'] },
+            { id: 'snowy', name: '雪天', icon: '❄️', types: ['red','yellow','blue','purple','white','rock','winged','ice'] },
+            { id: 'lunar', name: '农历新年', icon: '🧧', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'chess', name: '国际象棋', icon: '♟️', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'hanafuda', name: '花札', icon: '🎴', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'mahjong', name: '麻将', icon: '🀄', types: ['red','yellow','blue','purple','white','rock','winged','ice'] },
+            { id: 'kopparite', name: 'Kopparite矿石', icon: '💎', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'fingerboard', name: '滑板', icon: '🛹', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'mitten', name: '手套', icon: '🧤', types: ['red','yellow','blue','purple','white','rock','winged'] },
+            { id: 'present', name: '礼物', icon: '🎁', types: ['red','yellow','blue','purple','white','rock','winged'] }
+        ];
+
+        let collection = {};
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let colorFilter = null;
+
+        function init() {
+            loadData();
+            renderColorStats();
+            renderGrid();
+            updateStats();
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('pikmin_census_v2');
+            collection = saved ? JSON.parse(saved) : {};
+        }
+
+        function saveData() {
+            localStorage.setItem('pikmin_census_v2', JSON.stringify(collection));
+        }
+
+        function getKey(decorId, pikminId, isRare = false) {
+            return `${decorId}_${pikminId}${isRare ? '_rare' : ''}`;
+        }
+
+        function toggleOwned(decorId, pikminId, isRare = false) {
+            const key = getKey(decorId, pikminId, isRare);
+            collection[key] = !collection[key];
+            saveData();
+            updateStats();
+            renderGrid();
+            renderColorStats();
+
+            // 检查是否完成一个类别
+            const decor = DECOR_TYPES.find(d => d.id === decorId);
+            if (decor) {
+                const owned = decor.types.filter(t => collection[getKey(decor.id, t)]).length;
+                if (owned === decor.types.length) {
+                    showToast(`🎉 恭喜！完成了 ${decor.name} 的收集！`);
+                    createConfetti();
+                }
+            }
+        }
+
+        function fillAll(decorId) {
+            const decor = DECOR_TYPES.find(d => d.id === decorId);
+            if (!decor) return;
+            decor.types.forEach(t => {
+                collection[getKey(decorId, t)] = true;
+            });
+            saveData();
+            updateStats();
+            renderGrid();
+            renderColorStats();
+            showToast(`✨ ${decor.name} 已全部标记为已收集`);
+        }
+
+        function clearAll(decorId) {
+            const decor = DECOR_TYPES.find(d => d.id === decorId);
+            if (!decor) return;
+            decor.types.forEach(t => {
+                delete collection[getKey(decorId, t)];
+                delete collection[getKey(decorId, t, true)];
+            });
+            saveData();
+            updateStats();
+            renderGrid();
+            renderColorStats();
+        }
+
+        function renderColorStats() {
+            const container = document.getElementById('color-stats');
+            const stats = PIKMIN_TYPES.map(pik => {
+                let owned = 0;
+                let total = 0;
+                DECOR_TYPES.forEach(decor => {
+                    if (decor.types.includes(pik.id)) {
+                        total++;
+                        if (collection[getKey(decor.id, pik.id)]) owned++;
+                    }
+                });
+                return { ...pik, owned, total };
+            });
+
+            container.innerHTML = stats.map(s => `
+                <div class="color-stat ${colorFilter === s.id ? 'active' : ''}" 
+                     style="color: var(--${s.id})"
+                     onclick="toggleColorFilter('${s.id}')">
+                    <div class="color-dot ${s.id}"></div>
+                    <span>${s.owned}/${s.total}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleColorFilter(colorId) {
+            colorFilter = colorFilter === colorId ? null : colorId;
+            renderColorStats();
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('decor-grid');
+            
+            const filteredDecors = DECOR_TYPES.filter(decor => {
+                // 搜索过滤
+                if (searchQuery && !decor.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+                    return false;
+                }
+
+                // 颜色过滤
+                if (colorFilter && !decor.types.includes(colorFilter)) {
+                    return false;
+                }
+
+                // 完成状态过滤
+                const owned = decor.types.filter(t => collection[getKey(decor.id, t)]).length;
+                const total = decor.types.length;
+
+                if (currentFilter === 'complete') return owned === total;
+                if (currentFilter === 'incomplete') return owned < total;
+                return true;
+            });
+
+            if (filteredDecors.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results" style="grid-column: 1 / -1;">
+                        <div class="no-results-icon">🔍</div>
+                        <p>没有找到匹配的装饰类型</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredDecors.map(decor => {
+                const owned = decor.types.filter(t => collection[getKey(decor.id, t)]).length;
+                const total = decor.types.length;
+                const progress = (owned / total * 100).toFixed(0);
+                const isComplete = owned === total;
+
+                return `
+                    <div class="decor-card ${isComplete ? 'complete' : ''}">
+                        <div class="decor-header">
+                            <div class="decor-name">
+                                <span class="decor-icon">${decor.icon}</span>
+                                ${decor.name}
+                            </div>
+                            <div class="decor-progress-text">${owned}/${total}</div>
+                        </div>
+                        <div class="pikmin-grid">
+                            ${PIKMIN_TYPES.map(pik => {
+                                const available = decor.types.includes(pik.id);
+                                const isOwned = available && collection[getKey(decor.id, pik.id)];
+                                return `
+                                    <div class="pikmin-cell ${pik.id} ${isOwned ? 'owned' : ''} ${!available ? 'unavailable' : ''}" 
+                                         ${available ? `onclick="toggleOwned('${decor.id}', '${pik.id}')"` : ''}>
+                                        <div class="pikmin-check">✓</div>
+                                        <div class="pikmin-avatar ${pik.id}"></div>
+                                        <div class="pikmin-label">${pik.name}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="quick-fill">
+                            <button class="quick-btn" onclick="fillAll('${decor.id}')">全选</button>
+                            <button class="quick-btn" onclick="clearAll('${decor.id}')">清空</button>
+                        </div>
+                        ${decor.hasRare ? `
+                            <div class="rare-section">
+                                <div class="rare-label">
+                                    <span class="sparkle">✨</span> 稀有版本
+                                </div>
+                                <div class="rare-grid">
+                                    ${decor.types.filter(t => t !== 'ice').map(t => {
+                                        const pik = PIKMIN_TYPES.find(p => p.id === t);
+                                        const isOwned = collection[getKey(decor.id, t, true)];
+                                        return `
+                                            <div class="rare-cell ${isOwned ? 'owned' : ''}" 
+                                                 onclick="toggleOwned('${decor.id}', '${t}', true)"
+                                                 title="${pik.name}">
+                                                <div class="rare-dot pikmin-avatar ${t}"></div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            let owned = 0;
+            let total = 0;
+            let completeDecors = 0;
+
+            DECOR_TYPES.forEach(decor => {
+                let decorOwned = 0;
+                decor.types.forEach(t => {
+                    total++;
+                    if (collection[getKey(decor.id, t)]) {
+                        owned++;
+                        decorOwned++;
+                    }
+                });
+                if (decorOwned === decor.types.length) completeDecors++;
+
+                if (decor.hasRare) {
+                    decor.types.filter(t => t !== 'ice').forEach(t => {
+                        total++;
+                        if (collection[getKey(decor.id, t, true)]) owned++;
+                    });
+                }
+            });
+
+            document.getElementById('owned-count').textContent = owned;
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('progress-percent').textContent = (owned / total * 100).toFixed(1) + '%';
+            document.getElementById('complete-decors').textContent = completeDecors;
+        }
+
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderGrid();
+        }
+
+        function filterDecors(query) {
+            searchQuery = query;
+            renderGrid();
+        }
+
+        function exportData() {
+            const exportObj = {
+                version: 2,
+                date: new Date().toISOString(),
+                collection: collection
+            };
+            const dataStr = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pikmin_census_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('📤 数据已导出！');
+        }
+
+        function openImportModal() {
+            document.getElementById('import-modal').classList.add('active');
+            document.getElementById('import-data').value = '';
+        }
+
+        function closeImportModal() {
+            document.getElementById('import-modal').classList.remove('active');
+        }
+
+        function importData() {
+            try {
+                const raw = document.getElementById('import-data').value;
+                let data = JSON.parse(raw);
+                
+                // 兼容旧版本
+                if (data.version === 2) {
+                    collection = data.collection;
+                } else if (typeof data === 'object' && !data.version) {
+                    collection = data;
+                } else {
+                    throw new Error('Unknown format');
+                }
+                
+                saveData();
+                updateStats();
+                renderGrid();
+                renderColorStats();
+                closeImportModal();
+                showToast('📥 数据导入成功！');
+            } catch (e) {
+                showToast('❌ 导入失败：无效的数据格式');
+            }
+        }
+
+        function resetData() {
+            if (confirm('⚠️ 确定要重置所有数据吗？此操作不可撤销！')) {
+                collection = {};
+                saveData();
+                updateStats();
+                renderGrid();
+                renderColorStats();
+                showToast('🔄 数据已重置');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#ffd93d', '#4dabf7', '#cc5de8', '#4ade80', '#f783ac'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.cssText = `
+                    left: ${Math.random() * 100}vw;
+                    top: -10px;
+                    width: ${Math.random() * 10 + 5}px;
+                    height: ${Math.random() * 10 + 5}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                `;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
+        // 添加 confetti 动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(720deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeImportModal();
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                exportData();
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
