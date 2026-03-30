@@ -2,31 +2,29 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Pikmin Bloom 人口普查 🌱</title>
     <meta name="description" content="追蹤你的 Pikmin Bloom Decor 收集進度">
-    <meta name="theme-color" content="#66bb6a">
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#66bb6a">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#66bb6a">
+    <meta name="theme-color" content="#5cb860">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
     <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Pikmin%20%E6%99%AE%E6%9F%A5%22%2C%22short_name%22%3A%22Pikmin%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="msapplication-navbutton-color" content="#66bb6a">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --red:#e53935; --yellow:#fdd835; --blue:#1e88e5; --purple:#8e24aa;
             --white:#e0e0e0; --rock:#616161; --winged:#ec407a; --ice:#26c6da;
-            --bg:#f9fdf9; --card:#ffffff; --accent:#66bb6a; --accent2:#a5d6a7; --text:#222; --muted:#777;
+            --bg:#f9fdf9; --card:#ffffff; --accent:#5cb860; --accent2:#81c784; --text:#222; --muted:#777;
             --shadow:0 2px 8px rgba(0,0,0,.05);
         }
         *{margin:0;padding:0;box-sizing:border-box}
+        html{background:#5cb860}
         body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
         .app{max-width:1100px;margin:0 auto;padding:12px}
         
-        .header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#66bb6a,#81c784);padding:12px 16px;border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(102,187,106,.2)}
+        .header{position:sticky;top:0;z-index:100;background:#5cb860;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(92,184,96,.25)}
         .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
         .logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:4px;color:#fff}
         .logo-img{height:26px}
@@ -171,7 +169,7 @@
         
         @media(max-width:600px){
             .app{padding:0}
-            .header{padding:10px 12px;border-radius:0 0 12px 12px}
+            .header{padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-radius:0 0 12px 12px}
             .header-row{gap:8px}
             .logo{font-size:1.1rem}
             .stats{gap:6px}
