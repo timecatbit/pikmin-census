@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pikmin Bloom 人口普查 🌱</title>
     <meta name="description" content="追蹤你的 Pikmin Bloom Decor 收集進度">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#66bb6a">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
     <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Pikmin%20%E6%99%AE%E6%9F%A5%22%2C%22short_name%22%3A%22Pikmin%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,8 +25,7 @@
         
         .header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#66bb6a,#81c784);padding:12px 16px;border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(102,187,106,.2)}
         .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-        .logo{font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:6px;color:#fff}
-        .logo-img{width:28px;height:28px;object-fit:contain}
+        .logo{font-size:1.15rem;font-weight:700;display:flex;align-items:center;gap:4px;color:#fff}
         .stats{display:flex;gap:12px;margin-left:auto}
         .stat{text-align:center;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .15s}
         .stat:hover{background:rgba(255,255,255,.15)}
@@ -61,22 +60,23 @@
         .event-chip:hover{border-color:var(--accent2);transform:scale(1.02)}
         .event-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
         
-        .event-selected{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
+        .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
         .event-selected:empty{display:none}
-        .event-selected::before{content:'已選：';font-size:.75rem;color:var(--muted);margin-right:4px;display:flex;align-items:center}
-        .event-tag{display:flex;align-items:center;gap:2px;padding:3px 8px;border-radius:12px;background:#e8f5e9;color:var(--accent);font-size:.75rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2)}
+        .event-selected-label{font-size:.7rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:60px;overflow-y:auto}
+        .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
         .event-tag:hover{background:#c8e6c9}
-        .event-tag .x{font-size:.6rem;margin-left:2px;opacity:.7}
+        .event-tag .x{margin-left:3px;opacity:.6}
         
-        .filters{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;padding:8px 0}
-        .filter-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-        .color-dots{display:flex;gap:4px;align-items:center;background:var(--card);padding:4px 8px;border-radius:20px;box-shadow:var(--shadow)}
-        .color-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700}
-        .color-dot:hover{transform:scale(1.1)}
-        .color-dot.on{border-color:#333;box-shadow:0 0 0 2px #fff}
-        .chip{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:20px;background:var(--card);font-size:.8rem;cursor:pointer;border:2px solid transparent;transition:all .15s;box-shadow:var(--shadow)}
-        .chip:hover{border-color:var(--accent2)}
-        .chip.on{border-color:var(--accent);color:var(--accent);background:#e8f5e9}
+        .filters{background:var(--card);border-radius:12px;padding:10px;margin-bottom:12px;box-shadow:var(--shadow)}
+        .filter-section{margin-bottom:8px}
+        .filter-section:last-child{margin-bottom:0}
+        .filter-label{font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:600}
+        .filter-row{display:flex;gap:4px;flex-wrap:wrap}
+        .color-chip{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;background:#f5f5f5;font-size:.7rem;cursor:pointer;border:2px solid transparent;transition:all .15s}
+        .color-chip:hover{background:#eee}
+        .color-chip.on{border-color:var(--accent);background:#e8f5e9}
+        .color-chip .cdot{width:12px;height:12px;border-radius:50%}
         .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
         .dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}.dot.blue{background:var(--blue)}
         .dot.purple{background:var(--purple)}.dot.white{background:var(--white)}.dot.rock{background:var(--rock)}
@@ -182,9 +182,9 @@
             .btn{padding:8px 10px;font-size:.8rem}
             .views{margin:0 10px 10px}
             .view-btn{padding:10px 8px;font-size:.8rem}
-            .filters{gap:6px;padding:4px 10px}
-            .filter-row{flex-wrap:nowrap}
-            .color-dot{width:22px;height:22px}
+            .filters{margin:0 10px 10px;padding:8px}
+            .color-chip{padding:3px 6px;font-size:.65rem}
+            .color-chip .cdot{width:10px;height:10px}
             .chip{padding:5px 8px;font-size:.75rem;flex-shrink:0}
             .event-section{margin:0 10px 10px;padding:10px}
             .event-chip{padding:5px 8px;font-size:.75rem}
@@ -210,7 +210,7 @@
 <div class="app">
     <div class="header">
         <div class="header-row">
-            <div class="logo"><img src="https://pikminbloom.com/assets/images/common/pikmin_red.png" class="logo-img" alt="">Pikmin 普查</div>
+            <div class="logo">🌿 Pikmin 普查</div>
             <div class="stats" onclick="showStatsModal()">
                 <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
                 <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
@@ -521,25 +521,29 @@ function renderEvents(){
     });
     document.getElementById('eventHint').textContent=selectedEvents.length?`已選 ${selectedEvents.length} 個活動（${totalSelected} 裝飾）`:'點擊展開選擇';
     // 渲染已選活動標籤（折疊時也可見）
-    let tags='';
-    selectedEvents.forEach(eid=>{
-        const ev=EVENTS.find(e=>e.id===eid);
-        if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')">${ev.i} ${ev.n} <span class="x">✕</span></div>`;
-    });
-    document.getElementById('eventSelected').innerHTML=tags;
+    if(selectedEvents.length>0){
+        let tags='';
+        selectedEvents.forEach(eid=>{
+            const ev=EVENTS.find(e=>e.id===eid);
+            if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')">${ev.i}${ev.n}<span class="x">✕</span></div>`;
+        });
+        document.getElementById('eventSelected').innerHTML=`<div class="event-selected-label">已選 ${selectedEvents.length} 個活動（${totalSelected} 裝飾）：</div><div class="event-selected-list">${tags}</div>`;
+    }else{
+        document.getElementById('eventSelected').innerHTML='';
+    }
 }
 
 function renderFilters(){
     const cs=colorStats();
-    let colorDots='';
+    let colors=`<div class="color-chip ${colorF==='all'?'on':''}" onclick="setColorF('all')">全部</div>`;
     C.forEach(c=>{
         const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
-        const done=cs[c].o===cs[c].t&&cs[c].t>0;
-        colorDots+=`<div class="color-dot ${colorF===c?'on':''}" style="background:var(--${c})" onclick="setColorF('${c}')" title="${CN[c]}：${cs[c].o}/${cs[c].t}">${done?'✓':''}</div>`;
+        colors+=`<div class="color-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct}%</div>`;
     });
-    let row1=`<div class="chip ${colorF==='all'?'on':''}" onclick="setColorF('all')">全部</div><div class="color-dots">${colorDots}</div>`;
-    let row2=`<div class="chip ${statusF==='all'?'on':''}" onclick="setStatusF('all')">全部</div><div class="chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">未完成</div><div class="chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">已完成</div>`;
-    document.getElementById('filters').innerHTML=`<div class="filter-row">${row1}</div><div class="filter-row">${row2}</div>`;
+    let status=`<div class="color-chip ${statusF==='all'?'on':''}" onclick="setStatusF('all')">全部</div>`;
+    status+=`<div class="color-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">❌ 未完成</div>`;
+    status+=`<div class="color-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">✅ 已完成</div>`;
+    document.getElementById('filters').innerHTML=`<div class="filter-section"><div class="filter-label">按顏色</div><div class="filter-row">${colors}</div></div><div class="filter-section"><div class="filter-label">按狀態</div><div class="filter-row">${status}</div></div>`;
 }
 function setColorF(c){colorF=c;render();}
 function setStatusF(s){statusF=s;render();}
