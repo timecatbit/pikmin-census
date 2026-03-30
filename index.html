@@ -6,6 +6,8 @@
     <title>Pikmin Bloom 人口普查 🌱</title>
     <meta name="description" content="追蹤你的 Pikmin Bloom Decor 收集進度">
     <meta name="theme-color" content="#66bb6a">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#66bb6a">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#66bb6a">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
     <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Pikmin%20%E6%99%AE%E6%9F%A5%22%2C%22short_name%22%3A%22Pikmin%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,7 +27,8 @@
         
         .header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#66bb6a,#81c784);padding:12px 16px;border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(102,187,106,.2)}
         .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-        .logo{font-size:1.15rem;font-weight:700;display:flex;align-items:center;gap:4px;color:#fff}
+        .logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:4px;color:#fff}
+        .logo-img{height:26px}
         .stats{display:flex;gap:12px;margin-left:auto}
         .stat{text-align:center;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .15s}
         .stat:hover{background:rgba(255,255,255,.15)}
@@ -63,20 +66,17 @@
         .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
         .event-selected:empty{display:none}
         .event-selected-label{font-size:.7rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px}
-        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:60px;overflow-y:auto}
+        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:72px;overflow-y:auto}
         .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
         .event-tag:hover{background:#c8e6c9}
         .event-tag .x{margin-left:3px;opacity:.6}
         
-        .filters{background:var(--card);border-radius:12px;padding:10px;margin-bottom:12px;box-shadow:var(--shadow)}
-        .filter-section{margin-bottom:8px}
-        .filter-section:last-child{margin-bottom:0}
-        .filter-label{font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:600}
-        .filter-row{display:flex;gap:4px;flex-wrap:wrap}
-        .color-chip{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;background:#f5f5f5;font-size:.7rem;cursor:pointer;border:2px solid transparent;transition:all .15s}
-        .color-chip:hover{background:#eee}
-        .color-chip.on{border-color:var(--accent);background:#e8f5e9}
-        .color-chip .cdot{width:12px;height:12px;border-radius:50%}
+        .filters{display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+        .filter-grp{display:flex;gap:3px;align-items:center;background:var(--card);padding:3px;border-radius:8px;box-shadow:var(--shadow)}
+        .f-chip{display:flex;align-items:center;gap:3px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
+        .f-chip:hover{background:#f0f0f0}
+        .f-chip.on{background:var(--accent);color:#fff}
+        .f-chip .cdot{width:10px;height:10px;border-radius:50%}
         .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
         .dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}.dot.blue{background:var(--blue)}
         .dot.purple{background:var(--purple)}.dot.white{background:var(--white)}.dot.rock{background:var(--rock)}
@@ -182,9 +182,10 @@
             .btn{padding:8px 10px;font-size:.8rem}
             .views{margin:0 10px 10px}
             .view-btn{padding:10px 8px;font-size:.8rem}
-            .filters{margin:0 10px 10px;padding:8px}
-            .color-chip{padding:3px 6px;font-size:.65rem}
-            .color-chip .cdot{width:10px;height:10px}
+            .filters{margin:0 10px 8px;gap:6px}
+            .filter-grp{padding:2px}
+            .f-chip{padding:3px 5px;font-size:.65rem}
+            .f-chip .cdot{width:8px;height:8px}
             .chip{padding:5px 8px;font-size:.75rem;flex-shrink:0}
             .event-section{margin:0 10px 10px;padding:10px}
             .event-chip{padding:5px 8px;font-size:.75rem}
@@ -210,7 +211,7 @@
 <div class="app">
     <div class="header">
         <div class="header-row">
-            <div class="logo">🌿 Pikmin 普查</div>
+            <div class="logo"><img src="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200" class="logo-img">普查</div>
             <div class="stats" onclick="showStatsModal()">
                 <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
                 <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
@@ -535,15 +536,15 @@ function renderEvents(){
 
 function renderFilters(){
     const cs=colorStats();
-    let colors=`<div class="color-chip ${colorF==='all'?'on':''}" onclick="setColorF('all')">全部</div>`;
+    let colors=`<div class="f-chip ${colorF==='all'?'on':''}" onclick="setColorF('all')">全部</div>`;
     C.forEach(c=>{
         const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
-        colors+=`<div class="color-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct}%</div>`;
+        colors+=`<div class="f-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct}%</div>`;
     });
-    let status=`<div class="color-chip ${statusF==='all'?'on':''}" onclick="setStatusF('all')">全部</div>`;
-    status+=`<div class="color-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">❌ 未完成</div>`;
-    status+=`<div class="color-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">✅ 已完成</div>`;
-    document.getElementById('filters').innerHTML=`<div class="filter-section"><div class="filter-label">按顏色</div><div class="filter-row">${colors}</div></div><div class="filter-section"><div class="filter-label">按狀態</div><div class="filter-row">${status}</div></div>`;
+    let status=`<div class="f-chip ${statusF==='all'?'on':''}" onclick="setStatusF('all')">全部</div>`;
+    status+=`<div class="f-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">未完成</div>`;
+    status+=`<div class="f-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">已完成</div>`;
+    document.getElementById('filters').innerHTML=`<div class="filter-grp">${colors}</div><div class="filter-grp">${status}</div>`;
 }
 function setColorF(c){colorF=c;render();}
 function setStatusF(s){statusF=s;render();}
