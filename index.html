@@ -11,7 +11,8 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
     <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Pikmin%20%E6%99%AE%E6%9F%A5%22%2C%22short_name%22%3A%22Pikmin%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="msapplication-navbutton-color" content="#66bb6a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -66,12 +67,12 @@
         .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
         .event-selected:empty{display:none}
         .event-selected-label{font-size:.7rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px}
-        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:90px;overflow-y:auto}
+        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:95px;overflow-y:auto}
         .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
         .event-tag:hover{background:#c8e6c9}
         .event-tag .x{margin-left:3px;opacity:.6}
         
-        .filters{display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+        .filters{display:flex;gap:6px;margin-bottom:10px;align-items:center;justify-content:center}
         .filter-grp{display:flex;gap:2px;align-items:center;background:var(--card);padding:2px;border-radius:8px;box-shadow:var(--shadow)}
         .f-chip{display:flex;align-items:center;gap:2px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
         .f-chip:hover{background:#f0f0f0}
@@ -183,8 +184,8 @@
             .btn{padding:8px 10px;font-size:.8rem}
             .views{margin:0 10px 10px}
             .view-btn{padding:10px 8px;font-size:.8rem}
-            .filters{margin:0 10px 8px;justify-content:center}
-            .filter-grp{padding:2px;flex-wrap:wrap;justify-content:center}
+            .filters{margin:0 10px 8px}
+            .filter-grp{padding:2px;width:100%;justify-content:space-between}
             .f-chip{padding:3px 4px;font-size:.6rem}
             .f-chip .cdot{width:8px;height:8px}
             .f-sep{display:none}
@@ -213,7 +214,7 @@
 <div class="app">
     <div class="header">
         <div class="header-row">
-            <div class="logo"><img src="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200" class="logo-img">皮克敏普查</div>
+            <div class="logo"><img src="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200" class="logo-img">皮口普查</div>
             <div class="stats" onclick="showStatsModal()">
                 <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
                 <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
@@ -543,8 +544,8 @@ function renderFilters(){
         const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
         colors+=`<div class="f-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct}%</div>`;
     });
-    let status=`<div class="f-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')">❌</div>`;
-    status+=`<div class="f-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')">✅</div>`;
+    let status=`<div class="f-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')" style="font-size:.6rem">❌</div>`;
+    status+=`<div class="f-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')" style="font-size:.6rem">✅</div>`;
     document.getElementById('filters').innerHTML=`<div class="filter-grp"><div class="f-chip ${colorF==='all'&&statusF==='all'?'on':''}" onclick="setColorF('all');setStatusF('all')">全部</div><div class="f-sep"></div>${colors}<div class="f-sep"></div>${status}</div>`;
 }
 function setColorF(c){colorF=c;render();}
