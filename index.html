@@ -99,22 +99,21 @@
         .cat-body{padding-top:6px}
         .cat-body.hide{display:none}
         
-        .item{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);transition:all .15s}
+        .item{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);transition:all .15s;display:flex;flex-direction:column}
         .item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
         .item.done{border:2px solid var(--accent2);background:#f0fff0}
         .item.done .item-name::after{content:' ✓';color:var(--accent)}
-        .item-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+        .item-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-width:0}
         .item-icon{font-size:1.2rem}
         .item-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
         .item-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .item-sub{font-size:.75rem;color:var(--muted)}
         .item-prog{color:var(--accent);font-weight:600;font-size:.8rem;white-space:nowrap}
         .item-btns{display:flex;gap:4px}
-        .item-btns button{padding:5px 10px;font-size:.7rem;border-radius:6px;background:#f0f0f0;color:#555;border:none;cursor:pointer;transition:all .15s}
-        .item-btns button:hover{color:var(--accent);background:#e0f2e0}
+        .clear-btn{padding:5px 0;font-size:.7rem;border-radius:6px;background:#f0f0f0;color:#555;cursor:pointer;user-select:none;width:26px;box-sizing:border-box;text-align:center}
         
-        .piks{display:flex;gap:6px}
-        .pik{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:none;cursor:pointer;position:relative;transition:all .15s}
+        .piks{display:grid;grid-template-columns:repeat(8,52px);gap:6px;justify-content:left}
+        .pik{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:none;cursor:pointer;position:relative;transition:all .15s}
         .pik:hover{transform:scale(1.1)}
         .pik:active{transform:scale(0.95)}
         .pik.own{background:#c8e6c9;box-shadow:0 0 0 2px var(--accent)}
@@ -122,7 +121,9 @@
         @keyframes bubblePop{0%{transform:scale(0)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
         .pik.na{cursor:default;pointer-events:none;background:#f5f5f5;position:relative}
         .pik.na::before{content:'';position:absolute;width:70%;height:2px;background:#888;transform:rotate(-45deg)}
-        .pik .d{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,0,0,.1);box-shadow:inset 0 -2px 4px rgba(0,0,0,.1)}
+        .pik .d{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,0,0,.1);box-shadow:inset 0 -2px 4px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:bold;color:#fff}
+        .dot-num{pointer-events:none}
+        .pik .d.white,.pik .d.ice{color:rgba(0,0,0,.6)}
         .bubble{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;background:var(--accent);border-radius:8px;font-size:.6rem;font-weight:bold;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;box-shadow:0 1px 3px rgba(0,0,0,.2);line-height:1}
         
         .miss-sec{margin-bottom:16px}
@@ -148,7 +149,7 @@
         .share-input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);color:var(--text);font-size:.75rem;font-family:monospace}
         .share-input:focus{outline:none;border-color:var(--accent)}
         
-        .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 24px;border-radius:25px;font-weight:700;font-size:.9rem;z-index:1001;box-shadow:0 4px 16px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:opacity .3s}
+        .toast{position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 24px;border-radius:25px;font-weight:700;font-size:.9rem;z-index:1001;box-shadow:0 4px 16px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:opacity .3s}
         .toast.show{opacity:1}
         
         .empty{text-align:center;padding:32px;color:var(--muted)}
@@ -199,9 +200,12 @@
             .item-icon{font-size:1.1rem}
             .item-name{font-size:.85rem}
             .item-prog{font-size:.75rem}
-            .item-btns button{padding:4px 8px;font-size:.65rem}
-            .piks{justify-content:space-between}
-            .pik{width:calc(12.5% - 5px);max-width:38px;height:38px;aspect-ratio:1}
+            .clear-btn{padding:4px 0;font-size:.65rem;background:#f0f0f0;color:#555;width:38px;box-sizing:border-box;text-align:center}
+            .piks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;width:100%;box-sizing:border-box}
+            .pik{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;cursor:pointer;position:relative;transition:all .15s;width:100%;height:100%;box-sizing:border-box}
+            .pik:hover{transform:scale(1.08)}
+            .pik:active{transform:scale(0.95)}
+            .pik.own{background:#c8e6c9}
             .miss-chip{padding:5px 10px;font-size:.75rem}
             .cat-head{padding:8px 0}
             .cat-head h3{font-size:.85rem}
@@ -274,82 +278,85 @@ const CN = {red:'紅',yellow:'黃',blue:'藍',purple:'紫',white:'白',rock:'岩
 const C7 = ['red','yellow','blue','purple','white','rock','winged'];
 const C8 = C;
 
+
 const REGULAR = [
-  {id:'reg_1',n:'廚師帽子',i:'🍽️',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'reg_2',n:'咖啡杯',i:'☕',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_3',n:'馬卡龍',i:'🍰',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_4',n:'甜甜圈',i:'🍩',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_5',n:'爆米花',i:'🍿',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_6',n:'牙刷',i:'🪥',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_7',n:'蒲公英',i:'🌼',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_8',n:'鍬形蟲',i:'🪲',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'reg_9',n:'橡栗',i:'🌰',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'reg_10',n:'擬餌',i:'🪤',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_11',n:'郵票',i:'📮',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_12',n:'畫框',i:'🖼️',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_13',n:'飛機玩具',i:'✈️',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_14',n:'電車紙模型',i:'🚃',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_15',n:'票券',i:'🎫',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_16',n:'貝殼',i:'🐚',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_17',n:'漢堡',i:'🍔',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_18',n:'瓶蓋',i:'🧢',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_19',n:'零食',i:'🍫',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_20',n:'蘑菇',i:'🍄',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_21',n:'香蕉',i:'🍌',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_22',n:'法国麵包',i:'🥖',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_23',n:'剪刀',i:'✂',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_24',n:'髮圈',i:'💇',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_25',n:'幸運草',i:'☘️',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_26',n:'四葉幸運草',i:'🍀',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_27',n:'迷你書',i:'📚',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_28',n:'綠色貼紙',i:'🟢',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'reg_29',n:'藍色貼紙',i:'🔵',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'reg_30',n:'橘色貼紙',i:'🟠',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'reg_31',n:'金幣',i:'🪙',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'reg_32',n:'壽司',i:'🍣',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_33',n:'山岳别针徽章',i:'🏔️',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_34',n:'体育馆鑰匙圈',i:'🏟️',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_35',n:'葉子帽',i:'🌿',c:['blue']},
-  {id:'reg_36',n:'雪',i:'❄️',c:['blue','white','ice']},
-  {id:'reg_37',n:'主題樂園門票',i:'🎢',c:['red','yellow','blue']},
-  {id:'reg_38',n:'公車紙模型',i:'🚌',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_39',n:'披薩',i:'🍕',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_40',n:'義大利麵',i:'🍝',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_41',n:'拉麵鑰匙圈',i:'🍜',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_42',n:'橋梁別針',i:'🌉',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_43',n:'飯店備品',i:'🏨',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_44',n:'化妝品',i:'💄',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_45',n:'運勢（吉）',i:'🛕',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_46',n:'電池（大號黃紅配色）',i:'🔋',c:['yellow']},
-  {id:'reg_47',n:'大電池（大號藍紅配色）',i:'🔋',c:['yellow']},
-  {id:'reg_48',n:'大電池（大號綠色）',i:'🔋',c:['yellow']},
-  {id:'reg_49',n:'電池（小號黃紅配色×2）',i:'🔋',c:['yellow']},
-  {id:'reg_50',n:'電池（小號藍紅配色×2）',i:'🔋',c:['yellow']},
-  {id:'reg_51',n:'電池（小號綠色×2）',i:'🔋',c:['yellow']},
-  {id:'reg_52',n:'仙女燈（單燈泡＋紅藍線）',i:'💡',c:['yellow']},
-  {id:'reg_53',n:'仙女燈（多色燈串）',i:'💡',c:['yellow']},
-  {id:'reg_54',n:'一碗咖哩',i:'🍛',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_55',n:'工具',i:'🔧',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_56',n:'校徽胸針',i:'🎓',c:['red','yellow','blue']},
-  {id:'reg_57',n:'塔可餅',i:'🌮',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_58',n:'洗衣用品',i:'🧺',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'reg_59',n:'韓國泡菜',i:'🥬',c:['red','yellow','blue','purple','white','rock','winged','ice']},
+  {id:'reg_廚師帽子',n:'餐廳/廚師帽子',i:'🍽️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_咖啡杯',n:'咖啡廳/咖啡杯',i:'☕',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_馬卡龍',n:'甜品店/馬卡龍',i:'🍰',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_甜甜圈',n:'甜品店/甜甜圈',i:'🍩',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_爆米花',n:'電影院/爆米花',i:'🍿',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_牙刷',n:'藥局/牙刷',i:'🪥',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_蒲公英',n:'動物園/蒲公英',i:'🌼',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_鍬形蟲',n:'森林/鍬形蟲',i:'🪲',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_橡栗',n:'森林/橡栗',i:'🌰',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_擬餌',n:'水邊/擬餌',i:'🪤',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_郵票',n:'郵局/郵票',i:'📮',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_畫框',n:'美術館/畫框',i:'🖼️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_飛機玩具',n:'機場/飛機玩具',i:'✈️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_電車紙模型',n:'車站/電車紙模型',i:'🚃',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_票券',n:'車站/票券',i:'🎫',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_貝殼',n:'海灘/貝殼',i:'🐚',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_漢堡',n:'漢堡店/漢堡',i:'🍔',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_瓶蓋',n:'便利店/瓶蓋',i:'🧢',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_零食',n:'便利店/零食',i:'🍫',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_蘑菇',n:'超市/蘑菇',i:'🍄',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_香蕉',n:'超市/香蕉',i:'🍌',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_法国麵包',n:'麵包店/法国麵包',i:'🥖',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_剪刀',n:'美容院/剪刀',i:'✂️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_髮圈',n:'服装店/髮圈',i:'💇',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_幸運草',n:'公園/幸運草',i:'☘️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_四葉幸運草',n:'公園/四葉幸運草',i:'🍀',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_迷你書',n:'圖書館＆書店/迷你書',i:'📚',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_綠色貼紙',n:'路邊/綠色貼紙',i:'🟢',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_藍色貼紙',n:'路邊/藍色貼紙',i:'🔵',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_橘色貼紙',n:'路邊/橘色貼紙',i:'🟠',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_金幣',n:'路邊/金幣',i:'🪙',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_壽司',n:'壽司餐厅/壽司',i:'🍣',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_山岳别针徽章',n:'山丘/山岳别针徽章',i:'🏔️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_体育馆鑰匙圈',n:'體育馆/体育馆鑰匙圈',i:'🏟️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_葉子帽',n:'雨天/葉子帽',i:'🌿',c:{'blue':3}},
+  {id:'reg_雪',n:'下雪/雪',i:'❄️',c:{'blue':1,'white':1,'ice':1}},
+  {id:'reg_主題樂園門票',n:'主題樂園/主題樂園門票',i:'🎢',c:{'red':2,'yellow':2,'blue':2}},
+  {id:'reg_公車紙模型',n:'公車站/公車紙模型',i:'🚌',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_披薩',n:'義式餐廳/披薩',i:'🍕',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_義大利麵',n:'義式餐廳/義大利麵',i:'🍝',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_拉麵鑰匙圈',n:'拉麵店/拉麵鑰匙圈',i:'🍜',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_橋梁別針',n:'橋樑/橋梁別針',i:'🌉',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_飯店備品',n:'飯店/飯店備品',i:'🏨',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_化妝品',n:'化妝品商店/化妝品',i:'💄',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_運勢（吉）',n:'神社和寺廟/運勢（吉）',i:'🛕',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_電池（大號黃紅配色）',n:'電器行/電池（大號黃紅配色）',i:'🔋',c:{'yellow':1}},
+  {id:'reg_大電池（大號藍紅配色）',n:'電器行/大電池（大號藍紅配色）',i:'🔋',c:{'yellow':1}},
+  {id:'reg_大電池（大號綠色）',n:'電器行/大電池（大號綠色）',i:'🔋',c:{'yellow':1}},
+  {id:'reg_電池（小號黃紅配色×2）',n:'電器行/電池（小號黃紅配色×2）',i:'🔋',c:{'yellow':1}},
+  {id:'reg_電池（小號藍紅配色×2）',n:'電器行/電池（小號藍紅配色×2）',i:'🔋',c:{'yellow':1}},
+  {id:'reg_電池（小號綠色×2）',n:'電器行/電池（小號綠色×2）',i:'🔋',c:{'yellow':1}},
+  {id:'reg_仙女燈（單燈泡＋紅藍線）',n:'電器行/仙女燈（單燈泡＋紅藍線）',i:'💡',c:{'yellow':1}},
+  {id:'reg_仙女燈（多色燈串）',n:'電器行/仙女燈（多色燈串）',i:'💡',c:{'yellow':1}},
+  {id:'reg_一碗咖哩',n:'咖哩餐廳/一碗咖哩',i:'🍛',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_工具',n:'五金行/工具',i:'🔧',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_校徽胸針',n:'大學&學院/校徽胸針',i:'🎓',c:{'red':1,'yellow':1,'blue':1}},
+  {id:'reg_塔可餅',n:'墨西哥餐廳/塔可餅',i:'🌮',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_洗衣用品',n:'自助洗衣店&乾洗店/洗衣用品',i:'🧺',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_韓國泡菜',n:'韓國餐廳/韓國泡菜',i:'🥬',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
 ];
 
-// NEW EVENTS from Excel (flat structure - each event is one decor item)
 const EVENTS = [
-  {id:'ev_1',n:'超級瑪利歐鑰匙圈',i:'🎮',c:['red','yellow','blue','purple']},
-  {id:'ev_2',n:'逆轉情人節貼紙',i:'💜',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'ev_3',n:'復活節彩蛋',i:'🥚',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'ev_4',n:'兔寶寶彩蛋',i:'🐰',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'ev_5',n:'下午茶',i:'🫖',c:['red','yellow','blue','purple','white','rock','winged']},
-  {id:'ev_6',n:'照片鈕扣徽章',i:'📷',c:['red']},
-  {id:'ev_7',n:'奶嘴',i:'🍼',c:['red']},
-  {id:'ev_8',n:'彩色粉末',i:'🎨',c:['red','yellow','blue','purple','white','rock','winged','ice']},
-  {id:'ev_9',n:'荷蘭木鞋鑰匙圈',i:'🥿',c:['red','yellow','blue','purple','white','rock','winged','ice']},
+  {id:'ev_超級瑪利歐鑰匙圈',n:'超級瑪利歐鑰匙圈',i:'🎮',c:{'red':1,'yellow':1,'blue':1,'purple':1}},
+  {id:'ev_逆轉情人節貼紙',n:'逆轉情人節貼紙',i:'💜',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_復活節彩蛋',n:'復活節彩蛋',i:'🥚',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_兔寶寶彩蛋',n:'兔寶寶彩蛋',i:'🐰',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_下午茶',n:'下午茶',i:'🫖',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_照片鈕扣徽章',n:'照片鈕扣徽章',i:'📷',c:{'red':1}},
+  {id:'ev_奶嘴',n:'奶嘴',i:'🍼',c:{'red':1}},
+  {id:'ev_彩色粉末',n:'彩色粉末',i:'🎨',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'ev_荷蘭木鞋鑰匙圈',n:'荷蘭木鞋鑰匙圈',i:'🥿',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
 ];
 
 
+
+
+let own = {};
 let selectedEvents = [];
 let view = 'list';
 let colorF = 'all';
@@ -357,7 +364,7 @@ let statusF = 'all';
 let searchQ = '';
 let shut = {};
 
-const key = (d,c) => d+'_'+c;
+const key = (d,c,i) => d+'_'+c+'_'+i;
 
 // Compression Streams API 壓縮（用於縮短分享連結，無需外部庫）
 async function compressToBase64Url(str) {
@@ -385,7 +392,7 @@ async function decompressFromBase64Url(b64url) {
     return new TextDecoder().decode(buf);
 }
 
-const DATA_VERSION = 2;
+const DATA_VERSION = 3;
 
 async function encode(data){
     const payload = {v:DATA_VERSION, o:data.o, e:data.e};
@@ -477,28 +484,25 @@ function getActiveDecors(){
     return list;
 }
 
-function toggle(did,col){
-    const k=key(did,col);
-    const prev = own[k] || 0;
-    const next = prev >= 5 ? 0 : prev + 1;
-    if(next === 0) delete own[k];
-    else own[k] = next;
-    // 觸覺反饋
-    if(navigator.vibrate) navigator.vibrate(10);
-    save(); render();
-    // render 完成後，只動畫變化了的那個 bubble
-    const cur = own[k] || 0;
-    if(prev !== cur){
-        const el = document.querySelector(`.pik[data-id="${did}"][data-color="${col}"] .bubble`);
-        if(el){
-            el.style.animation='none';
-            el.offsetHeight; // force reflow
-            el.style.animation='bubblePop .3s ease';
-        }
-    }
+function toggle(did,col,idx){
+    const k=key(did,col,idx);
+    const prev=own[k]||0;
+    const next=prev>=5?0:prev+1;
+    if(next===0)delete own[k];else own[k]=next;
+    if(navigator.vibrate)navigator.vibrate(10);
+    // Save bubble el before render destroys it
+    const el=document.querySelector(`.pik[data-id="${did}"][data-color="${col}"][data-idx="${idx}"] .bubble`);
+    const newEl=document.querySelector(`.pik[data-id="${did}"][data-color="${col}"][data-idx="${idx}"]`);
+    save();render();
+    if(el&&newEl){newEl.style.animation='none';newEl.offsetHeight;newEl.style.animation='bubblePop .3s ease';}
 }
-function fillD(did,cols){cols.forEach(c=>own[key(did,c)]=5);save();render();toast('✅ 已全選');}
-function clearD(did,cols){cols.forEach(c=>delete own[key(did,c)]);save();render();toast('🗑️ 已清空');}
+function clearD(did,cols){
+    const d=getActiveDecors().find(x=>x.id===did);
+    if(!d)return;
+    cols.forEach(c=>{const max=d.c[c]||0;for(let i=0;i<max;i++)delete own[key(did,c,i)];});
+    save();render();toast('🗑️ 已清空');
+    document.querySelectorAll('.item-btns button').forEach(b=>b.blur());
+}
 
 function toggleEvent(eid){
     if(selectedEvents.includes(eid)) selectedEvents=selectedEvents.filter(e=>e!==eid);
@@ -509,14 +513,14 @@ function toggleEvent(eid){
 function stats(){
     const decors = getActiveDecors();
     let o=0,t=0;
-    decors.forEach(d=>d.c.forEach(c=>{t++;if((own[key(d.id,c)]||0)>0)o++;}));
+    decors.forEach(d=>Object.entries(d.c).forEach(([col,max])=>{for(let i=0;i<max;i++){t++;if((own[key(d.id,col,i)]||0)>0)o++;}}));
     return {o,t,p:t>0?(o/t*100).toFixed(1):0};
 }
 
 function colorStats(){
     const decors = getActiveDecors();
     const cs={};C.forEach(c=>cs[c]={o:0,t:0});
-    decors.forEach(d=>d.c.forEach(c=>{cs[c].t++;if((own[key(d.id,c)]||0)>0)cs[c].o++;}));
+    decors.forEach(d=>Object.entries(d.c).forEach(([col,max])=>{for(let i=0;i<max;i++){cs[col].t++;if((own[key(d.id,col,i)]||0)>0)cs[col].o++;}}));
     return cs;
 }
 
@@ -531,7 +535,7 @@ function renderEvents(){
     let totalSelected=0;
     selectedEvents.forEach(eid=>{
         const ev=EVENTS.find(e=>e.id===eid);
-        if(ev) totalSelected+=ev.c.length;
+        if(ev) totalSelected+=Object.values(ev.c).reduce((a,b)=>a+b,0);
     });
     document.getElementById('eventHint').textContent=selectedEvents.length?`已選 ${selectedEvents.length} 個活動（${totalSelected} 裝飾）`:'點擊展開選擇';
     // 渲染已選活動標籤（折疊時也可見）
@@ -564,10 +568,13 @@ function setStatusF(s){statusF=s;render();}
 
 function filterD(d){
     if(searchQ&&!d.n.includes(searchQ))return false;
-    if(colorF!=='all'&&!d.c.includes(colorF))return false;
-    const cnt=d.c.filter(c=>(own[key(d.id,c)]||0)>0).length;
-    if(statusF==='done'&&cnt!==d.c.length)return false;
-    if(statusF==='miss'&&cnt===d.c.length)return false;
+    if(colorF!=='all'&&!d.c[colorF])return false;
+    const entries=Object.entries(d.c);
+    // Count collected dots
+    let collected=0,total=0;
+    entries.forEach(([col,max])=>{for(let i=0;i<max;i++){total++;if((own[key(d.id,col,i)]||0)>0)collected++;}});
+    if(statusF==='done'&&collected!==total)return false;
+    if(statusF==='miss'&&collected===total)return false;
     return true;
 }
 
@@ -577,16 +584,16 @@ function renderList(){
     const special = decors.filter(d=>!REGULAR.find(r=>r.id===d.id)).filter(filterD);
     let h='';
     if(regular.length){
-        const cO=regular.reduce((s,d)=>s+d.c.filter(c=>own[key(d.id,c)]).length,0);
-        const cT=regular.reduce((s,d)=>s+d.c.length,0);
+        const cO=regular.reduce((s,d)=>s+Object.entries(d.c).reduce((s2,[c,max])=>s2+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0),0);
+        const cT=regular.reduce((s,d)=>s+Object.values(d.c).reduce((a,b)=>a+b,0),0);
         const closed=shut['regular'];
         h+=`<div class="cat"><div class="cat-head ${closed?'shut':''}" onclick="toggleCat('regular')"><span class="arr">▼</span><h3>常駐 Decor</h3><span class="cat-cnt">${cO}/${cT}</span></div><div class="cat-body ${closed?'hide':''}">`;
         regular.forEach(d=>h+=renderItem(d));
         h+=`</div></div>`;
     }
     if(special.length){
-        const cO=special.reduce((s,d)=>s+d.c.filter(c=>own[key(d.id,c)]).length,0);
-        const cT=special.reduce((s,d)=>s+d.c.length,0);
+        const cO=special.reduce((s,d)=>s+Object.entries(d.c).reduce((s2,[c,max])=>s2+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0),0);
+        const cT=special.reduce((s,d)=>s+Object.values(d.c).reduce((a,b)=>a+b,0),0);
         const closed=shut['special'];
         h+=`<div class="cat"><div class="cat-head ${closed?'shut':''}" onclick="toggleCat('special')"><span class="arr">▼</span><h3>特殊活動 Decor</h3><span class="cat-cnt">${cO}/${cT}</span></div><div class="cat-body ${closed?'hide':''}">`;
         special.forEach(d=>h+=renderItem(d));
@@ -597,18 +604,21 @@ function renderList(){
 }
 
 function renderItem(d){
-    const cnt=d.c.filter(c=>(own[key(d.id,c)]||0)>0).length;
-    const done=cnt===d.c.length;
-    const cols=JSON.stringify(d.c).replace(/"/g,"'");
-    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${d.c.length}</span></div><div class="item-btns"><button onclick="event.stopPropagation();fillD('${d.id}',${cols})">全選</button><button onclick="event.stopPropagation();clearD('${d.id}',${cols})">清空</button></div></div><div class="piks">${C.map(c=>{const av=d.c.includes(c);const val=own[key(d.id,c)]||0;const has=av&&val>0;return`<div class="pik ${has?'own':''} ${!av?'na':''}" data-id="${d.id}" data-color="${c}" ${av?`onclick="toggle('${d.id}','${c}')"`:''}title="${CN[c]}"><div class="d dot ${c}"></div>${val>0?`<span class="bubble">${val}</span>`:''}</div>`;}).join('')}</div></div>`;
+    const entries=Object.entries(d.c);
+    const total=entries.reduce((s,[,max])=>s+max,0);
+    // Each dot (index) counts as 1 if collected (value>0), regardless of cycle count
+    const cnt=entries.reduce((s,[c,max])=>s+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0);
+    const done=cnt===total;
+    const cols=JSON.stringify(Object.keys(d.c)).replace(/"/g,"'");
+    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${total}</span></div><div class="item-btns"><span class="clear-btn" onclick="event.stopPropagation();clearD('${d.id}',${cols})">清空</span></div></div><div class="piks">${entries.flatMap(([c,max])=>Array.from({length:max},(_,i)=>{const val=own[key(d.id,c,i)]||0;const has=val>0;return`<div class="pik ${has?'own':''}" data-id="${d.id}" data-color="${c}" data-idx="${i}" onclick="toggle('${d.id}','${c}',${i})" title="${CN[c]}"><div class="d dot ${c}">${max>1?'<span class="dot-num">'+(i+1)+'</span>':''}</div>${has?`<span class="bubble">${val}</span>`:''}</div>`;})).join('')}</div></div>`;
 }
 
 function renderMiss(){
     const decors = getActiveDecors();
     // 計算每個顏色的缺失數並排序
     const colorData = C.map(c=>{
-        const miss=decors.filter(d=>d.c.includes(c)&&(own[key(d.id,c)]||0)===0&&(!searchQ||d.n.includes(searchQ)));
-        const total=decors.filter(d=>d.c.includes(c)).length;
+        const miss=decors.filter(d=>{if(!d.c[c])return false;if(searchQ&&!d.n.includes(searchQ))return false;const max=d.c[c];for(let i=0;i<max;i++)if((own[key(d.id,c,i)]||0)>0)return false;return true;});
+        const total=decors.filter(d=>d.c[c]&&(!searchQ||!searchQ||d.n.includes(searchQ))).length;
         return {c, miss, total, owned:total-miss.length};
     }); // 固定顏色順序：紅→黃→藍→紫→白→岩→翼→冰
     
@@ -772,7 +782,7 @@ document.onkeydown=e=>{
     if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('search').focus();}
 };
 
-load();render();
+load().then(()=>render());
 </script>
 </body>
 </html>
