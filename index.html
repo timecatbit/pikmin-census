@@ -461,45 +461,45 @@ async function decompressFromBase64Url(b64url) {
     return new TextDecoder().decode(buf);
 }
 
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
+
+function packOwnMap(ownMap){
+    return Object.entries(ownMap)
+        .filter(([,v]) => (v||0) > 0)
+        .map(([k,v]) => `${k}:${v}`);
+}
+
+function unpackOwnMap(arr){
+    const out = {};
+    (arr || []).forEach(s => {
+        const i = s.lastIndexOf(':');
+        if(i <= 0) return;
+        const k = s.slice(0, i);
+        const v = Number(s.slice(i + 1));
+        if(k && Number.isFinite(v) && v > 0) out[k] = v;
+    });
+    return out;
+}
 
 async function encode(data){
-    const payload = {v:DATA_VERSION, o:data.o, e:data.e};
-    const j = JSON.stringify(payload);
-    return await compressToBase64Url(j);
+    const payload = [DATA_VERSION, packOwnMap(data.o || {}), data.e || []];
+    return await compressToBase64Url(JSON.stringify(payload));
 }
 
 async function decode(str){
     try{
-        const j = await decompressFromBase64Url(str);
-        const data = JSON.parse(j);
-        return migrateData(data);
+        const raw = JSON.parse(await decompressFromBase64Url(str));
+        if(Array.isArray(raw)){
+            return {o: unpackOwnMap(raw[1]), e: raw[2] || []};
+        }
+        return {o: raw.o || {}, e: raw.e || raw.events || []};
     }catch(e){return null;}
 }
 
-function migrateData(data){
-    // v1：從舊的 base64 格式遷移而來，數據已在 old key
-    if(!data.v){
-        // 舊格式 {own:{}, events:[]} -> 轉為新格式
-        return {o: data.own || data.o || {}, e: data.events || data.e || []};
-    }
-    // 舊 boolean 格式（v1/v2 true/false）-> 轉為數字格式（0-5）
-    if(data.v < DATA_VERSION && data.o){
-        const converted = {};
-        for(const [k,v] of Object.entries(data.o)){
-            converted[k] = v ? 1 : 0; // true→1（顯示氣泡1）, false→0（無氣泡）
-        }
-        return {o: converted, e: data.e || []};
-    }
-    return {o: data.o || {}, e: data.e || []};
-}
-
 async function load(){
-    // 先檢查 URL 參數
-    const params = new URLSearchParams(location.search);
-    const d = params.get('d');
-    if(d){
-        const data = await decode(d);
+    const hash = location.hash.startsWith('#d=') ? location.hash.slice(3) : '';
+    if(hash){
+        const data = await decode(hash);
         if(data){
             own = migrateLocalOwn(data.o || {});
             selectedEvents = data.e || [];
@@ -764,7 +764,7 @@ let cachedShareUrl = '';
 async function showShareModal(){
     const data = {o:own,e:selectedEvents};
     const encoded = await encode(data);
-    cachedShareUrl = location.origin + location.pathname + '?d=' + encoded;
+    cachedShareUrl = location.origin + location.pathname + '#d=' + encoded;
     document.getElementById('modalTitle').textContent = '🔗 分享連結';
     document.getElementById('modalContent').innerHTML = `
         <div style="text-align:center">
