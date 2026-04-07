@@ -42,7 +42,7 @@
         .stat b{color:#fff;font-size:1.2rem;font-weight:800}
         .stat small{display:block;font-size:.7rem;color:rgba(255,255,255,.8)}
         
-        .progress-ring{position:relative;flex-shrink:0}
+        .progress-ring{position:relative;flex-shrink:0;margin-top:4px}
         .progress-ring svg{display:block;width:42px;height:42px;transform:rotate(-90deg)}
         .progress-ring circle{fill:none;stroke-width:3}
         .progress-ring .bg{stroke:rgba(255,255,255,.3)}
@@ -76,7 +76,7 @@
         .event-selected:empty{display:none}
         .event-selected-wrap{position:relative}
         .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:96px;overflow-y:auto;padding-bottom:3px}
-        .scroll-progress{position:relative;height:3px;background:rgba(92,184,96,.12);border-radius:2px;margin-top:2px}
+        .scroll-progress{position:relative;height:3px;background:rgba(92,184,96,.12);border-radius:2px;margin-top:4px}
         .scroll-progress-bar{height:100%;background:rgba(92,184,96,.72);border-radius:2px;transition:width .12s ease}
         .event-tag{display:inline-flex;align-items:center;max-width:100%;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap;overflow:hidden}
         .event-tag .x{margin-left:3px;opacity:.6}
@@ -744,7 +744,10 @@ function render(){
     const st=stats();
     document.getElementById('sOwn').textContent=st.o;
     document.getElementById('sTotal').textContent=st.t;
-    document.getElementById('sPct').textContent=Number(st.p)===100?'✓':st.p+'%';
+    const pctEl = document.getElementById('sPct');
+    const done = Number(st.p)===100;
+    pctEl.textContent = done ? '✓' : st.p+'%';
+    pctEl.style.fontSize = done ? '15px' : '';
     const pct = parseFloat(st.p);
     const offset = 113 - (pct/100)*113;
     document.getElementById('progressCircle').style.strokeDashoffset = offset;
