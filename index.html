@@ -30,6 +30,7 @@
         *{margin:0;padding:0;box-sizing:border-box}
         html{background:#5cb860}
         body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        body.modal-open{overflow:hidden;touch-action:none}
         .app{max-width:1100px;margin:0 auto;padding:12px;padding-bottom:120px}
         
         .header{position:sticky;top:0;z-index:100;background:#5cb860;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(92,184,96,.25)}
@@ -167,12 +168,13 @@
         .scan-actions{display:flex;gap:8px;justify-content:center;margin-top:10px}
         
         .share-row{display:flex;gap:8px;align-items:center;justify-content:center}
-        .share-action{min-width:138px;justify-content:center;display:inline-flex;align-items:center}
+        .share-action{min-width:138px;justify-content:center;display:inline-flex;align-items:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
         .share-input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);color:var(--text);font-size:.75rem;font-family:monospace}
         .share-input:focus{outline:none;border-color:var(--accent)}
         
-        .toast{position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 24px;border-radius:25px;font-weight:700;font-size:.9rem;z-index:1001;box-shadow:0 4px 16px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:opacity .3s}
+        .toast{position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 24px;border-radius:25px;font-weight:700;font-size:.9rem;z-index:1001;box-shadow:0 4px 16px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:none}
         .toast.show{opacity:1}
+        .toast.center{top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%);padding:14px 24px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
         
         .empty{text-align:center;padding:32px;color:var(--muted)}
         .contact{margin-top:18px;text-align:center;color:var(--muted);font-size:.78rem}
@@ -793,6 +795,18 @@ function showStatsModal(){
 }
 
 let cachedShareUrl = '';
+
+function openModal(){
+    document.body.classList.add('modal-open');
+    document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(){
+    stopQrScan();
+    document.body.classList.remove('modal-open');
+    document.getElementById('modal').classList.remove('show');
+}
+
 async function showShareModal(){
     const data = {o:own,e:selectedEvents};
     const encoded = await encode(data);
@@ -808,10 +822,10 @@ ${mobile ? '<p style="font-size:.92rem;color:var(--accent);margin-top:14px;font-
         <div class="share-row" style="margin-top:14px;justify-content:center;flex-wrap:wrap">
             ${mobile ? '' : '<button class="btn primary share-action" onclick="saveShareQr()">保存二維碼</button>'}
             <button class="btn primary share-action" onclick="copyShare()">複製連結</button>
-            <button class="btn primary share-action" onclick="exportData()">下載 JSON</button>
+            <button class="btn primary share-action" onclick="exportData(true)">下載 JSON</button>
         </div>
     `;
-    document.getElementById('modal').classList.add('show');
+    openModal();
     requestAnimationFrame(async()=>{
         const dataUrl = await buildShareCardDataUrl();
         const preview = document.getElementById('shareCardPreview');
@@ -820,9 +834,18 @@ ${mobile ? '<p style="font-size:.92rem;color:var(--accent);margin-top:14px;font-
 }
 function copyShare(){
     const url = cachedShareUrl;
-    navigator.clipboard.writeText(url).catch(()=>{
+    navigator.clipboard.writeText(url).then(()=>{
+        copyShareDone();
+        centerToast('✅ 已複製連結');
+    }).catch(()=>{
         document.execCommand('copy');
+        copyShareDone();
+        centerToast('✅ 已複製連結');
     });
+}
+function copyShareDone(){
+    const btns=document.querySelectorAll('.share-action');
+    btns.forEach(b=>{b.blur();b.style.transform='none';b.style.webkitTapHighlightColor='transparent';});
 }
 
 function isMobileLike(){
@@ -946,7 +969,7 @@ function showImportModal(){
             <div class="scan-box" id="drop"><div style="font-size:1.8rem">📁</div><strong>JSON 匯入</strong><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>
             <div class="scan-box" id="scanImageBtn"><div style="font-size:1.5rem">🖼️</div><strong>識別二維碼圖片</strong><p>從相冊選一張二維碼圖片</p><input type="file" id="qrImageIn" accept="image/*"></div>
         </div>`;
-    document.getElementById('modal').classList.add('show');
+    openModal();
     setupDrop();
     setupQrImport();
 }
@@ -980,7 +1003,7 @@ async function applySharedLink(url){
         selectedEvents = data.e || [];
         save(); render();
         stopQrScan();
-        document.getElementById('modal').classList.remove('show');
+        closeModal();
         toast('📥 匯入成功');
     }catch(e){ toast('❌ 無法識別分享碼'); }
 }
@@ -1028,13 +1051,25 @@ async function scanQrImage(file){
     }
 }
 
-async function exportData(){
+async function exportData(fromShare=false){
     const d={v:DATA_VERSION,date:new Date().toISOString(),own,events:selectedEvents};
     const j=JSON.stringify(d,null,2);
     const b=new Blob([j],{type:'application/json'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(b);
-    a.download='pikmin_'+new Date().toISOString().slice(0,10)+'.json';a.click();
-    toast('📤 已匯出');
+    const a=document.createElement('a');
+    const href=URL.createObjectURL(b);
+    a.href=href;
+    a.download='pikmin_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(href),1000);
+    if(fromShare){
+        const btns=document.querySelectorAll('.share-action');
+        btns.forEach(b=>{b.blur();b.style.transform='none';});
+        centerToast('✅ 已下載 JSON');
+    }else{
+        toast('📤 已匯出');
+    }
 }
 
 async function importFile(f){
@@ -1049,7 +1084,7 @@ async function importFile(f){
                 own=data.own||data.o||{};
                 selectedEvents=data.events||data.e||[];
                 save();render();
-                document.getElementById('modal').classList.remove('show');
+                closeModal();
                 toast('📥 匯入成功');
                 return;
             }
@@ -1059,24 +1094,67 @@ async function importFile(f){
         own=j.own||j.data||j.collection||j;
         selectedEvents=j.events||[];
         save();render();
-        document.getElementById('modal').classList.remove('show');
+        closeModal();
         toast('📥 匯入成功');
     }catch(e){toast('❌ 格式錯誤');}};
     r.readAsText(f);
 }
 
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+let toastTimer = null;
+let toastSeq = 0;
+function clearToastState(){
+    const t=document.getElementById('toast');
+    t.classList.remove('show');
+    t.classList.remove('center');
+    if(toastTimer){clearTimeout(toastTimer);toastTimer=null;}
+}
+function toast(m){
+    const t=document.getElementById('toast');
+    const seq = ++toastSeq;
+    if(toastTimer)clearTimeout(toastTimer);
+    t.classList.remove('show');
+    t.classList.remove('center');
+    t.textContent=m;
+    requestAnimationFrame(()=>{
+        if(toastSeq!==seq)return;
+        t.classList.add('show');
+        toastTimer=setTimeout(()=>{
+            if(toastSeq!==seq)return;
+            t.classList.remove('show');
+        },2500);
+    });
+}
+function centerToast(m){
+    // Use a completely separate element for center notifications
+    let c=document.getElementById('centerToast');
+    if(!c){
+        c=document.createElement('div');
+        c.id='centerToast';
+        c.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(30,30,30,.88);color:#fff;padding:14px 28px;border-radius:18px;font-weight:700;font-size:.95rem;z-index:1002;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 8px 28px rgba(0,0,0,.2)';
+        document.body.appendChild(c);
+    }
+    const el=c;
+    el.textContent=m;
+    el.style.opacity='0';
+    requestAnimationFrame(()=>{ el.style.opacity='1'; });
+    if(window._centerToastTimer)clearTimeout(window._centerToastTimer);
+    window._centerToastTimer=setTimeout(()=>{
+        el.style.opacity='0';
+        setTimeout(()=>{ if(window._centerToastTimer)el.style.opacity='0'; },220);
+    },1600);
+}
+function releaseActionButtonState(){document.querySelectorAll('.share-action').forEach(b=>b.blur());}
 
 // 事件綁定
 document.getElementById('search').oninput=e=>{searchQ=e.target.value;render();};
 document.getElementById('btnShare').onclick=async()=>{await showShareModal();};
 document.getElementById('btnImport').onclick=showImportModal;
 document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
-document.getElementById('modalClose').onclick=()=>{stopQrScan();document.getElementById('modal').classList.remove('show');};
+document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('eventHeader').onclick=toggleEventPanel;
 document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 
-document.getElementById('modal').onclick=e=>{if(e.target.id==='modal'){stopQrScan();document.getElementById('modal').classList.remove('show');}};
+document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal();};
 
 
 
@@ -1087,7 +1165,7 @@ window.onscroll=()=>{
 
 // 快捷鍵：/ 聚焦搜索
 document.onkeydown=e=>{
-    if(e.key==='Escape'){stopQrScan();document.getElementById('modal').classList.remove('show');}
+    if(e.key==='Escape')closeModal();
     if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('search').focus();}
 };
 
