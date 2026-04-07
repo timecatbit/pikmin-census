@@ -83,7 +83,7 @@
         .event-tag{display:inline-flex;align-items:center;max-width:100%;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap;overflow:hidden}
         .event-tag .x{margin-left:3px;opacity:.6}
         
-        .filters{margin-bottom:10px}
+        .filters{margin-bottom:8px}
         .filter-grp{display:flex;align-items:center;background:var(--card);padding:4px 8px;border-radius:12px;box-shadow:var(--shadow);justify-content:space-between}
         .f-chip{display:flex;align-items:center;gap:2px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
         .f-chip:hover{background:#f0f0f0}
@@ -150,9 +150,10 @@
         
         .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
         .modal.show{display:flex}
-        .modal-box{background:var(--card);padding:24px;border-radius:24px;max-width:420px;width:90%;max-height:min(88vh,860px);overflow:auto;animation:modalIn .2s ease;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+        .modal-box{background:var(--card);padding:18px 18px 14px;border-radius:24px;max-width:420px;width:90%;max-height:min(88vh,860px);overflow:auto;animation:modalIn .2s ease;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+        .modal-box.stats-modal{min-height:345px}
         @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
-        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
         .modal-head h3{font-size:1.1rem}
         .modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:4px 8px;border-radius:4px}
         .modal-close:hover{background:rgba(255,255,255,.1)}
@@ -257,7 +258,15 @@
             .import-grid{grid-template-columns:1fr}
             .scan-box{padding:14px}
         }
-    </style>
+    
+        .whale-bubble{position:absolute;border-radius:50%;background:rgba(255,255,255,.65);animation:bubbleRise .85s ease-in forwards;pointer-events:none}
+        @keyframes bubbleRise{0%{transform:translateY(0) scale(1);opacity:.7}100%{transform:translateY(-48px) scale(.3);opacity:0}}
+        .whale-swim{position:absolute;left:0;bottom:6px;font-size:1.3rem;pointer-events:none;display:inline-block;animation:whaleSwim 10s ease-in-out forwards}
+        @keyframes whaleSwim{0%{transform:translateX(-34px) scaleX(-1)}10%{transform:translateX(8px) scaleX(-1)}46%{transform:translateX(292px) scaleX(-1)}54%{transform:translateX(292px) scaleX(1)}90%{transform:translateX(8px) scaleX(1)}100%{transform:translateX(-34px) scaleX(1)}}
+        .whale-sparkle{position:absolute;font-size:.75rem;animation:sparklePop .5s ease-out forwards;pointer-events:none}
+        @keyframes sparklePop{0%{transform:scale(0) rotate(0deg);opacity:1}50%{transform:scale(1.4) rotate(180deg);opacity:1}100%{transform:scale(0) rotate(360deg);opacity:0}}
+
+</style>
     <script src="https://unpkg.com/html5-qrcode" defer></script>
 </head>
 <body>
@@ -787,10 +796,12 @@ function showStatsModal(){
     C.forEach(c=>{
         const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
         const bar=`<div style="flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--${c})"></div></div>`;
-        rows+=`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div class="dot ${c}"></div><span style="width:30px">${CN[c]}</span>${bar}<span style="width:70px;text-align:right;font-size:.85rem">${cs[c].o}/${cs[c].t}</span><span style="width:40px;text-align:right;color:var(--accent);font-weight:700">${pct}%</span></div>`;
+        rows+=`<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div class="dot ${c}"></div><span style="width:28px">${CN[c]}</span>${bar}<span style="width:66px;text-align:right;font-size:.82rem">${cs[c].o}/${cs[c].t}</span><span style="width:38px;text-align:right;color:var(--accent);font-weight:700">${pct}%</span></div>`;
     });
+    document.getElementById('modal').querySelector('.modal-box').classList.add('stats-modal');
     document.getElementById('modalTitle').textContent = '📊 收集統計';
-    document.getElementById('modalContent').innerHTML = `<div style="margin-bottom:16px">${rows}</div>`;
+    document.getElementById('modalContent').innerHTML = `<div style="margin-bottom:10px">${rows}</div><div id="whaleTank" style="height:34px;position:relative;overflow:hidden;cursor:pointer;margin-top:4px" title="click!"></div>`;
+    document.getElementById('whaleTank').onclick=showWhaleDance;
     document.getElementById('modal').classList.add('show');
 }
 
@@ -801,13 +812,56 @@ function openModal(){
     document.getElementById('modal').classList.add('show');
 }
 
+function showWhaleDance(){
+    var tank=document.getElementById('whaleTank');
+    if(!tank)return;
+    var w=document.createElement('div');
+    w.className='whale-swim';
+    w.textContent='🐳';
+    w.style.bottom=(4+Math.random()*8)+'px';
+    tank.appendChild(w);
+    for(var i=0;i<6;i++){
+        (function(ii){
+            setTimeout(function(){
+                var b=document.createElement('div');
+                b.className='whale-bubble';
+                var sz=2+Math.random()*3;
+                b.style.width=sz+'px';
+                b.style.height=sz+'px';
+                b.style.left=(14+Math.random()*72)+'%';
+                b.style.bottom=(3+Math.random()*6)+'px';
+                b.style.opacity='0.26';
+                tank.appendChild(b);
+                setTimeout(function(){try{b.remove();}catch(e){}},850);
+            },ii*260);
+        })(i);
+    }
+    for(var i=0;i<7;i++){
+        (function(ii){
+            setTimeout(function(){
+                var s=document.createElement('div');
+                s.className='whale-sparkle';
+                s.textContent=['✨','✦','·'][Math.floor(Math.random()*3)];
+                s.style.left=(12+Math.random()*76)+'%';
+                s.style.top=(2+Math.random()*12)+'px';
+                s.style.opacity='0.35';
+                tank.appendChild(s);
+                setTimeout(function(){try{s.remove();}catch(e){}},500);
+            },120+ii*180);
+        })(i);
+    }
+    w.addEventListener('animationend', function(){ try{w.remove();}catch(e){} }, {once:true});
+}
+
 function closeModal(){
     stopQrScan();
     document.body.classList.remove('modal-open');
+    document.getElementById('modal').querySelector('.modal-box').classList.remove('stats-modal');
     document.getElementById('modal').classList.remove('show');
 }
 
 async function showShareModal(){
+    document.getElementById('modal').querySelector('.modal-box').classList.remove('stats-modal');
     const data = {o:own,e:selectedEvents};
     const encoded = await encode(data);
     cachedShareUrl = location.origin + location.pathname + '#d=' + encoded;
@@ -958,6 +1012,7 @@ async function saveShareQr(){
 let qrScanner = null;
 
 function showImportModal(){
+    document.getElementById('modal').querySelector('.modal-box').classList.remove('stats-modal');
     document.getElementById('modalTitle').textContent = '📥 匯入資料';
     document.getElementById('modalContent').innerHTML = `
         <div class="import-grid">
