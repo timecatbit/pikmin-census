@@ -770,7 +770,7 @@ function showStatsModal(){
         rows+=`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div class="dot ${c}"></div><span style="width:30px">${CN[c]}</span>${bar}<span style="width:70px;text-align:right;font-size:.85rem">${cs[c].o}/${cs[c].t}</span><span style="width:40px;text-align:right;color:var(--accent);font-weight:600">${pct}%</span></div>`;
     });
     document.getElementById('modalTitle').textContent = '📊 收集統計';
-    document.getElementById('modalContent').innerHTML = `<div style="margin-bottom:16px">${rows}</div><p style="font-size:.8rem;color:var(--muted);text-align:center">點擊顏色篩選可查看特定 Pikmin</p>`;
+    document.getElementById('modalContent').innerHTML = `<div style="margin-bottom:16px">${rows}</div>`;
     document.getElementById('modal').classList.add('show');
 }
 
