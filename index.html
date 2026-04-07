@@ -67,6 +67,7 @@
         .event-header.shut .arr{transform:rotate(-90deg)}
         .event-header.shut + .event-grid{display:none}
         .event-hint{font-size:.75rem;color:var(--muted)}
+        .event-note{font-size:.72rem;color:var(--muted);margin-top:6px;font-style:italic}
         .event-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:280px;overflow-y:auto;padding:4px 0}
         .event-chip{padding:5px 10px;border-radius:16px;background:#f0f0f0;font-size:.75rem;cursor:pointer;transition:all .15s}
         .event-chip:hover{background:#e0e0e0}
@@ -279,6 +280,7 @@
             <span class="event-hint" id="eventHint">點擊展開選擇</span>
         </div>
         <div class="event-grid" id="eventGrid" style="display:none"></div>
+        <div class="event-note">*目前僅收錄 2026 年 2 月份之後的活動</div>
         <div class="event-selected" id="eventSelected"><div class="event-selected-wrap"><div class="event-selected-list" id="eventSelList"></div></div><div class="scroll-progress" id="selProgress"><div class="scroll-progress-bar" id="selProgressBar"></div></div></div>
     </div>
     
