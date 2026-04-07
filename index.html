@@ -120,6 +120,7 @@
         .item-prog{color:var(--accent);font-weight:700;font-size:.78rem;white-space:nowrap;padding:2px 6px;border-radius:999px;background:rgba(92,184,96,.10)}
         .item-btns{display:flex;gap:4px;align-items:center}
         .clear-btn{display:inline-flex;align-items:center;justify-content:center;padding:5px 0;font-size:.68rem;font-weight:700;border-radius:8px;background:#f6f6f6;color:#666;cursor:pointer;user-select:none;width:var(--pik-size);box-sizing:border-box;text-align:center;border:1px solid #dddddd;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:background .15s,border-color .15s,color .15s,transform .12s}
+        .clear-btn.confirm{background:#fff6e8;color:#b26a00;border-color:#f1cf91}
         
         .piks{display:grid;grid-template-columns:repeat(8,var(--pik-size));gap:var(--pik-gap);justify-content:left}
         .pik{width:var(--pik-size);height:var(--pik-size);border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--tile-bg);border:1px solid var(--soft-border);cursor:pointer;position:relative;transition:all .15s}
@@ -228,6 +229,7 @@
             .item-name{font-size:.85rem}
             .item-prog{font-size:.75rem}
             .clear-btn{display:inline-flex;align-items:center;justify-content:center;padding:4px 0;font-size:.65rem;font-weight:700;background:#f6f6f6;color:#666;width:var(--pik-size);box-sizing:border-box;text-align:center;border:1px solid #dddddd;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+            .clear-btn.confirm{background:#fff6e8;color:#b26a00;border-color:#f1cf91}
             .piks{display:grid;grid-template-columns:repeat(8,var(--pik-size));gap:var(--pik-gap);width:100%;box-sizing:border-box;justify-content:space-between}
             .pik{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--tile-bg);cursor:pointer;position:relative;transition:all .15s;width:var(--pik-size);height:var(--pik-size);box-sizing:border-box;border:1px solid var(--soft-border)}
             .pik:hover{transform:scale(1.08)}
@@ -432,6 +434,8 @@ let colorF = 'all';
 let statusF = 'all';
 let searchQ = '';
 let shut = {};
+let pendingClear = null;
+let clearTimer = null;
 
 const key = (d,c,i) => d+'_'+c+'_'+i;
 
@@ -568,9 +572,18 @@ function toggle(did,col,idx){
 function clearD(did,cols){
     const d=getActiveDecors().find(x=>x.id===did);
     if(!d)return;
+    if(pendingClear!==did){
+        pendingClear=did;
+        if(clearTimer)clearTimeout(clearTimer);
+        clearTimer=setTimeout(()=>{pendingClear=null;render();},1600);
+        render();
+        toast('再按一次確認清空');
+        return;
+    }
+    pendingClear=null;
+    if(clearTimer)clearTimeout(clearTimer);
     cols.forEach(c=>{const max=d.c[c]||0;for(let i=0;i<max;i++)delete own[key(did,c,i)];});
     save();render();toast('🗑️ 已清空');
-    document.querySelectorAll('.item-btns button').forEach(b=>b.blur());
 }
 
 function toggleEvent(eid){
@@ -695,7 +708,7 @@ function renderItem(d){
     const cnt=entries.reduce((s,[c,max])=>s+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0);
     const done=cnt===total;
     const cols=JSON.stringify(Object.keys(d.c)).replace(/"/g,"'");
-    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${total}</span></div><div class="item-btns"><span class="clear-btn" onclick="event.stopPropagation();clearD('${d.id}',${cols})">清空</span></div></div><div class="piks">${entries.flatMap(([c,max])=>Array.from({length:max},(_,i)=>{const val=own[key(d.id,c,i)]||0;const has=val>0;return`<div class="pik ${has?'own':''}" data-id="${d.id}" data-color="${c}" data-idx="${i}" onclick="toggle('${d.id}','${c}',${i})" title="${CN[c]}"><div class="d dot ${c}">${max>1?'<span class="dot-num">'+(i+1)+'</span>':''}</div>${has?`<span class="bubble">${val}</span>`:''}</div>`;})).join('')}</div></div>`;
+    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${total}</span></div><div class="item-btns"><span class="clear-btn ${pendingClear===d.id?'confirm':''}" onclick="event.stopPropagation();clearD('${d.id}',${cols})">${pendingClear===d.id?'確認':'清空'}</span></div></div><div class="piks">${entries.flatMap(([c,max])=>Array.from({length:max},(_,i)=>{const val=own[key(d.id,c,i)]||0;const has=val>0;return`<div class="pik ${has?'own':''}" data-id="${d.id}" data-color="${c}" data-idx="${i}" onclick="toggle('${d.id}','${c}',${i})" title="${CN[c]}"><div class="d dot ${c}">${max>1?'<span class="dot-num">'+(i+1)+'</span>':''}</div>${has?`<span class="bubble">${val}</span>`:''}</div>`;})).join('')}</div></div>`;
 }
 
 function renderMiss(){
@@ -765,25 +778,89 @@ async function showShareModal(){
     const data = {o:own,e:selectedEvents};
     const encoded = await encode(data);
     cachedShareUrl = location.origin + location.pathname + '#d=' + encoded;
-    document.getElementById('modalTitle').textContent = '🔗 分享連結';
+    document.getElementById('modalTitle').textContent = '🔗 分享進度';
     document.getElementById('modalContent').innerHTML = `
         <div style="text-align:center">
-            <img id="shareQr" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(cachedShareUrl)}&margin=10" alt="QR Code" style="border-radius:12px;max-width:200px">
-            <p style="font-size:.8rem;color:var(--muted);margin-top:12px">用手機相機掃描二維碼</p>
+            <img id="shareQr" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(cachedShareUrl)}&margin=12" alt="QR Code" style="border-radius:16px;max-width:240px;background:#fff;padding:8px;box-shadow:0 6px 20px rgba(0,0,0,.08)">
+            <p style="font-size:.86rem;color:var(--text);margin-top:14px;font-weight:700">多裝置共享進度</p>
+            <p style="font-size:.8rem;color:var(--muted);margin-top:6px">保存二維碼或複製連結</p>
         </div>
-        <div class="share-row" style="margin-top:14px">
-            <input class="share-input" id="shareUrl" value="${cachedShareUrl}" readonly onclick="this.select()">
-            <button class="btn primary" onclick="copyShare()">複製</button>
+        <div class="share-row" style="margin-top:14px;justify-content:center">
+            <button class="btn primary" onclick="saveShareQr()">保存二維碼</button>
+            <button class="btn" onclick="copyShare()">複製連結</button>
         </div>
     `;
     document.getElementById('modal').classList.add('show');
 }
 function copyShare(){
-    const url = cachedShareUrl || document.getElementById('shareUrl').value;
+    const url = cachedShareUrl;
     navigator.clipboard.writeText(url).then(()=>toast('✅ 已複製連結')).catch(()=>{
         document.execCommand('copy');
         toast('✅ 已複製連結');
     });
+}
+
+async function saveShareQr(){
+    const qr = document.getElementById('shareQr');
+    if(!qr || !cachedShareUrl) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 720;
+    canvas.height = 980;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f4fbf4';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    const cardX = 60, cardY = 80, cardW = 600, cardH = 820, r = 32;
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0,0,0,0.10)';
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 8;
+    ctx.beginPath();
+    ctx.moveTo(cardX+r, cardY);
+    ctx.arcTo(cardX+cardW, cardY, cardX+cardW, cardY+cardH, r);
+    ctx.arcTo(cardX+cardW, cardY+cardH, cardX, cardY+cardH, r);
+    ctx.arcTo(cardX, cardY+cardH, cardX, cardY, r);
+    ctx.arcTo(cardX, cardY, cardX+cardW, cardY, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+
+    ctx.fillStyle = '#5cb860';
+    ctx.font = '700 42px Nunito, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('皮口普查', canvas.width/2, 160);
+    ctx.fillStyle = '#222';
+    ctx.font = '700 28px Nunito, sans-serif';
+    ctx.fillText('多裝置共享進度', canvas.width/2, 210);
+    ctx.fillStyle = '#777';
+    ctx.font = '600 22px Nunito, sans-serif';
+    ctx.fillText('掃描二維碼即可開啟目前進度', canvas.width/2, 250);
+
+    await new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = ()=>{ctx.drawImage(img, 170, 300, 380, 380); resolve();};
+        img.onerror = reject;
+        img.src = qr.src;
+    });
+
+    ctx.fillStyle = '#e8f5e9';
+    ctx.beginPath();
+    ctx.roundRect(180, 720, 360, 78, 20);
+    ctx.fill();
+    ctx.fillStyle = '#5cb860';
+    ctx.font = '700 24px Nunito, sans-serif';
+    ctx.fillText('保存這張圖或分享給朋友', canvas.width/2, 770);
+
+    ctx.fillStyle = '#9aa39b';
+    ctx.font = '600 18px Nunito, sans-serif';
+    ctx.fillText('Generated by 皮口普查', canvas.width/2, 865);
+
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'pikmin-census-share.png';
+    a.click();
+    toast('✅ 已保存二維碼圖片');
 }
 
 function showImportModal(){
