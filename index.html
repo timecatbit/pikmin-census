@@ -113,10 +113,10 @@
         .item-sub{font-size:.75rem;color:var(--muted)}
         .item-prog{color:var(--accent);font-weight:600;font-size:.8rem;white-space:nowrap}
         .item-btns{display:flex;gap:4px}
-        .clear-btn{padding:5px 0;font-size:.7rem;border-radius:6px;background:#f0f0f0;color:#555;cursor:pointer;user-select:none;width:52px;box-sizing:border-box;text-align:center}
+        .clear-btn{display:inline-flex;align-items:center;justify-content:center;padding:5px 0;font-size:.68rem;font-weight:700;border-radius:8px;background:#f6f6f6;color:#666;cursor:pointer;user-select:none;width:38px;box-sizing:border-box;text-align:center;border:1px solid #dddddd;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:background .15s,border-color .15s,color .15s,transform .12s}
         
         .piks{display:grid;grid-template-columns:repeat(8,52px);gap:6px;justify-content:left}
-        .pik{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:none;cursor:pointer;position:relative;transition:all .15s}
+        .pik{width:38px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:none;cursor:pointer;position:relative;transition:all .15s}
         .pik:hover{transform:scale(1.1)}
         .pik:active{transform:scale(0.95)}
         .pik.own{background:#c8e6c9;box-shadow:0 0 0 2px var(--accent)}
@@ -175,7 +175,10 @@
         
         @media(hover:hover){
             .event-tag:hover{background:#c8e6c9}
+            .clear-btn:hover{background:#eeeeee;border-color:#cfcfcf;color:#4f4f4f}
         }
+
+        .clear-btn:active{transform:scale(.96);background:#ebebeb}
 
         @media(max-width:600px){
             .app{padding:0 0 120px}
@@ -185,8 +188,8 @@
             .stats{gap:6px}
             .stat b{font-size:1rem}
             .stat small{font-size:.65rem}
-            .progress-ring svg{width:36px;height:36px}
-            .progress-ring span{width:36px;height:36px;font-size:9px}
+            .progress-ring svg{width:38px;height:36px}
+            .progress-ring span{width:38px;height:36px;font-size:9px}
             .toolbar{gap:6px;margin:8px 10px;padding:0}
             .search{padding:8px 12px;font-size:.85rem}
             .btn{padding:8px 10px;font-size:.8rem}
@@ -207,7 +210,7 @@
             .item-icon{font-size:1.1rem}
             .item-name{font-size:.85rem}
             .item-prog{font-size:.75rem}
-            .clear-btn{padding:4px 0;font-size:.65rem;background:#f0f0f0;color:#555;width:38px;box-sizing:border-box;text-align:center}
+            .clear-btn{display:inline-flex;align-items:center;justify-content:center;padding:4px 0;font-size:.65rem;font-weight:700;background:#f6f6f6;color:#666;width:38px;box-sizing:border-box;text-align:center;border:1px solid #dddddd;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
             .piks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;width:100%;box-sizing:border-box}
             .pik{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;cursor:pointer;position:relative;transition:all .15s;width:100%;height:100%;box-sizing:border-box}
             .pik:hover{transform:scale(1.08)}
