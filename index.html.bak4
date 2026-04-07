@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>pi-census</title>
+    <meta name="description" content="追蹤你的 Pikmin Bloom Decor 收集進度">
+    <meta name="theme-color" content="#5cb860">
+    <link rel="icon" href="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22pi-census%22%2C%22short_name%22%3A%22pi-census%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%235cb860%22%2C%22theme_color%22%3A%22%235cb860%22%7D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red:#e53935; --yellow:#fdd835; --blue:#1e88e5; --purple:#8e24aa;
+            --white:#e0e0e0; --rock:#616161; --winged:#ec407a; --ice:#26c6da;
+            --bg:#f9fdf9; --card:#ffffff; --accent:#5cb860; --accent2:#81c784; --text:#222; --muted:#777;
+            --shadow:0 2px 8px rgba(0,0,0,.05);
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{background:#5cb860}
+        body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        .app{max-width:1100px;margin:0 auto;padding:12px}
+        
+        .header{position:sticky;top:0;z-index:100;background:#5cb860;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(92,184,96,.25)}
+        .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:4px;color:#fff}
+        .logo-img{height:26px}
+        .stats{display:flex;gap:12px;margin-left:auto}
+        .stat{text-align:center;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .15s}
+        .stat:hover{background:rgba(255,255,255,.15)}
+        .stat b{color:#fff;font-size:1.2rem;font-weight:800}
+        .stat small{display:block;font-size:.7rem;color:rgba(255,255,255,.8)}
+        
+        .progress-ring{position:relative;flex-shrink:0}
+        .progress-ring svg{display:block;width:42px;height:42px;transform:rotate(-90deg)}
+        .progress-ring circle{fill:none;stroke-width:3}
+        .progress-ring .bg{stroke:rgba(255,255,255,.3)}
+        .progress-ring .fg{stroke:#fff;stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+        .progress-ring span{position:absolute;top:0;left:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+        
+        .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center}
+        .search{flex:1;min-width:140px;padding:10px 14px;border-radius:12px;border:2px solid #e0e0e0;background:var(--card);color:var(--text);font-size:.9rem;box-shadow:var(--shadow)}
+        .search:focus{outline:none;border-color:var(--accent)}
+        .btn{padding:10px 14px;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;background:var(--card);color:var(--text);border:2px solid #e0e0e0;transition:all .15s;box-shadow:var(--shadow)}
+        .btn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(10,148,116,.15)}
+        .btn:active{transform:translateY(0)}
+        .btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+        .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+        
+        .event-section{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+        .event-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}
+        .event-section:has(.event-selected:empty) .event-header{margin-bottom:0}
+        .event-header-left{display:flex;align-items:center;gap:6px}
+        .event-header h3{font-size:.9rem;color:var(--muted)}
+        .event-header .arr{transition:transform .2s;font-size:.8rem}
+        .event-header.shut .arr{transform:rotate(-90deg)}
+        .event-header.shut + .event-grid{display:none}
+        .event-hint{font-size:.75rem;color:var(--muted)}
+        .event-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:280px;overflow-y:auto;padding:4px 0}
+        .event-chip{padding:5px 10px;border-radius:16px;background:#f0f0f0;font-size:.75rem;cursor:pointer;transition:all .15s}
+        .event-chip:hover{background:#e0e0e0}
+        .event-chip.on{background:var(--accent);color:#fff}
+        
+        .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
+        .event-selected:empty{display:none}
+        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:95px;overflow-y:auto}
+        .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
+        .event-tag:hover{background:#c8e6c9}
+        .event-tag .x{margin-left:3px;opacity:.6}
+        
+        .filters{margin-bottom:10px}
+        .filter-grp{display:flex;align-items:center;background:var(--card);padding:4px 8px;border-radius:12px;box-shadow:var(--shadow);justify-content:space-between}
+        .f-chip{display:flex;align-items:center;gap:2px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
+        .f-chip:hover{background:#f0f0f0}
+        .f-chip.on{background:var(--accent);color:#fff}
+        .f-chip .cdot{width:10px;height:10px;border-radius:50%}
+        .f-sep{width:1px;height:16px;background:#ddd;margin:0 2px}
+        .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+        .dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}.dot.blue{background:var(--blue)}
+        .dot.purple{background:var(--purple)}.dot.white{background:var(--white)}.dot.rock{background:var(--rock)}
+        .dot.winged{background:var(--winged)}.dot.ice{background:var(--ice)}
+        
+        
+        .views{display:flex;gap:0;margin-bottom:12px;background:var(--card);border-radius:16px;padding:4px;box-shadow:var(--shadow)}
+        .view-btn{flex:1;padding:10px 16px;border-radius:12px;background:transparent;border:none;color:var(--muted);font-weight:700;cursor:pointer;font-size:.85rem;transition:all .15s;text-align:center}
+        .view-btn:hover{color:var(--text)}
+        .view-btn.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(10,148,116,.3)}
+        
+        .cat{margin-top:12px}
+        .cat-head{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none}
+        .cat-head h3{font-size:.9rem;color:var(--muted)}
+        .cat-head .arr{transition:transform .2s}
+        .cat-head.shut .arr{transform:rotate(-90deg)}
+        .cat-cnt{margin-left:auto;font-size:.8rem;color:var(--accent)}
+        .cat-body{padding-top:6px}
+        .cat-body.hide{display:none}
+        
+        .item{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);transition:all .15s}
+        .item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+        .item.done{border:2px solid var(--accent2);background:#f0fff0}
+        .item.done .item-name::after{content:' ✓';color:var(--accent)}
+        .item-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+        .item-icon{font-size:1.2rem}
+        .item-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+        .item-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .item-sub{font-size:.75rem;color:var(--muted)}
+        .item-prog{color:var(--accent);font-weight:600;font-size:.8rem;white-space:nowrap}
+        .item-btns{display:flex;gap:4px}
+        .item-btns button{padding:5px 10px;font-size:.7rem;border-radius:6px;background:#f0f0f0;color:#555;border:none;cursor:pointer;transition:all .15s}
+        .item-btns button:hover{color:var(--accent);background:#e0f2e0}
+        
+        .piks{display:flex;gap:6px}
+        .pik{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:none;cursor:pointer;position:relative;transition:all .15s}
+        .pik:hover{transform:scale(1.1)}
+        .pik:active{transform:scale(0.95)}
+        .pik.own{background:#c8e6c9;box-shadow:0 0 0 2px var(--accent);animation:popIn .3s ease}
+        .pik.own::after{content:'✓';position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:var(--accent);border-radius:50%;font-size:.6rem;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
+        @keyframes popIn{0%{transform:scale(1.3)}50%{transform:scale(0.9)}100%{transform:scale(1)}}
+        .pik.na{cursor:default;pointer-events:none;background:#f5f5f5;position:relative}
+        .pik.na::before{content:'';position:absolute;width:70%;height:2px;background:#888;transform:rotate(-45deg)}
+        .pik .d{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,0,0,.1);box-shadow:inset 0 -2px 4px rgba(0,0,0,.1)}
+        
+        .miss-sec{margin-bottom:16px}
+        .miss-head{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+        .miss-head h4{font-size:.9rem}
+        .miss-grid{display:flex;flex-wrap:wrap;gap:6px}
+        .miss-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:var(--card);font-size:.8rem;cursor:pointer;box-shadow:var(--shadow);transition:all .15s}
+        .miss-chip:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(10,148,116,.15)}
+        .miss-none{color:var(--accent);font-size:.85rem;font-weight:700}
+        
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+        .modal.show{display:flex}
+        .modal-box{background:var(--card);padding:24px;border-radius:24px;max-width:420px;width:90%;animation:modalIn .2s ease;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+        @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+        .modal-head h3{font-size:1.1rem}
+        .modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:4px 8px;border-radius:4px}
+        .modal-close:hover{background:rgba(255,255,255,.1)}
+        .drop{border:2px dashed rgba(255,255,255,.15);border-radius:10px;padding:36px;text-align:center;cursor:pointer;transition:all .15s}
+        .drop:hover{border-color:var(--accent);background:rgba(74,222,128,.05)}
+        .drop input{display:none}
+        
+        .share-row{display:flex;gap:8px}
+        .share-input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);color:var(--text);font-size:.75rem;font-family:monospace}
+        .share-input:focus{outline:none;border-color:var(--accent)}
+        
+        .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 24px;border-radius:25px;font-weight:700;font-size:.9rem;z-index:1001;box-shadow:0 4px 16px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:opacity .3s}
+        .toast.show{opacity:1}
+        
+        .empty{text-align:center;padding:32px;color:var(--muted)}
+        
+        /* 浮動按鈕組 */
+        .float-btns{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
+        .float-btns.show{opacity:1;pointer-events:auto}
+        .float-btn{width:46px;height:46px;border-radius:50%;background:var(--card);color:var(--text);border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.12);transition:all .2s}
+        .float-btn:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+        .float-btn:active{transform:scale(0.95)}
+        .float-btn.primary{background:var(--accent);color:#fff}
+        .float-btn.share{background:var(--accent);color:#fff}
+        
+        .hide-mobile{display:inline-flex}
+        @media(max-width:600px){.hide-mobile{display:none}}
+        
+        /* 快捷鍵提示 */
+        .kbd{display:inline-block;padding:2px 6px;background:rgba(255,255,255,.1);border-radius:4px;font-size:.7rem;color:var(--muted);margin-left:6px}
+        
+        
+        @media(max-width:600px){
+            .app{padding:0}
+            .header{padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-radius:0 0 12px 12px}
+            .header-row{gap:8px}
+            .logo{font-size:1.1rem}
+            .stats{gap:6px}
+            .stat b{font-size:1rem}
+            .stat small{font-size:.65rem}
+            .progress-ring svg{width:36px;height:36px}
+            .progress-ring span{width:36px;height:36px;font-size:9px}
+            .toolbar{gap:6px;margin:8px 10px;padding:0}
+            .search{padding:8px 12px;font-size:.85rem}
+            .btn{padding:8px 10px;font-size:.8rem}
+            .views{margin:0 10px 10px}
+            .view-btn{padding:10px 8px;font-size:.8rem}
+            .filters{margin:0 10px 8px}
+            .filter-grp{padding:3px 6px}
+            .f-chip{padding:3px 4px;font-size:.6rem}
+            .f-chip .cdot{width:8px;height:8px}
+            .f-sep{display:none}
+            .chip{padding:5px 8px;font-size:.75rem;flex-shrink:0}
+            .event-section{margin:0 10px 10px;padding:10px}
+            .event-chip{padding:5px 8px;font-size:.75rem}
+            .event-tag{padding:4px 8px;font-size:.75rem}
+            #listView,#missView{padding:0 10px}
+            .item{padding:10px 12px;margin-bottom:8px}
+            .item-row{margin-bottom:8px}
+            .item-icon{font-size:1.1rem}
+            .item-name{font-size:.85rem}
+            .item-prog{font-size:.75rem}
+            .item-btns button{padding:4px 8px;font-size:.65rem}
+            .piks{justify-content:space-between}
+            .pik{width:calc(12.5% - 5px);max-width:38px;height:38px;aspect-ratio:1}
+            .miss-chip{padding:5px 10px;font-size:.75rem}
+            .cat-head{padding:8px 0}
+            .cat-head h3{font-size:.85rem}
+            .float-btns{bottom:16px;right:16px}
+            .float-btn{width:44px;height:44px;font-size:1.1rem}
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="header-row">
+            <div class="logo"><img src="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200" class="logo-img">皮口普查</div>
+            <div class="stats" onclick="showStatsModal()">
+                <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
+                <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
+                <div class="progress-ring">
+                    <svg viewBox="0 0 42 42"><circle class="bg" cx="21" cy="21" r="18"/><circle class="fg" id="progressCircle" cx="21" cy="21" r="18" stroke-dasharray="113" stroke-dashoffset="113"/></svg>
+                    <span id="sPct">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    <div class="toolbar">
+        <input class="search" placeholder="🔍 搜尋..." id="search">
+        <button class="btn" id="btnShare">🔗</button>
+        <button class="btn" id="btnImport">📥</button>
+        <button class="btn" id="btnExport">📤</button>
+        <button class="btn" id="btnReset">🔄</button>
+    </div>
+    
+    <div class="event-section">
+        <div class="event-header shut" id="eventHeader">
+            <div class="event-header-left"><span class="arr">▼</span><h3>🎉 特殊活動</h3></div>
+            <span class="event-hint" id="eventHint">點擊展開選擇</span>
+        </div>
+        <div class="event-grid" id="eventGrid" style="display:none"></div>
+        <div class="event-selected" id="eventSelected"></div>
+    </div>
+    
+    <div class="views">
+        <button class="view-btn on" data-v="list">📝 完整列表</button>
+        <button class="view-btn" data-v="miss">📋 缺失清單</button>
+    </div>
+    
+    <div class="filters" id="filters"></div>
+    
+    <div id="listView"></div>
+    <div id="missView" style="display:none"></div>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-box">
+        <div class="modal-head"><h3 id="modalTitle">📥 匯入資料</h3><button class="modal-close" id="modalClose">×</button></div>
+        <div id="modalContent"></div>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="float-btns" id="floatBtns">
+    <button class="float-btn primary" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="返回頂部">↑</button>
+    <button class="float-btn share" onclick="showShareModal()" title="分享連結">🔗</button>
+</div>
+
+<script>
+const C = ['red','yellow','blue','purple','white','rock','winged','ice'];
+const CN = {red:'紅',yellow:'黃',blue:'藍',purple:'紫',white:'白',rock:'岩',winged:'翼',ice:'冰'};
+const C7 = ['red','yellow','blue','purple','white','rock','winged'];
+const C8 = C;
+
+const REGULAR = [
+  {id:'restaurant',n:'餐廳',i:'🍽️',c:C8},
+  {id:'cafe',n:'咖啡廳',i:'☕',c:C7},
+  {id:'sweetshop_macaron',n:'甜品店（馬卡龍）',i:'🍰',c:C7},
+  {id:'sweetshop_donut',n:'甜品店（甜甜圈）',i:'🍩',c:C7},
+  {id:'movie',n:'電影院',i:'🎬',c:C7},
+  {id:'pharmacy_toothbrush',n:'藥局（牙刷）',i:'🪥',c:C7},
+  {id:'pharmacy_floss',n:'藥局（牙線棒）',i:'🦷',c:C7},
+  {id:'pharmacy_paste',n:'藥局（牙膏）',i:'💊',c:C7},
+  {id:'zoo',n:'動物園',i:'🦁',c:C7},
+  {id:'forest_beetle',n:'森林（鍬形蟲）',i:'🪲',c:C8},
+  {id:'forest_acorn',n:'森林（橡果）',i:'🌰',c:C8},
+  {id:'waterside',n:'水邊',i:'🎣',c:C7},
+  {id:'postoffice',n:'郵局',i:'📮',c:C7},
+  {id:'artgallery',n:'美術館',i:'🖼️',c:C7},
+  {id:'airport',n:'機場',i:'✈️',c:C7},
+  {id:'station_train',n:'車站（紙火車）',i:'🚂',c:C7},
+  {id:'station_ticket',n:'車站（車票）',i:'🎫',c:C7},
+  {id:'beach',n:'海灘',i:'🏖️',c:C7},
+  {id:'burger',n:'漢堡店',i:'🍔',c:C7},
+  {id:'convenience_cap',n:'便利商店（瓶蓋）',i:'🧢',c:C7},
+  {id:'convenience_snack',n:'便利商店（零食）',i:'🍫',c:C7},
+  {id:'supermarket_mushroom',n:'超市（蘑菇）',i:'🍄',c:C7},
+  {id:'supermarket_banana',n:'超市（香蕉）',i:'🍌',c:C7},
+  {id:'bakery',n:'麵包店',i:'🥖',c:C7},
+  {id:'hairsalon',n:'美髮沙龍',i:'💇',c:C7},
+  {id:'clothes',n:'服飾店',i:'👗',c:C7},
+  {id:'park_clover3',n:'公園（三葉草）',i:'☘️',c:C7},
+  {id:'park_clover4',n:'公園（四葉草）',i:'🍀',c:C7},
+  {id:'library',n:'圖書館',i:'📚',c:C7},
+  {id:'sushi',n:'壽司店',i:'🍣',c:C7},
+  {id:'mountain',n:'山',i:'⛰️',c:C7},
+  {id:'stadium',n:'體育場',i:'🏟️',c:C7},
+  {id:'themepark_ferris',n:'遊樂園（摩天輪）',i:'🎡',c:['red','yellow','blue']},
+  {id:'themepark_pirate',n:'遊樂園（海盜船）',i:'🏴‍☠️',c:['red','yellow','blue']},
+  {id:'busstop',n:'公車站',i:'🚌',c:C7},
+  {id:'italian_pizza',n:'義式餐廳（披薩）',i:'🍕',c:C7},
+  {id:'italian_pasta',n:'義式餐廳（義大利麵）',i:'🍝',c:C7},
+  {id:'ramen',n:'拉麵店',i:'🍜',c:C7},
+  {id:'bridge',n:'橋',i:'🌉',c:C7},
+  {id:'hotel',n:'飯店',i:'🏨',c:C7},
+  {id:'makeup',n:'化妝品店',i:'💄',c:C7},
+  {id:'shrine_daikichi',n:'神社（大吉）',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_kichi',n:'神社（吉）',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_chukichi',n:'神社（中吉）',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_shokichi',n:'神社（小吉）',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'shrine_suekichi',n:'神社（末吉）',i:'⛩️',c:C7,note:'🇯🇵'},
+  {id:'appliance_bat_yr',n:'電器行（大電池黃紅）',i:'🔋',c:['yellow']},
+  {id:'appliance_bat_br',n:'電器行（大電池藍紅）',i:'🔋',c:['yellow']},
+  {id:'appliance_bat_g',n:'電器行（大電池綠）',i:'🔋',c:['yellow']},
+  {id:'appliance_sbat_yr',n:'電器行（小電池黃紅）',i:'🔋',c:['yellow']},
+  {id:'appliance_sbat_br',n:'電器行（小電池藍紅）',i:'🔋',c:['yellow']},
+  {id:'appliance_sbat_g',n:'電器行（小電池綠）',i:'🔋',c:['yellow']},
+  {id:'appliance_light1',n:'電器行（仙女燈單燈）',i:'💡',c:['yellow']},
+  {id:'appliance_light2',n:'電器行（仙女燈多色）',i:'💡',c:['yellow']},
+  {id:'curry',n:'咖哩餐廳',i:'🍛',c:C7},
+  {id:'diy',n:'DIY商店',i:'🔧',c:C7},
+  {id:'university',n:'大學',i:'🎓',c:['red','yellow','blue']},
+  {id:'mexican',n:'墨西哥餐廳',i:'🌮',c:C7},
+  {id:'laundry',n:'洗衣店',i:'🧺',c:C7},
+  {id:'korean',n:'韓式餐廳',i:'🥬',c:C8},
+  {id:'roadside_green',n:'路邊（綠貼紙）',i:'🟢',c:C7},
+  {id:'roadside_blue',n:'路邊（藍貼紙）',i:'🔵',c:C7},
+  {id:'roadside_orange',n:'路邊（橘貼紙）',i:'🟠',c:C7},
+  {id:'roadside_coin',n:'路邊（金幣）',i:'🪙',c:C7},
+  {id:'rainy',n:'雨天',i:'🌧️',c:C7},
+  {id:'snowy',n:'雪天',i:'❄️',c:C8},
+  
+];
+
+const EVENTS = [
+  {id:'ev_spring',n:'春季貼紙',i:'🌸',items:[{id:'spring',n:'春季貼紙',i:'🌸',c:C7}]},
+  {id:'ev_summer',n:'夏季貼紙',i:'🌻',items:[{id:'summer',n:'夏季貼紙',i:'🌻',c:C7}]},
+  {id:'ev_fall',n:'秋季貼紙',i:'🍂',items:[{id:'fall',n:'秋季貼紙',i:'🍂',c:C7}]},
+  {id:'ev_winter',n:'冬季貼紙',i:'⛄',items:[{id:'winter',n:'冬季貼紙',i:'⛄',c:C7}]},
+  {id:'ev_lunar_red',n:'農曆新年（紅）',i:'🧧',items:[{id:'lunar_red',n:'農曆新年（紅）',i:'🧧',c:C7}]},
+  {id:'ev_lunar_gold',n:'農曆新年（金）',i:'🧧',items:[{id:'lunar_gold',n:'農曆新年（金）',i:'🧧',c:C7}]},
+  {id:'ev_valentine',n:'情人節貼紙',i:'💝',items:[{id:'valentine',n:'情人節貼紙',i:'💝',c:C7}]},
+  {id:'ev_rev_valentine',n:'逆轉情人節貼紙',i:'💜',items:[{id:'rev_valentine',n:'逆轉情人節貼紙',i:'💜',c:C7}]},
+  {id:'ev_easter',n:'復活節蛋',i:'🥚',items:[{id:'easter',n:'復活節蛋',i:'🥚',c:C7}]},
+  {id:'ev_bunny',n:'兔子蛋',i:'🐰',items:[{id:'bunny',n:'兔子蛋',i:'🐰',c:C7}]},
+  {id:'ev_halloween_lantern',n:'南瓜燈',i:'🎃',items:[{id:'halloween_lantern',n:'南瓜燈',i:'🎃',c:C7}]},
+  {id:'ev_halloween_treat',n:'萬聖節糖果',i:'🍬',items:[{id:'halloween_treat',n:'萬聖節糖果',i:'🍬',c:C7}]},
+  {id:'ev_halloween_light',n:'萬聖節燈',i:'🔮',items:[{id:'halloween_light',n:'萬聖節燈',i:'🔮',c:C7}]},
+  {id:'ev_mitten',n:'聖誕手套',i:'🧤',items:[{id:'mitten',n:'聖誕手套',i:'🧤',c:C7}]},
+  {id:'ev_ball_ornament',n:'聖誕球形吊飾',i:'🔴',items:[{id:'ball_ornament',n:'聖誕球形吊飾',i:'🔴',c:C7}]},
+  {id:'ev_mario',n:'Super Mario Keychain',i:'🎩',items:[{id:'mario_keychain',n:'Super Mario Keychain',i:'🎩',c:['red','yellow','purple','blue']}]},
+  {id:'ev_color_powder',n:'彩色粉末（灑紅節）',i:'🎨',items:[{id:'color_powder',n:'彩色粉末',i:'🎨',c:C8}]},
+  {id:'ev_golden_plane',n:'金色玩具飛機',i:'✈️',items:[{id:'golden_plane',n:'金色玩具飛機',i:'✈️',c:C7}]},
+  {id:'ev_chocolate_2026',n:'2026巧克力',i:'🍫',items:[{id:'chocolate_2026',n:'2026巧克力',i:'🍫',c:C8}]},
+  {id:'ev_osechi',n:'御節料理',i:'🍱',items:[{id:'osechi',n:'御節料理',i:'🍱',c:C8}]},
+  {id:'ev_popper_2025',n:'2025派對彩炮',i:'🎉',items:[{id:'popper_2025',n:'2025派對彩炮',i:'🎉',c:C7}]},
+  {id:'ev_ornament_2025',n:'2025吊飾',i:'🎄',items:[{id:'ornament_2025',n:'2025吊飾',i:'🎄',c:C8}]},
+  {id:'ev_pacifier',n:'奶嘴',i:'🍼',items:[{id:'pacifier',n:'奶嘴',i:'🍼',c:['red']}]},
+  {id:'ev_calavera',n:'骷髏頭（亡靈節）',i:'💀',items:[{id:'calavera',n:'骷髏頭',i:'💀',c:C7}]},
+  {id:'ev_anniv4_flower',n:'四週年花盒',i:'💐',items:[{id:'anniv4_flower',n:'四週年花盒',i:'💐',c:C8}]},
+  {id:'ev_anniv4_snack',n:'四週年零食',i:'🎂',items:[{id:'anniv4_snack',n:'四週年零食',i:'🎂',c:C8}]},
+  {id:'ev_photo_badge',n:'照片徽章',i:'📷',items:[{id:'photo_badge',n:'照片徽章',i:'📷',c:C7}]},
+  {id:'ev_mooncake',n:'月餅',i:'🥮',items:[{id:'mooncake',n:'月餅',i:'🥮',c:C7}]},
+  {id:'ev_shaved_ice',n:'刨冰',i:'🍧',items:[{id:'shaved_ice',n:'刨冰',i:'🍧',c:C8}]},
+  {id:'ev_surfboard',n:'衝浪板鑰匙圈',i:'🏄',items:[{id:'surfboard',n:'衝浪板鑰匙圈',i:'🏄',c:C7}]},
+  {id:'ev_instrument',n:'小樂器',i:'🎵',items:[{id:'instrument',n:'小樂器',i:'🎵',c:C7}]},
+  {id:'ev_nintendo',n:'任天堂主機',i:'🎮',items:[{id:'nintendo',n:'任天堂主機',i:'🎮',c:C7}]},
+  {id:'ev_afternoon_tea',n:'下午茶',i:'🫖',items:[{id:'afternoon_tea',n:'下午茶',i:'🫖',c:C8}]},
+  {id:'ev_rio',n:'里約嘉年華',i:'🎭',items:[{id:'rio',n:'里約嘉年華',i:'🎭',c:C7}]},
+  {id:'ev_chocolate',n:'2025巧克力',i:'🍫',items:[{id:'chocolate',n:'2025巧克力',i:'🍫',c:C8}]},
+  {id:'ev_glasses_2024',n:'2024眼鏡',i:'👓',items:[{id:'glasses_2024',n:'2024眼鏡',i:'👓',c:C7}]},
+  {id:'ev_puzzle_2024fall',n:'拼圖 2024秋',i:'🧩',items:[{id:'puzzle_2024fall',n:'拼圖 2024秋',i:'🧩',c:C8}]},
+  {id:'ev_rosette_red',n:'紅色緞帶勳章',i:'🎖️',items:[{id:'rosette_red',n:'紅色緞帶勳章',i:'🎖️',c:C7}]},
+  {id:'ev_rosette_yellow',n:'黃色緞帶勳章',i:'🎖️',items:[{id:'rosette_yellow',n:'黃色緞帶勳章',i:'🎖️',c:C7}]},
+  {id:'ev_anniv3',n:'三週年杯子蛋糕',i:'🧁',items:[{id:'anniv3_cupcake',n:'三週年杯子蛋糕',i:'🧁',c:C7}]},
+  {id:'ev_icecream_2024',n:'冰淇淋（2024）',i:'🍦',items:[{id:'icecream_2024',n:'冰淇淋（2024）',i:'🍦',c:C7}]},
+  {id:'ev_icecream_extra',n:'冰淇淋（特別）',i:'🍦',items:[{id:'icecream_extra',n:'冰淇淋（特別）',i:'🍦',c:['ice']}]},
+  {id:'ev_coral',n:'珊瑚',i:'🪸',items:[{id:'coral',n:'珊瑚',i:'🪸',c:C7}]},
+  {id:'ev_paint',n:'油漆',i:'🎨',items:[{id:'paint',n:'油漆',i:'🎨',c:C7}]},
+  {id:'ev_present_gold',n:'禮物貼紙（金）',i:'🎁',items:[{id:'present_gold',n:'禮物貼紙（金）',i:'🎁',c:C7}]},
+  {id:'ev_glasses_2023',n:'2023眼鏡',i:'👓',items:[{id:'glasses_2023',n:'2023眼鏡',i:'👓',c:C7}]},
+  {id:'ev_puzzle_2023sum',n:'拼圖 2023夏',i:'🧩',items:[{id:'puzzle_2023sum',n:'拼圖 2023夏',i:'🧩',c:C7}]},
+  {id:'ev_pikmin4_ship',n:'Pikmin 4太空船',i:'🛸',items:[{id:'pikmin4_ship',n:'Pikmin 4太空船',i:'🛸',c:C8}]},
+  {id:'ev_pikmin4_toy',n:'Pikmin 4玩具',i:'🧸',items:[{id:'pikmin4_toy',n:'Pikmin 4玩具',i:'🧸',c:C8}]},
+  {id:'ev_mahjong',n:'麻將牌',i:'🀄',items:[{id:'mahjong_upper',n:'麻將牌（上排）',i:'🀄',c:C7},{id:'mahjong_lower',n:'麻將牌（下排）',i:'🀄',c:C7}]},
+  {id:'ev_icecream_classic',n:'冰淇淋（經典）',i:'🍦',items:[{id:'icecream_classic',n:'冰淇淋（經典）',i:'🍦',c:['red','yellow','blue','purple','white','winged']}]},
+  {id:'ev_cheese',n:'起司',i:'🧀',items:[{id:'cheese',n:'起司',i:'🧀',c:C7}]},
+  {id:'ev_playing_card',n:'撲克牌',i:'🃏',items:[{id:'playing_card',n:'撲克牌',i:'🃏',c:C7}]},
+  {id:'ev_sneaker',n:'運動鞋鑰匙圈',i:'👟',items:[{id:'sneaker',n:'運動鞋鑰匙圈',i:'👟',c:C7}]},
+  {id:'ev_koppaite',n:'科巴派太空衣',i:'🚀',items:[{id:'koppaite_brittany',n:'科巴派太空衣（紅）',i:'🚀',c:['red']},{id:'koppaite_charlie',n:'科巴派太空衣（黃）',i:'🚀',c:['yellow']},{id:'koppaite_alph',n:'科巴派太空衣（藍）',i:'🚀',c:['blue']}]},
+  {id:'ev_puzzle_2022sum',n:'拼圖 2022夏',i:'🧩',items:[{id:'puzzle_2022sum',n:'拼圖 2022夏',i:'🧩',c:C7}]},
+  {id:'ev_anniv1',n:'一週年零食',i:'🍪',items:[{id:'anniv1_snack',n:'一週年零食',i:'🍪',c:['red','yellow','blue']}]},
+  {id:'ev_fingerboard',n:'指板滑板',i:'🛹',items:[{id:'fingerboard',n:'指板滑板',i:'🛹',c:C7}]},
+  {id:'ev_chess',n:'西洋棋',i:'♟️',items:[{id:'chess_black',n:'西洋棋（黑）',i:'♟️',c:C7},{id:'chess_white',n:'西洋棋（白）',i:'♙',c:C7}]},
+  {id:'ev_hanafuda1',n:'花札（第一輯）',i:'🎴',items:[{id:'hanafuda_v1',n:'花札（第一輯）',i:'🎴',c:['red','yellow','blue','purple']}]},
+  {id:'ev_hanafuda2',n:'花札（第二輯）',i:'🎴',items:[{id:'hanafuda_v2',n:'花札（第二輯）',i:'🎴',c:['red','yellow','blue','white','rock','winged']}]},
+  {id:'ev_puzzle_2021fall',n:'拼圖 2021秋',i:'🧩',items:[{id:'puzzle_2021fall',n:'拼圖 2021秋',i:'🧩',c:C7}]},
+];
+
+let own = {};
+let selectedEvents = [];
+let view = 'list';
+let colorF = 'all';
+let statusF = 'all';
+let searchQ = '';
+let shut = {};
+
+const key = (d,c) => d+'_'+c;
+
+// URL-safe Base64 編碼/解碼（含版本號，確保向後兼容）
+const DATA_VERSION = 1;
+function encode(data){
+    // 添加版本號
+    const payload = {v:DATA_VERSION, o:data.o, e:data.e};
+    const j = JSON.stringify(payload);
+    const b = btoa(unescape(encodeURIComponent(j)));
+    return b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decode(str){
+    try{
+        let b = str.replace(/-/g,'+').replace(/_/g,'/');
+        while(b.length % 4) b += '=';
+        const j = decodeURIComponent(escape(atob(b)));
+        const data = JSON.parse(j);
+        // 向後兼容：處理不同版本的數據格式
+        return migrateData(data);
+    }catch(e){return null;}
+}
+function migrateData(data){
+    // 未來版本迭代時在這裡添加遷移邏輯
+    // 例如：if(data.v < 2) { /* 遷移 v1 到 v2 */ }
+    return {o: data.o || data.own || {}, e: data.e || data.events || []};
+}
+
+function load(){
+    // 先檢查 URL 參數
+    const params = new URLSearchParams(location.search);
+    const d = params.get('d');
+    if(d){
+        const data = decode(d);
+        if(data){
+            own = data.o || {};
+            selectedEvents = data.e || [];
+            save();
+            toast('📥 已從連結載入資料');
+            // 清除 URL 參數
+            history.replaceState(null,'',location.pathname);
+            return;
+        }
+    }
+    // 從 localStorage 載入
+    const s = localStorage.getItem('pik_v7');
+    if(s){const d=JSON.parse(s);own=d.own||{};selectedEvents=d.events||[];}
+    }
+function save(){
+    localStorage.setItem('pik_v7',JSON.stringify({own,events:selectedEvents}));
+}
+
+function getActiveDecors(){
+    const list = [...REGULAR];
+    selectedEvents.forEach(eid=>{
+        const ev = EVENTS.find(e=>e.id===eid);
+        if(ev) list.push(...ev.items);
+    });
+    return list;
+}
+
+function toggle(did,col){
+    const k=key(did,col);
+    own[k]=!own[k];
+    if(!own[k]) delete own[k];
+    // 觸覺反饋
+    if(navigator.vibrate) navigator.vibrate(10);
+    save(); render();
+}
+function fillD(did,cols){cols.forEach(c=>own[key(did,c)]=true);save();render();toast('✅ 已全選');}
+function clearD(did,cols){cols.forEach(c=>delete own[key(did,c)]);save();render();toast('🗑️ 已清空');}
+
+function toggleEvent(eid){
+    if(selectedEvents.includes(eid)) selectedEvents=selectedEvents.filter(e=>e!==eid);
+    else selectedEvents.push(eid);
+    save(); render();
+}
+
+function stats(){
+    const decors = getActiveDecors();
+    let o=0,t=0;
+    decors.forEach(d=>d.c.forEach(c=>{t++;if(own[key(d.id,c)])o++;}));
+    return {o,t,p:t>0?(o/t*100).toFixed(1):0};
+}
+
+function colorStats(){
+    const decors = getActiveDecors();
+    const cs={};C.forEach(c=>cs[c]={o:0,t:0});
+    decors.forEach(d=>d.c.forEach(c=>{cs[c].t++;if(own[key(d.id,c)])cs[c].o++;}));
+    return cs;
+}
+
+function renderEvents(){
+    let h='';
+    EVENTS.forEach(ev=>{
+        const on = selectedEvents.includes(ev.id);
+        h+=`<div class="event-chip ${on?'on':''}" onclick="toggleEvent('${ev.id}')">${ev.i} ${ev.n}</div>`;
+    });
+    document.getElementById('eventGrid').innerHTML=h;
+    // 計算已選活動的總裝飾數
+    let totalSelected=0;
+    selectedEvents.forEach(eid=>{
+        const ev=EVENTS.find(e=>e.id===eid);
+        if(ev) totalSelected+=ev.items.reduce((s,it)=>s+it.c.length,0);
+    });
+    document.getElementById('eventHint').textContent=selectedEvents.length?`已選 ${selectedEvents.length} 個活動（${totalSelected} 裝飾）`:'點擊展開選擇';
+    // 渲染已選活動標籤（折疊時也可見）
+    const selBox = document.getElementById('eventSelected');
+    if(selectedEvents.length>0){
+        let tags='';
+        selectedEvents.forEach(eid=>{
+            const ev=EVENTS.find(e=>e.id===eid);
+            if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')">${ev.i}${ev.n}<span class="x">✕</span></div>`;
+        });
+        selBox.innerHTML=`<div class="event-selected-list">${tags}</div>`;
+    }else{
+        selBox.innerHTML='';
+    }
+}
+
+function renderFilters(){
+    const cs=colorStats();
+    let colors='';
+    C.forEach(c=>{
+        const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
+        colors+=`<div class="f-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct}%</div>`;
+    });
+    let status=`<div class="f-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')" style="font-size:.6rem">❌</div>`;
+    status+=`<div class="f-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')" style="font-size:.6rem">✅</div>`;
+    document.getElementById('filters').innerHTML=`<div class="filter-grp"><div class="f-chip ${colorF==='all'&&statusF==='all'?'on':''}" onclick="setColorF('all');setStatusF('all')">全部</div><div class="f-sep"></div>${colors}<div class="f-sep"></div>${status}</div>`;
+}
+function setColorF(c){colorF=c;render();}
+function setStatusF(s){statusF=s;render();}
+
+function filterD(d){
+    if(searchQ&&!d.n.includes(searchQ))return false;
+    if(colorF!=='all'&&!d.c.includes(colorF))return false;
+    const cnt=d.c.filter(c=>own[key(d.id,c)]).length;
+    if(statusF==='done'&&cnt!==d.c.length)return false;
+    if(statusF==='miss'&&cnt===d.c.length)return false;
+    return true;
+}
+
+function renderList(){
+    const decors = getActiveDecors();
+    const regular = REGULAR.filter(filterD);
+    const special = decors.filter(d=>!REGULAR.find(r=>r.id===d.id)).filter(filterD);
+    let h='';
+    if(regular.length){
+        const cO=regular.reduce((s,d)=>s+d.c.filter(c=>own[key(d.id,c)]).length,0);
+        const cT=regular.reduce((s,d)=>s+d.c.length,0);
+        const closed=shut['regular'];
+        h+=`<div class="cat"><div class="cat-head ${closed?'shut':''}" onclick="toggleCat('regular')"><span class="arr">▼</span><h3>常駐 Decor</h3><span class="cat-cnt">${cO}/${cT}</span></div><div class="cat-body ${closed?'hide':''}">`;
+        regular.forEach(d=>h+=renderItem(d));
+        h+=`</div></div>`;
+    }
+    if(special.length){
+        const cO=special.reduce((s,d)=>s+d.c.filter(c=>own[key(d.id,c)]).length,0);
+        const cT=special.reduce((s,d)=>s+d.c.length,0);
+        const closed=shut['special'];
+        h+=`<div class="cat"><div class="cat-head ${closed?'shut':''}" onclick="toggleCat('special')"><span class="arr">▼</span><h3>特殊活動 Decor</h3><span class="cat-cnt">${cO}/${cT}</span></div><div class="cat-body ${closed?'hide':''}">`;
+        special.forEach(d=>h+=renderItem(d));
+        h+=`</div></div>`;
+    }
+    if(!h)h='<div class="empty">沒有匹配項</div>';
+    document.getElementById('listView').innerHTML=h;
+}
+
+function renderItem(d){
+    const cnt=d.c.filter(c=>own[key(d.id,c)]).length;
+    const done=cnt===d.c.length;
+    const cols=JSON.stringify(d.c).replace(/"/g,"'");
+    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${d.c.length}</span></div><div class="item-btns"><button onclick="event.stopPropagation();fillD('${d.id}',${cols})">全選</button><button onclick="event.stopPropagation();clearD('${d.id}',${cols})">清空</button></div></div><div class="piks">${C.map(c=>{const av=d.c.includes(c);const has=av&&own[key(d.id,c)];return`<div class="pik ${has?'own':''} ${!av?'na':''}" ${av?`onclick="toggle('${d.id}','${c}')"`:''}title="${CN[c]}"><div class="d dot ${c}"></div></div>`;}).join('')}</div></div>`;
+}
+
+function renderMiss(){
+    const decors = getActiveDecors();
+    // 計算每個顏色的缺失數並排序
+    const colorData = C.map(c=>{
+        const miss=decors.filter(d=>d.c.includes(c)&&!own[key(d.id,c)]&&(!searchQ||d.n.includes(searchQ)));
+        const total=decors.filter(d=>d.c.includes(c)).length;
+        return {c, miss, total, owned:total-miss.length};
+    }); // 固定顏色順序：紅→黃→藍→紫→白→岩→翼→冰
+    
+    let h='';
+    colorData.forEach(({c,miss,total,owned})=>{
+        if(colorF!=='all'&&colorF!==c)return;
+        if(statusF==='done')return;
+        const pct=total>0?Math.round(owned/total*100):0;
+        h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">${owned}/${total} (${pct}%)</span></div><div class="miss-grid">${miss.length?miss.map(d=>`<div class="miss-chip" onclick="toggle('${d.id}','${c}')">${d.i} ${d.n}</div>`).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
+    });
+    if(!h)h='<div class="empty">沒有匹配項</div>';
+    document.getElementById('missView').innerHTML=h;
+}
+
+function toggleCat(cat){shut[cat]=!shut[cat];render();}
+function toggleEventPanel(){
+    const h=document.getElementById('eventHeader');
+    const g=document.getElementById('eventGrid');
+    h.classList.toggle('shut');
+    g.style.display=h.classList.contains('shut')?'none':'flex';
+}
+
+function render(){
+    const st=stats();
+    document.getElementById('sOwn').textContent=st.o;
+    document.getElementById('sTotal').textContent=st.t;
+    document.getElementById('sPct').textContent=st.p+'%';
+    const pct = parseFloat(st.p);
+    const offset = 113 - (pct/100)*113;
+    document.getElementById('progressCircle').style.strokeDashoffset = offset;
+    renderEvents();
+    renderFilters();
+    renderList();
+    renderMiss();
+}
+
+function setView(v){
+    view=v;
+    document.querySelectorAll('.view-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+    document.getElementById('listView').style.display=v==='list'?'':'none';
+    document.getElementById('missView').style.display=v==='miss'?'':'none';
+}
+
+function showStatsModal(){
+    const cs=colorStats();
+    let rows='';
+    C.forEach(c=>{
+        const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
+        const bar=`<div style="flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--${c})"></div></div>`;
+        rows+=`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div class="dot ${c}"></div><span style="width:30px">${CN[c]}</span>${bar}<span style="width:70px;text-align:right;font-size:.85rem">${cs[c].o}/${cs[c].t}</span><span style="width:40px;text-align:right;color:var(--accent);font-weight:600">${pct}%</span></div>`;
+    });
+    document.getElementById('modalTitle').textContent = '📊 收集統計';
+    document.getElementById('modalContent').innerHTML = `<div style="margin-bottom:16px">${rows}</div><p style="font-size:.8rem;color:var(--muted);text-align:center">點擊顏色篩選可查看特定 Pikmin</p>`;
+    document.getElementById('modal').classList.add('show');
+}
+
+function showShareModal(){
+    const data = {o:own,e:selectedEvents};
+    const encoded = encode(data);
+    const url = location.origin + location.pathname + '?d=' + encoded;
+    document.getElementById('modalTitle').textContent = '🔗 分享連結';
+    document.getElementById('modalContent').innerHTML = `
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">複製此連結，可在其他裝置開啟：</p>
+        <div class="share-row">
+            <input class="share-input" id="shareUrl" value="${url}" readonly onclick="this.select()">
+            <button class="btn primary" onclick="copyShare()">複製</button>
+        </div>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:12px">💡 連結包含所有收集資料與已選活動</p>
+    `;
+    document.getElementById('modal').classList.add('show');
+}
+function copyShare(){
+    const input = document.getElementById('shareUrl');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(()=>toast('✅ 已複製連結')).catch(()=>{
+        document.execCommand('copy');
+        toast('✅ 已複製連結');
+    });
+}
+
+function showImportModal(){
+    document.getElementById('modalTitle').textContent = '📥 匯入資料';
+    document.getElementById('modalContent').innerHTML = `<div class="drop" id="drop"><p style="font-size:1.8rem">📁</p><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>`;
+    document.getElementById('modal').classList.add('show');
+    setupDrop();
+}
+
+function setupDrop(){
+    const drop=document.getElementById('drop'),fi=document.getElementById('fileIn');
+    if(!drop||!fi)return;
+    drop.onclick=()=>fi.click();
+    fi.onchange=e=>e.target.files[0]&&importFile(e.target.files[0]);
+    drop.ondragover=e=>{e.preventDefault();drop.style.borderColor='var(--accent)';};
+    drop.ondragleave=()=>drop.style.borderColor='';
+    drop.ondrop=e=>{e.preventDefault();drop.style.borderColor='';e.dataTransfer.files[0]&&importFile(e.dataTransfer.files[0]);};
+}
+
+function exportData(){
+    const d={v:7,date:new Date().toISOString(),own,events:selectedEvents};
+    const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='pikmin_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+    toast('📤 已匯出');
+}
+
+function importFile(f){
+    const r=new FileReader();
+    r.onload=e=>{try{
+        const j=JSON.parse(e.target.result);
+        own=j.own||j.data||j.collection||j;
+        selectedEvents=j.events||[];
+        save();render();
+        document.getElementById('modal').classList.remove('show');
+        toast('📥 匯入成功');
+    }catch(e){toast('❌ 格式錯誤');}};
+    r.readAsText(f);
+}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// 事件綁定
+document.getElementById('search').oninput=e=>{searchQ=e.target.value;render();};
+document.getElementById('btnShare').onclick=showShareModal;
+document.getElementById('btnImport').onclick=showImportModal;
+document.getElementById('btnExport').onclick=exportData;
+document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
+document.getElementById('modalClose').onclick=()=>document.getElementById('modal').classList.remove('show');
+document.getElementById('eventHeader').onclick=toggleEventPanel;
+document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+
+document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('show');};
+
+
+
+// 浮動按鈕滾動顯示
+window.onscroll=()=>{
+    document.getElementById('floatBtns').classList.toggle('show',window.scrollY>200);
+};
+
+// 快捷鍵：/ 聚焦搜索
+document.onkeydown=e=>{
+    if(e.key==='Escape')document.getElementById('modal').classList.remove('show');
+    if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('search').focus();}
+};
+
+load();render();
+</script>
+</body>
+</html>

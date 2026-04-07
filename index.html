@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>皮口普查</title>
+    <meta name="description" content="追蹤你的 Pikmin Bloom Decor 收集進度">
+    <meta name="theme-color" content="#5cb860">
+    <link rel="icon" href="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%E7%9A%AE%E5%8F%A3%E6%99%AE%E6%9F%A5%22%2C%22short_name%22%3A%22%E7%9A%AE%E5%8F%A3%E6%99%AE%E6%9F%A5%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%235cb860%22%2C%22theme_color%22%3A%22%235cb860%22%7D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="皮口普查">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red:#e53935; --yellow:#fdd835; --blue:#1e88e5; --purple:#8e24aa;
+            --white:#e0e0e0; --rock:#616161; --winged:#ec407a; --ice:#26c6da;
+            --bg:#f9fdf9; --card:#ffffff; --accent:#5cb860; --accent2:#81c784; --text:#222; --muted:#777;
+            --shadow:0 2px 8px rgba(0,0,0,.05);
+            --soft-border:#e7ece7;
+            --tile-bg:#f3f5f3;
+            --tile-bg-own:#dff4e1;
+            --tile-shadow-own:0 0 0 2px var(--accent), 0 4px 10px rgba(92,184,96,.14);
+            --pik-size:38px;
+            --pik-gap:8px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{background:#5cb860}
+        body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        .app{max-width:1100px;margin:0 auto;padding:12px;padding-bottom:120px}
+        
+        .header{position:sticky;top:0;z-index:100;background:#5cb860;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(92,184,96,.25)}
+        .header-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:4px;color:#fff}
+        .logo-img{height:26px}
+        .stats{display:flex;gap:12px;margin-left:auto}
+        .stat{text-align:center;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .15s}
+        .stat:hover{background:rgba(255,255,255,.15)}
+        .stat b{color:#fff;font-size:1.2rem;font-weight:800}
+        .stat small{display:block;font-size:.7rem;color:rgba(255,255,255,.8)}
+        
+        .progress-ring{position:relative;flex-shrink:0;margin-top:4px}
+        .progress-ring svg{display:block;width:42px;height:42px;transform:rotate(-90deg)}
+        .progress-ring circle{fill:none;stroke-width:3}
+        .progress-ring .bg{stroke:rgba(255,255,255,.3)}
+        .progress-ring .fg{stroke:#fff;stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+        .progress-ring span{position:absolute;top:0;left:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+        
+        .toolbar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center}
+        .search{flex:1;min-width:140px;padding:10px 14px;border-radius:12px;border:2px solid #e0e0e0;background:var(--card);color:var(--text);font-size:.9rem;box-shadow:var(--shadow)}
+        .search:focus{outline:none;border-color:var(--accent)}
+        .btn{padding:10px 14px;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;background:var(--card);color:var(--text);border:2px solid #e0e0e0;transition:all .15s;box-shadow:var(--shadow)}
+        .btn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(10,148,116,.15)}
+        .btn:active{transform:translateY(0)}
+        .btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+        .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+        
+        .event-section{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+        .event-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}
+        .event-section:has(.event-selected:empty) .event-header{margin-bottom:0}
+        .event-header-left{display:flex;align-items:center;gap:6px}
+        .event-header h3{font-size:.9rem;color:var(--muted)}
+        .event-header .arr{transition:transform .2s;font-size:.8rem}
+        .event-header.shut .arr{transform:rotate(-90deg)}
+        .event-header.shut + .event-grid{display:none}
+        .event-hint{font-size:.75rem;color:var(--muted)}
+        .event-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:280px;overflow-y:auto;padding:4px 0}
+        .event-chip{padding:5px 10px;border-radius:16px;background:#f0f0f0;font-size:.75rem;cursor:pointer;transition:all .15s}
+        .event-chip:hover{background:#e0e0e0}
+        .event-chip.on{background:var(--accent);color:#fff}
+        
+        .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd;display:none}
+        .event-selected:empty{display:none}
+        .event-selected-wrap{position:relative}
+        .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:96px;overflow-y:auto;padding-bottom:3px}
+        .scroll-progress{position:relative;height:3px;background:rgba(92,184,96,.12);border-radius:2px;margin-top:4px}
+        .scroll-progress-bar{height:100%;background:rgba(92,184,96,.72);border-radius:2px;transition:width .12s ease}
+        .event-tag{display:inline-flex;align-items:center;max-width:100%;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap;overflow:hidden}
+        .event-tag .x{margin-left:3px;opacity:.6}
+        
+        .filters{margin-bottom:10px}
+        .filter-grp{display:flex;align-items:center;background:var(--card);padding:4px 8px;border-radius:12px;box-shadow:var(--shadow);justify-content:space-between}
+        .f-chip{display:flex;align-items:center;gap:2px;padding:4px 6px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--muted)}
+        .f-chip:hover{background:#f0f0f0}
+        .f-chip.on{background:var(--accent);color:#fff}
+        .f-chip .cdot{width:10px;height:10px;border-radius:50%}
+        .f-sep{width:1px;height:16px;background:#ddd;margin:0 2px}
+        .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+        .dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}.dot.blue{background:var(--blue)}
+        .dot.purple{background:var(--purple)}.dot.white{background:var(--white)}.dot.rock{background:var(--rock)}
+        .dot.winged{background:var(--winged)}.dot.ice{background:var(--ice)}
+        
+        
+        .views{display:flex;gap:0;margin-bottom:12px;background:var(--card);border-radius:16px;padding:4px;box-shadow:var(--shadow)}
+        .view-btn{flex:1;padding:10px 16px;border-radius:12px;background:transparent;border:none;color:var(--muted);font-weight:700;cursor:pointer;font-size:.85rem;transition:all .15s;text-align:center}
+        .view-btn:hover{color:var(--text)}
+        .view-btn.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(10,148,116,.3)}
+        
+        .cat{margin-top:12px}
+        .cat-head{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none}
+        .cat-head h3{font-size:.9rem;color:var(--muted)}
+        .cat-head .arr{transition:transform .2s}
+        .cat-head.shut .arr{transform:rotate(-90deg)}
+        .cat-cnt{margin-left:auto;font-size:.8rem;color:var(--accent)}
+        .cat-body{padding-top:6px}
+        .cat-body.hide{display:none}
+        
+        .item{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);transition:all .15s;display:flex;flex-direction:column}
+        .item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+        .item.done{border:2px solid var(--accent2);background:#f0fff0}
+        .item.done .item-name::after{content:' ✓';color:var(--accent)}
+        .item-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-width:0}
+        .item-icon{font-size:1.2rem}
+        .item-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0;flex-wrap:wrap}
+        .item-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .item-sub{font-size:.75rem;color:var(--muted)}
+        .item-prog{color:var(--accent);font-weight:700;font-size:.78rem;white-space:nowrap;padding:2px 6px;border-radius:999px;background:rgba(92,184,96,.10)}
+        .item-btns{display:flex;gap:4px;align-items:center}
+        .clear-btn{display:inline-flex;align-items:center;justify-content:center;padding:5px 0;font-size:.68rem;font-weight:700;border-radius:8px;background:#f6f6f6;color:#666;cursor:pointer;user-select:none;width:var(--pik-size);box-sizing:border-box;text-align:center;border:1px solid #dddddd;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:background .15s,border-color .15s,color .15s,transform .12s}
+        .clear-btn.confirm{background:#fff6e8;color:#b26a00;border-color:#f1cf91}
+        
+        .piks{display:grid;grid-template-columns:repeat(8,var(--pik-size));gap:var(--pik-gap);justify-content:left}
+        .pik{width:var(--pik-size);height:var(--pik-size);border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--tile-bg);border:1px solid var(--soft-border);cursor:pointer;position:relative;transition:all .15s}
+        .pik:hover{transform:scale(1.1)}
+        .pik:active{transform:scale(0.95)}
+        .pik.own{background:var(--tile-bg-own);border-color:rgba(92,184,96,.34);box-shadow:var(--tile-shadow-own)}
+        @keyframes popIn{0%{transform:scale(1.3)}50%{transform:scale(0.9)}100%{transform:scale(1)}}
+        @keyframes bubblePop{0%{transform:scale(0)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+        .pik.na{cursor:default;pointer-events:none;background:#f5f5f5;position:relative}
+        .pik.na::before{content:'';position:absolute;width:70%;height:2px;background:#888;transform:rotate(-45deg)}
+        .pik .d{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,0,0,.12);box-shadow:inset 0 -2px 4px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:bold;color:#fff}
+        .dot-num{pointer-events:none}
+        .pik .d.white,.pik .d.ice,.pik .d.yellow{color:rgba(0,0,0,.58)}
+        .pik .d.white{border-color:rgba(0,0,0,.18)}
+        .pik .d.yellow{border-color:rgba(0,0,0,.16)}
+        .pik .d.ice{border-color:rgba(0,0,0,.18)}
+        .bubble{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;background:var(--accent);border-radius:8px;font-size:.6rem;font-weight:bold;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;box-shadow:0 1px 3px rgba(0,0,0,.2);line-height:1}
+        
+        .miss-sec{margin-bottom:16px}
+        .miss-head{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+        .miss-head h4{font-size:.9rem}
+        .miss-grid{display:flex;flex-wrap:wrap;gap:6px}
+        .miss-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:var(--card);font-size:.8rem;box-shadow:var(--shadow)}
+        .miss-none{color:var(--accent);font-size:.85rem;font-weight:700}
+        
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+        .modal.show{display:flex}
+        .modal-box{background:var(--card);padding:24px;border-radius:24px;max-width:420px;width:90%;animation:modalIn .2s ease;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+        @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+        .modal-head h3{font-size:1.1rem}
+        .modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:4px 8px;border-radius:4px}
+        .modal-close:hover{background:rgba(255,255,255,.1)}
+        .drop{border:2px dashed rgba(255,255,255,.15);border-radius:10px;padding:36px;text-align:center;cursor:pointer;transition:all .15s}
+        .drop:hover{border-color:var(--accent);background:rgba(74,222,128,.05)}
+        .drop input{display:none}
+        
+        .share-row{display:flex;gap:8px;align-items:center;justify-content:center}
+        .share-action{min-width:138px;justify-content:center;display:inline-flex;align-items:center}
+        .share-input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);color:var(--text);font-size:.75rem;font-family:monospace}
+        .share-input:focus{outline:none;border-color:var(--accent)}
+        
+        .toast{position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 24px;border-radius:25px;font-weight:700;font-size:.9rem;z-index:1001;box-shadow:0 4px 16px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:opacity .3s}
+        .toast.show{opacity:1}
+        
+        .empty{text-align:center;padding:32px;color:var(--muted)}
+        
+        /* 浮動按鈕組 */
+        .float-btns{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
+        .float-btns.show{opacity:1;pointer-events:auto}
+        .float-btn{width:46px;height:46px;border-radius:50%;background:var(--card);color:var(--text);border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.12);transition:all .2s}
+        .float-btn:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+        .float-btn:active{transform:scale(0.95)}
+        .float-btn.primary{background:var(--accent);color:#fff}
+        .float-btn.share{background:var(--accent);color:#fff}
+        
+        .hide-mobile{display:inline-flex}
+        @media(max-width:330px){
+            :root{--pik-size:min(34px, calc((100vw - 112px) / 8));--pik-gap:6px}
+            .event-section{padding:8px}
+            #listView,#missView{padding:0 8px}
+            .item{padding:10px}
+        }
+
+        @media(max-width:460px){.hide-mobile{display:none}}
+        
+        /* 快捷鍵提示 */
+        .kbd{display:inline-block;padding:2px 6px;background:rgba(255,255,255,.1);border-radius:4px;font-size:.7rem;color:var(--muted);margin-left:6px}
+        
+        
+        @media(hover:hover){
+            .event-tag:hover{background:#c8e6c9}
+            .clear-btn:hover{background:#eeeeee;border-color:#cfcfcf;color:#4f4f4f}
+        }
+
+        .clear-btn:active{transform:scale(.96);background:#ebebeb}
+
+        @media(max-width:460px){
+            :root{--pik-size:min(38px, calc((100vw - 120px) / 8));--pik-gap:8px}
+            .app{padding:0 0 120px}
+            .header{padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-radius:0 0 12px 12px}
+            .header-row{gap:8px}
+            .logo{font-size:1.1rem}
+            .stats{gap:6px}
+            .stat b{font-size:1rem}
+            .stat small{font-size:.65rem}
+            .progress-ring svg{width:38px;height:36px}
+            .progress-ring span{width:38px;height:36px;font-size:9px}
+            .toolbar{gap:6px;margin:8px 10px;padding:0}
+            .search{padding:8px 12px;font-size:.85rem}
+            .btn{padding:8px 10px;font-size:.8rem}
+            .views{margin:0 10px 10px}
+            .view-btn{padding:10px 8px;font-size:.8rem}
+            .filters{margin:0 10px 8px}
+            .filter-grp{padding:3px 6px}
+            .f-chip{padding:3px 4px;font-size:.6rem}
+            .f-chip .cdot{width:8px;height:8px}
+            .f-sep{display:none}
+            .chip{padding:5px 8px;font-size:.75rem;flex-shrink:0}
+            .event-section{margin:0 10px 10px;padding:10px}
+            .event-chip{padding:5px 8px;font-size:.75rem}
+            .event-tag{padding:4px 8px;font-size:.75rem}
+            #listView,#missView{padding:0 10px}
+            .item{padding:10px 12px;margin-bottom:8px}
+            .item-row{margin-bottom:8px}
+            .item-icon{font-size:1.1rem}
+            .item-name{font-size:.85rem}
+            .item-prog{font-size:.75rem}
+            .clear-btn{display:inline-flex;align-items:center;justify-content:center;padding:4px 0;font-size:.65rem;font-weight:700;background:#f6f6f6;color:#666;width:var(--pik-size);box-sizing:border-box;text-align:center;border:1px solid #dddddd;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+            .clear-btn.confirm{background:#fff6e8;color:#b26a00;border-color:#f1cf91}
+            .piks{display:grid;grid-template-columns:repeat(8,var(--pik-size));gap:var(--pik-gap);width:100%;box-sizing:border-box;justify-content:space-between}
+            .pik{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--tile-bg);cursor:pointer;position:relative;transition:all .15s;width:var(--pik-size);height:var(--pik-size);box-sizing:border-box;border:1px solid var(--soft-border)}
+            .pik:hover{transform:scale(1.08)}
+            .pik:active{transform:scale(0.95)}
+            .pik.own{background:var(--tile-bg-own);border-color:rgba(92,184,96,.34);box-shadow:0 0 0 1.5px var(--accent)}
+            .miss-chip{padding:5px 10px;font-size:.75rem}
+            .cat-head{padding:8px 0}
+            .cat-head h3{font-size:.85rem}
+            .float-btns{bottom:16px;right:16px}
+            .float-btn{width:44px;height:44px;font-size:1.1rem}
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="header-row">
+            <div class="logo"><img src="https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200" class="logo-img">皮口普查</div>
+            <div class="stats" onclick="showStatsModal()">
+                <div class="stat"><b id="sOwn">0</b><small>已收集</small></div>
+                <div class="stat"><b id="sTotal">0</b><small>總數</small></div>
+                <div class="progress-ring">
+                    <svg viewBox="0 0 42 42"><circle class="bg" cx="21" cy="21" r="18"/><circle class="fg" id="progressCircle" cx="21" cy="21" r="18" stroke-dasharray="113" stroke-dashoffset="113"/></svg>
+                    <span id="sPct">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    <div class="toolbar">
+        <input class="search" placeholder="🔍 搜尋..." id="search">
+        <button class="btn" id="btnShare">🔗</button>
+        <button class="btn" id="btnImport">📥</button>
+        <button class="btn" id="btnExport">📤</button>
+        <button class="btn" id="btnReset">🔄</button>
+    </div>
+    
+    <div class="event-section">
+        <div class="event-header shut" id="eventHeader">
+            <div class="event-header-left"><span class="arr">▼</span><h3>🎉 特殊活動</h3></div>
+            <span class="event-hint" id="eventHint">點擊展開選擇</span>
+        </div>
+        <div class="event-grid" id="eventGrid" style="display:none"></div>
+        <div class="event-selected" id="eventSelected"><div class="event-selected-wrap"><div class="event-selected-list" id="eventSelList"></div></div><div class="scroll-progress" id="selProgress"><div class="scroll-progress-bar" id="selProgressBar"></div></div></div>
+    </div>
+    
+    <div class="views">
+        <button class="view-btn on" data-v="list">📝 完整列表</button>
+        <button class="view-btn" data-v="miss">📋 缺失清單</button>
+    </div>
+    
+    <div class="filters" id="filters"></div>
+    
+    <div id="listView"></div>
+    <div id="missView" style="display:none"></div>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-box">
+        <div class="modal-head"><h3 id="modalTitle">📥 匯入資料</h3><button class="modal-close" id="modalClose">×</button></div>
+        <div id="modalContent"></div>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="float-btns" id="floatBtns">
+    <button class="float-btn primary" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="返回頂部">↑</button>
+    <button class="float-btn share" onclick="showShareModal()" title="分享連結">🔗</button>
+</div>
+
+<script>
+const C = ['red','yellow','blue','purple','white','rock','winged','ice'];
+const CN = {red:'紅',yellow:'黃',blue:'藍',purple:'紫',white:'白',rock:'岩',winged:'翼',ice:'冰'};
+const C7 = ['red','yellow','blue','purple','white','rock','winged'];
+const C8 = C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const REGULAR = [
+  {id:'reg_廚師帽子',n:'餐廳/廚師帽子',i:'🍽️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_咖啡杯',n:'咖啡廳/咖啡杯',i:'☕',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_馬卡龍',n:'甜品店/馬卡龍',i:'🍰',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_甜甜圈',n:'甜品店/甜甜圈',i:'🍩',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_爆米花',n:'電影院/爆米花',i:'🍿',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_牙刷',n:'藥局/牙刷',i:'🪥',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_蒲公英',n:'動物園/蒲公英',i:'🌼',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_鍬形蟲',n:'森林/鍬形蟲',i:'🪲',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_橡栗',n:'森林/橡栗',i:'🌰',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_擬餌',n:'水邊/擬餌',i:'🪤',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_郵票',n:'郵局/郵票',i:'📮',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_畫框',n:'美術館/畫框',i:'🖼️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_飛機玩具',n:'機場/飛機玩具',i:'✈️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_電車紙模型',n:'車站/電車紙模型',i:'🚃',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_票券',n:'車站/票券',i:'🎫',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_貝殼',n:'海灘/貝殼',i:'🐚',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_漢堡',n:'漢堡店/漢堡',i:'🍔',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_瓶蓋',n:'便利店/瓶蓋',i:'🧢',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_零食',n:'便利店/零食',i:'🍫',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_蘑菇',n:'超市/蘑菇',i:'🍄',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_香蕉',n:'超市/香蕉',i:'🍌',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_法国麵包',n:'麵包店/法国麵包',i:'🥖',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_剪刀',n:'美容院/剪刀',i:'✂️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_髮圈',n:'服装店/髮圈',i:'💇',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_幸運草',n:'公園/幸運草',i:'☘️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_四葉幸運草',n:'公園/四葉幸運草',i:'🍀',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_迷你書',n:'圖書館＆書店/迷你書',i:'📚',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_綠色貼紙',n:'路邊/綠色貼紙',i:'🟢',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_藍色貼紙',n:'路邊/藍色貼紙',i:'🔵',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_橘色貼紙',n:'路邊/橘色貼紙',i:'🟠',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_金幣',n:'路邊/金幣',i:'🪙',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'reg_壽司',n:'壽司餐厅/壽司',i:'🍣',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_山岳别针徽章',n:'山丘/山岳别针徽章',i:'🏔️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_体育馆鑰匙圈',n:'體育馆/体育馆鑰匙圈',i:'🏟️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_葉子帽',n:'雨天/葉子帽',i:'🌿',c:{'blue':3}},
+  {id:'reg_雪',n:'下雪/雪',i:'❄️',c:{'blue':1,'white':1,'ice':1}},
+  {id:'reg_主題樂園門票',n:'主題樂園/主題樂園門票',i:'🎢',c:{'red':2,'yellow':2,'blue':2}},
+  {id:'reg_公車紙模型',n:'公車站/公車紙模型',i:'🚌',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_披薩',n:'義式餐廳/披薩',i:'🍕',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_義大利麵',n:'義式餐廳/義大利麵',i:'🍝',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_拉麵鑰匙圈',n:'拉麵店/拉麵鑰匙圈',i:'🍜',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_橋梁別針',n:'橋樑/橋梁別針',i:'🌉',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_飯店備品',n:'飯店/飯店備品',i:'🏨',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_化妝品',n:'化妝品商店/化妝品',i:'💄',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_運勢（吉）',n:'神社和寺廟/運勢（吉）',i:'🛕',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_電池',n:'電器行/電池',i:'🔋',c:{'yellow':6}},
+  {id:'reg_仙女燈',n:'電器行/仙女燈',i:'📦',c:{'yellow':2}},
+  {id:'reg_一碗咖哩',n:'咖哩餐廳/一碗咖哩',i:'🍛',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_工具',n:'五金行/工具',i:'🔧',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_校徽胸針',n:'大學&學院/校徽胸針',i:'🎓',c:{'red':1,'yellow':1,'blue':1}},
+  {id:'reg_塔可餅',n:'墨西哥餐廳/塔可餅',i:'🌮',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_洗衣用品',n:'自助洗衣店&乾洗店/洗衣用品',i:'🧺',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_韓國泡菜',n:'韓國餐廳/韓國泡菜',i:'🥬',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+];
+
+const EVENTS = [
+  {id:'ev_超級瑪利歐鑰匙圈',n:'超級瑪利歐鑰匙圈',i:'🎮',c:{'red':1,'yellow':1,'blue':1,'purple':1}},
+  {id:'ev_逆轉情人節貼紙',n:'逆轉情人節貼紙',i:'💜',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_復活節彩蛋',n:'復活節彩蛋',i:'🥚',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_兔寶寶彩蛋',n:'兔寶寶彩蛋',i:'🐰',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_下午茶',n:'下午茶',i:'🫖',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_照片鈕扣徽章',n:'照片鈕扣徽章',i:'📷',c:{'red':1}},
+  {id:'ev_奶嘴',n:'奶嘴',i:'🍼',c:{'red':1}},
+  {id:'ev_彩色粉末',n:'彩色粉末',i:'🎨',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'ev_荷蘭木鞋鑰匙圈',n:'荷蘭木鞋鑰匙圈',i:'🥿',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let own = {};
+let selectedEvents = [];
+let view = 'list';
+let colorF = 'all';
+let statusF = 'all';
+let searchQ = '';
+let shut = {};
+let pendingClear = null;
+let clearTimer = null;
+
+const key = (d,c,i) => d+'_'+c+'_'+i;
+
+// Compression Streams API 壓縮（用於縮短分享連結，無需外部庫）
+async function compressToBase64Url(str) {
+    const bytes = new TextEncoder().encode(str);
+    const cs = new CompressionStream('gzip');
+    const writer = cs.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    const buf = await new Response(cs.readable).arrayBuffer();
+    const arr = new Uint8Array(buf);
+    let binary = '';
+    for (let i = 0; i < arr.length; i++) binary += String.fromCharCode(arr[i]);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function decompressFromBase64Url(b64url) {
+    let binary = atob(b64url.replace(/-/g, '+').replace(/_/g, '/'));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const cs = new DecompressionStream('gzip');
+    const writer = cs.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    const buf = await new Response(cs.readable).arrayBuffer();
+    return new TextDecoder().decode(buf);
+}
+
+const DATA_VERSION = 4;
+
+function packOwnMap(ownMap){
+    return Object.entries(ownMap)
+        .filter(([,v]) => (v||0) > 0)
+        .map(([k,v]) => `${k}:${v}`);
+}
+
+function unpackOwnMap(arr){
+    const out = {};
+    (arr || []).forEach(s => {
+        const i = s.lastIndexOf(':');
+        if(i <= 0) return;
+        const k = s.slice(0, i);
+        const v = Number(s.slice(i + 1));
+        if(k && Number.isFinite(v) && v > 0) out[k] = v;
+    });
+    return out;
+}
+
+async function encode(data){
+    const payload = [DATA_VERSION, packOwnMap(data.o || {}), data.e || []];
+    return await compressToBase64Url(JSON.stringify(payload));
+}
+
+async function decode(str){
+    try{
+        const raw = JSON.parse(await decompressFromBase64Url(str));
+        if(Array.isArray(raw)){
+            return {o: unpackOwnMap(raw[1]), e: raw[2] || []};
+        }
+        return {o: raw.o || {}, e: raw.e || raw.events || []};
+    }catch(e){return null;}
+}
+
+async function load(){
+    const hash = location.hash.startsWith('#d=') ? location.hash.slice(3) : '';
+    if(hash){
+        const data = await decode(hash);
+        if(data){
+            own = migrateLocalOwn(data.o || {});
+            selectedEvents = data.e || [];
+            save();
+            toast('📥 已從連結載入資料');
+            history.replaceState(null,'',location.pathname);
+            render();
+            return;
+        }
+    }
+    // 從 localStorage 載入（v2 格式）
+    const s2 = localStorage.getItem('pik_v2');
+    if(s2){
+        const d=JSON.parse(s2);
+        own = migrateLocalOwn(d.own || {});
+        selectedEvents=d.events||[];
+        render();
+        return;
+    }
+    // 舊 v7 格式兼容
+    const s7 = localStorage.getItem('pik_v7');
+    if(s7){
+        const d=JSON.parse(s7);
+        own = migrateLocalOwn(d.own || {});
+        selectedEvents=d.events||[];
+        save();
+        render();
+    }
+}
+
+function migrateLocalOwn(o){
+    // 舊 boolean 格式 -> 數字格式
+    const first = Object.values(o)[0];
+    if(typeof first === 'boolean'){
+        const converted = {};
+        for(const [k,v] of Object.entries(o)) converted[k] = v ? 1 : 0;
+        return converted;
+    }
+    return o;
+}
+function save(){
+    localStorage.setItem('pik_v2',JSON.stringify({own,events:selectedEvents}));
+}
+
+function getActiveDecors(){
+    const list = [...REGULAR];
+    selectedEvents.forEach(eid=>{
+        const ev = EVENTS.find(e=>e.id===eid);
+        if(ev) list.push(ev);
+    });
+    return list;
+}
+
+function toggle(did,col,idx){
+    const k=key(did,col,idx);
+    const prev=own[k]||0;
+    const next=prev>=5?0:prev+1;
+    if(next===0)delete own[k];else own[k]=next;
+    if(navigator.vibrate)navigator.vibrate(10);
+    // Save bubble el before render destroys it
+    const el=document.querySelector(`.pik[data-id="${did}"][data-color="${col}"][data-idx="${idx}"] .bubble`);
+    const newEl=document.querySelector(`.pik[data-id="${did}"][data-color="${col}"][data-idx="${idx}"]`);
+    save();render();
+    if(el&&newEl){newEl.style.animation='none';newEl.offsetHeight;newEl.style.animation='bubblePop .3s ease';}
+}
+function clearD(did,cols){
+    const d=getActiveDecors().find(x=>x.id===did);
+    if(!d)return;
+    if(pendingClear!==did){
+        pendingClear=did;
+        if(clearTimer)clearTimeout(clearTimer);
+        clearTimer=setTimeout(()=>{pendingClear=null;render();},1600);
+        render();
+        toast('再按一次確認清空');
+        return;
+    }
+    pendingClear=null;
+    if(clearTimer)clearTimeout(clearTimer);
+    cols.forEach(c=>{const max=d.c[c]||0;for(let i=0;i<max;i++)delete own[key(did,c,i)];});
+    save();render();toast('🗑️ 已清空');
+}
+
+function toggleEvent(eid){
+    if(selectedEvents.includes(eid)) selectedEvents=selectedEvents.filter(e=>e!==eid);
+    else selectedEvents.push(eid);
+    save(); render();
+}
+
+function stats(){
+    const decors = getActiveDecors();
+    let o=0,t=0;
+    decors.forEach(d=>Object.entries(d.c).forEach(([col,max])=>{for(let i=0;i<max;i++){t++;if((own[key(d.id,col,i)]||0)>0)o++;}}));
+    return {o,t,p:t>0?(o/t*100).toFixed(1):0};
+}
+
+function colorStats(){
+    const decors = getActiveDecors();
+    const cs={};C.forEach(c=>cs[c]={o:0,t:0});
+    decors.forEach(d=>Object.entries(d.c).forEach(([col,max])=>{for(let i=0;i<max;i++){cs[col].t++;if((own[key(d.id,col,i)]||0)>0)cs[col].o++;}}));
+    return cs;
+}
+
+function renderEvents(){
+    let h='';
+    EVENTS.forEach(ev=>{
+        const on = selectedEvents.includes(ev.id);
+        h+=`<div class="event-chip ${on?'on':''}" onclick="toggleEvent('${ev.id}')">${ev.i} ${ev.n}</div>`;
+    });
+    document.getElementById('eventGrid').innerHTML=h;
+    // 計算已選活動的總裝飾數
+    let totalSelected=0;
+    selectedEvents.forEach(eid=>{
+        const ev=EVENTS.find(e=>e.id===eid);
+        if(ev) totalSelected+=Object.values(ev.c).reduce((a,b)=>a+b,0);
+    });
+    document.getElementById('eventHint').textContent=selectedEvents.length?`已選 ${selectedEvents.length} 個活動（${totalSelected} 裝飾）`:'點擊展開選擇';
+    // 渲染已選活動標籤（折疊時也可見）
+    const selBox = document.getElementById('eventSelected');
+    if(selectedEvents.length>0){
+        let tags='';
+        selectedEvents.forEach(eid=>{
+            const ev=EVENTS.find(e=>e.id===eid);
+            if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')" onmousedown="event.preventDefault()"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${ev.i}${ev.n}</span><span class="x">✕</span></div>`;
+        });
+        const listEl = document.getElementById('eventSelList');
+        const barEl = document.getElementById('selProgressBar');
+        const progressEl = document.getElementById('selProgress');
+        listEl.innerHTML = tags;
+        progressEl.style.display='block';
+        selBox.style.display='block';
+        const scrollableMax = listEl.scrollHeight - listEl.clientHeight;
+        const minWidth = scrollableMax>0 ? (listEl.clientHeight/listEl.scrollHeight)*100 : 100;
+        function updateSelScroll(){
+            const pct = scrollableMax>0 ? Math.min(1, listEl.scrollTop / scrollableMax) : 0;
+            // bar = minWidth + (100-minWidth)*pct, so at top: minWidth, at bottom: 100%
+            barEl.style.width = (minWidth + (100-minWidth)*pct) + '%';
+        }
+        updateSelScroll();
+        listEl.addEventListener('scroll', updateSelScroll);
+    }else{
+        document.getElementById('eventSelList').innerHTML='';
+        document.getElementById('selProgress').style.display='none';
+        selBox.style.display='none';
+    }
+}
+
+function renderFilters(){
+    const cs=colorStats();
+    let colors='';
+    C.forEach(c=>{
+        const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
+        colors+=`<div class="f-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct===100?'✓':pct+'%'}</div>`;
+    });
+    let status=`<div class="f-chip ${statusF==='miss'?'on':''}" onclick="setStatusF('miss')" style="font-size:.6rem">❌</div>`;
+    status+=`<div class="f-chip ${statusF==='done'?'on':''}" onclick="setStatusF('done')" style="font-size:.6rem">✅</div>`;
+    document.getElementById('filters').innerHTML=`<div class="filter-grp"><div class="f-chip ${colorF==='all'&&statusF==='all'?'on':''}" onclick="setColorF('all');setStatusF('all')">全部</div><div class="f-sep"></div>${colors}<div class="f-sep"></div>${status}</div>`;
+}
+function setColorF(c){colorF=c;render();}
+function setStatusF(s){statusF=s;render();}
+
+function filterD(d){
+    if(searchQ&&!d.n.includes(searchQ))return false;
+    if(colorF!=='all'&&!d.c[colorF])return false;
+    const entries=Object.entries(d.c);
+    // Count collected dots
+    let collected=0,total=0;
+    entries.forEach(([col,max])=>{for(let i=0;i<max;i++){total++;if((own[key(d.id,col,i)]||0)>0)collected++;}});
+    if(statusF==='done'&&collected!==total)return false;
+    if(statusF==='miss'&&collected===total)return false;
+    return true;
+}
+
+function renderList(){
+    const decors = getActiveDecors();
+    const regular = REGULAR.filter(filterD);
+    const special = decors.filter(d=>!REGULAR.find(r=>r.id===d.id)).filter(filterD);
+    let h='';
+    if(regular.length){
+        const cO=regular.reduce((s,d)=>s+Object.entries(d.c).reduce((s2,[c,max])=>s2+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0),0);
+        const cT=regular.reduce((s,d)=>s+Object.values(d.c).reduce((a,b)=>a+b,0),0);
+        const closed=shut['regular'];
+        h+=`<div class="cat"><div class="cat-head ${closed?'shut':''}" onclick="toggleCat('regular')"><span class="arr">▼</span><h3>常駐 Decor</h3><span class="cat-cnt">${cO}/${cT}</span></div><div class="cat-body ${closed?'hide':''}">`;
+        regular.forEach(d=>h+=renderItem(d));
+        h+=`</div></div>`;
+    }
+    if(special.length){
+        const cO=special.reduce((s,d)=>s+Object.entries(d.c).reduce((s2,[c,max])=>s2+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0),0);
+        const cT=special.reduce((s,d)=>s+Object.values(d.c).reduce((a,b)=>a+b,0),0);
+        const closed=shut['special'];
+        h+=`<div class="cat"><div class="cat-head ${closed?'shut':''}" onclick="toggleCat('special')"><span class="arr">▼</span><h3>特殊活動 Decor</h3><span class="cat-cnt">${cO}/${cT}</span></div><div class="cat-body ${closed?'hide':''}">`;
+        special.forEach(d=>h+=renderItem(d));
+        h+=`</div></div>`;
+    }
+    if(!h)h='<div class="empty">沒有匹配項</div>';
+    document.getElementById('listView').innerHTML=h;
+}
+
+function renderItem(d){
+    const entries=Object.entries(d.c);
+    const total=entries.reduce((s,[,max])=>s+max,0);
+    // Each dot (index) counts as 1 if collected (value>0), regardless of cycle count
+    const cnt=entries.reduce((s,[c,max])=>s+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0);
+    const done=cnt===total;
+    const cols=JSON.stringify(Object.keys(d.c)).replace(/"/g,"'");
+    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${total}</span></div><div class="item-btns"><span class="clear-btn ${pendingClear===d.id?'confirm':''}" onclick="event.stopPropagation();clearD('${d.id}',${cols})">${pendingClear===d.id?'確認':'清空'}</span></div></div><div class="piks">${entries.flatMap(([c,max])=>Array.from({length:max},(_,i)=>{const val=own[key(d.id,c,i)]||0;const has=val>0;return`<div class="pik ${has?'own':''}" data-id="${d.id}" data-color="${c}" data-idx="${i}" onclick="toggle('${d.id}','${c}',${i})" title="${CN[c]}"><div class="d dot ${c}">${max>1?'<span class="dot-num">'+(i+1)+'</span>':''}</div>${has?`<span class="bubble">${val}</span>`:''}</div>`;})).join('')}</div></div>`;
+}
+
+function renderMiss(){
+    const decors = getActiveDecors();
+    // 計算每個顏色的缺失數並排序
+    const colorData = C.map(c=>{
+        const miss=decors.filter(d=>{if(!d.c[c])return false;if(searchQ&&!d.n.includes(searchQ))return false;const max=d.c[c];for(let i=0;i<max;i++)if((own[key(d.id,c,i)]||0)>0)return false;return true;});
+        const total=decors.filter(d=>d.c[c]&&(!searchQ||!searchQ||d.n.includes(searchQ))).length;
+        return {c, miss, total, owned:total-miss.length};
+    }); // 固定顏色順序：紅→黃→藍→紫→白→岩→翼→冰
+    
+    let h='';
+    colorData.forEach(({c,miss,total,owned})=>{
+        if(colorF!=='all'&&colorF!==c)return;
+        if(statusF==='done')return;
+        const pct=total>0?Math.round(owned/total*100):0;
+        h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">${owned}/${total} (${pct}%)</span></div><div class="miss-grid">${miss.length?miss.map(d=>`<div class="miss-chip">${d.i} ${d.n}</div>`).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
+    });
+    if(!h)h='<div class="empty">沒有匹配項</div>';
+    document.getElementById('missView').innerHTML=h;
+}
+
+function toggleCat(cat){shut[cat]=!shut[cat];render();}
+function toggleEventPanel(){
+    const h=document.getElementById('eventHeader');
+    const g=document.getElementById('eventGrid');
+    h.classList.toggle('shut');
+    g.style.display=h.classList.contains('shut')?'none':'flex';
+}
+
+function render(){
+    const st=stats();
+    document.getElementById('sOwn').textContent=st.o;
+    document.getElementById('sTotal').textContent=st.t;
+    const pctEl = document.getElementById('sPct');
+    const done = Number(st.p)===100;
+    pctEl.textContent = done ? '✓' : st.p+'%';
+    pctEl.style.fontSize = done ? '15px' : '';
+    const pct = parseFloat(st.p);
+    const offset = 113 - (pct/100)*113;
+    document.getElementById('progressCircle').style.strokeDashoffset = offset;
+    renderEvents();
+    renderFilters();
+    renderList();
+    renderMiss();
+}
+
+function setView(v){
+    view=v;
+    document.querySelectorAll('.view-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+    document.getElementById('listView').style.display=v==='list'?'':'none';
+    document.getElementById('missView').style.display=v==='miss'?'':'none';
+}
+
+function showStatsModal(){
+    const cs=colorStats();
+    let rows='';
+    C.forEach(c=>{
+        const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
+        const bar=`<div style="flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--${c})"></div></div>`;
+        rows+=`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div class="dot ${c}"></div><span style="width:30px">${CN[c]}</span>${bar}<span style="width:70px;text-align:right;font-size:.85rem">${cs[c].o}/${cs[c].t}</span><span style="width:40px;text-align:right;color:var(--accent);font-weight:700">${pct}%</span></div>`;
+    });
+    document.getElementById('modalTitle').textContent = '📊 收集統計';
+    document.getElementById('modalContent').innerHTML = `<div style="margin-bottom:16px">${rows}</div>`;
+    document.getElementById('modal').classList.add('show');
+}
+
+let cachedShareUrl = '';
+async function showShareModal(){
+    const data = {o:own,e:selectedEvents};
+    const encoded = await encode(data);
+    cachedShareUrl = location.origin + location.pathname + '#d=' + encoded;
+    document.getElementById('modalTitle').textContent = '🔗 分享進度';
+    const mobile = isMobileLike();
+    document.getElementById('modalContent').innerHTML = `
+        <div style="text-align:center">
+            <img id="shareQr" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(cachedShareUrl)}&margin=12" alt="QR Code" style="display:none">
+            <div style="display:inline-block;padding:10px 10px 14px;border-radius:20px;background:#eef8ef;box-shadow:inset 0 0 0 1px rgba(92,184,96,.10)">
+                <img id="shareCardPreview" alt="Share Card" style="display:block;border-radius:18px;max-width:260px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.10)">
+            </div>
+            ${mobile ? '<p style="font-size:.92rem;color:var(--accent);margin-top:14px;font-weight:800">長按二維碼保存到相冊</p>' : ''}
+        </div>
+        <div class="share-row" style="margin-top:14px;justify-content:center;flex-wrap:wrap">
+            ${mobile ? '' : '<button class="btn primary share-action" onclick="saveShareQr()">保存二維碼</button>'}
+            <button class="btn primary share-action" onclick="copyShare()">複製連結</button>
+        </div>
+    `;
+    document.getElementById('modal').classList.add('show');
+    requestAnimationFrame(async()=>{
+        const dataUrl = await buildShareCardDataUrl();
+        const preview = document.getElementById('shareCardPreview');
+        if(preview && dataUrl) preview.src = dataUrl;
+    });
+}
+function copyShare(){
+    const url = cachedShareUrl;
+    navigator.clipboard.writeText(url).catch(()=>{
+        document.execCommand('copy');
+    });
+}
+
+function isMobileLike(){
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '') || window.innerWidth <= 460;
+}
+
+function shareImageFilename(){
+    const d = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    return `皮口普查-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.png`;
+}
+
+async function buildShareCardDataUrl(){
+    const qr = document.getElementById('shareQr');
+    if(!qr || !cachedShareUrl) return null;
+    const st = stats();
+    const canvas = document.createElement('canvas');
+    canvas.width = 820;
+    canvas.height = 1120;
+    const ctx = canvas.getContext('2d');
+    const logoUrl = 'https://lh3.googleusercontent.com/U5Jp2yTMY_iiDlObsDYWeTZDjeEpBynvXiSFYJQO5hIJXAddeXbpSwaw2eE4RHB4ZBqa7NXrrVcyLcCWCFwaKoX42qKYO_JOg1oIFl-loDHZ5zQ=e365-pa-nu-w200';
+
+    const loadImg = (src) => new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = ()=>resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+
+    const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+    grad.addColorStop(0,'#f7fdf7');
+    grad.addColorStop(1,'#e8f6ea');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    const decoDots = [
+        {x:96,y:106,r:16,c:'#ec407a'},{x:158,y:82,r:9,c:'#fdd835'},{x:724,y:118,r:14,c:'#26c6da'},
+        {x:672,y:84,r:8,c:'#8e24aa'},{x:756,y:172,r:10,c:'#1e88e5'},{x:88,y:966,r:12,c:'#5cb860'}
+    ];
+    decoDots.forEach(d=>{ctx.fillStyle=d.c;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();});
+
+    const cardX = 68, cardY = 82, cardW = 684, cardH = 944, r = 36;
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(51,87,60,0.12)';
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetY = 10;
+    ctx.beginPath();
+    ctx.moveTo(cardX+r, cardY);
+    ctx.arcTo(cardX+cardW, cardY, cardX+cardW, cardY+cardH, r);
+    ctx.arcTo(cardX+cardW, cardY+cardH, cardX, cardY+cardH, r);
+    ctx.arcTo(cardX, cardY+cardH, cardX, cardY, r);
+    ctx.arcTo(cardX, cardY, cardX+cardW, cardY, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+
+    const logo = await loadImg(logoUrl).catch(()=>null);
+    if(logo){
+        const boxX=176, boxY=118, boxW=92, boxH=72;
+        const scale=Math.min(boxW/logo.width, boxH/logo.height);
+        const w=logo.width*scale, h=logo.height*scale;
+        ctx.drawImage(logo, boxX+(boxW-w)/2, boxY+(boxH-h)/2, w, h);
+    }
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#5cb860';
+    ctx.font = '800 42px Nunito, sans-serif';
+    ctx.fillText('皮口普查', canvas.width/2, 162);
+    ctx.fillStyle = '#222';
+    ctx.font = '700 28px Nunito, sans-serif';
+    ctx.fillText('多裝置共享進度', canvas.width/2, 218);
+    ctx.fillStyle = '#748174';
+    ctx.font = '600 19px Nunito, sans-serif';
+    ctx.fillText('Pikmin Bloom progress share', canvas.width/2, 248);
+
+    ctx.fillStyle = '#eef8ef';
+    ctx.beginPath();
+    ctx.roundRect(170, 286, 480, 88, 22);
+    ctx.fill();
+    ctx.fillStyle = '#5cb860';
+    ctx.font = '800 34px Nunito, sans-serif';
+    ctx.fillText(`${st.o} / ${st.t}`, canvas.width/2, 326);
+    ctx.fillStyle = '#7b887b';
+    ctx.font = '700 18px Nunito, sans-serif';
+    ctx.fillText(`完成率 ${st.p}%`, canvas.width/2, 360);
+
+    ctx.fillStyle = '#f7fbf7';
+    ctx.beginPath();
+    ctx.roundRect(150, 398, 520, 520, 32);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(92,184,96,.10)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const qrImg = await loadImg(qr.src);
+    ctx.drawImage(qrImg, 202, 450, 416, 416);
+
+    const accents = [
+        {x:168,y:414,t:'🌱'},{x:650,y:414,t:'🌼'},{x:168,y:920,t:'✨'},{x:650,y:920,t:'🍃'}
+    ];
+    accents.forEach(a=>{ctx.font='28px Nunito, sans-serif';ctx.fillText(a.t,a.x,a.y);});
+
+    ctx.fillStyle = '#4f9e55';
+    ctx.font = '700 22px Nunito, sans-serif';
+    ctx.fillText('掃描二維碼即可開啟目前進度', canvas.width/2, 968);
+    ctx.fillStyle = '#9aa39b';
+    ctx.font = '600 18px Nunito, sans-serif';
+    ctx.fillText('Generated by 皮口普查', canvas.width/2, 1016);
+
+    return canvas.toDataURL('image/png');
+}
+
+async function saveShareQr(){
+    const dataUrl = await buildShareCardDataUrl();
+    if(!dataUrl) return;
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = shareImageFilename();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
+
+
+function showImportModal(){
+    document.getElementById('modalTitle').textContent = '📥 匯入資料';
+    document.getElementById('modalContent').innerHTML = `<div class="drop" id="drop"><p style="font-size:1.8rem">📁</p><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>`;
+    document.getElementById('modal').classList.add('show');
+    setupDrop();
+}
+
+function setupDrop(){
+    const drop=document.getElementById('drop'),fi=document.getElementById('fileIn');
+    if(!drop||!fi)return;
+    drop.onclick=()=>fi.click();
+    fi.onchange=e=>e.target.files[0]&&importFile(e.target.files[0]);
+    drop.ondragover=e=>{e.preventDefault();drop.style.borderColor='var(--accent)';};
+    drop.ondragleave=()=>drop.style.borderColor='';
+    drop.ondrop=e=>{e.preventDefault();drop.style.borderColor='';e.dataTransfer.files[0]&&importFile(e.dataTransfer.files[0]);};
+}
+
+async function exportData(){
+    const d={v:DATA_VERSION,date:new Date().toISOString(),own,events:selectedEvents};
+    const j=JSON.stringify(d,null,2);
+    const b=new Blob([j],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='pikmin_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+    toast('📤 已匯出');
+}
+
+async function importFile(f){
+    const r=new FileReader();
+    r.onload=async e=>{try{
+        const raw=e.target.result;
+        // 嘗試 gzip 壓縮格式（v2）
+        try{
+            const j=await decompressFromBase64Url(raw.trim());
+            if(j){
+                const data=JSON.parse(j);
+                own=data.own||data.o||{};
+                selectedEvents=data.events||data.e||[];
+                save();render();
+                document.getElementById('modal').classList.remove('show');
+                toast('📥 匯入成功');
+                return;
+            }
+        }catch(_){}
+        // 舊 JSON 格式（v7 或更早）
+        const j=JSON.parse(raw);
+        own=j.own||j.data||j.collection||j;
+        selectedEvents=j.events||[];
+        save();render();
+        document.getElementById('modal').classList.remove('show');
+        toast('📥 匯入成功');
+    }catch(e){toast('❌ 格式錯誤');}};
+    r.readAsText(f);
+}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// 事件綁定
+document.getElementById('search').oninput=e=>{searchQ=e.target.value;render();};
+document.getElementById('btnShare').onclick=async()=>{await showShareModal();};
+document.getElementById('btnImport').onclick=showImportModal;
+document.getElementById('btnExport').onclick=async()=>{await exportData();};
+document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
+document.getElementById('modalClose').onclick=()=>document.getElementById('modal').classList.remove('show');
+document.getElementById('eventHeader').onclick=toggleEventPanel;
+document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+
+document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('show');};
+
+
+
+// 浮動按鈕滾動顯示
+window.onscroll=()=>{
+    document.getElementById('floatBtns').classList.toggle('show',window.scrollY>200);
+};
+
+// 快捷鍵：/ 聚焦搜索
+document.onkeydown=e=>{
+    if(e.key==='Escape')document.getElementById('modal').classList.remove('show');
+    if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('search').focus();}
+};
+
+load().then(()=>render());
+</script>
+</body>
+</html>
