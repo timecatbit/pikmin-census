@@ -267,14 +267,8 @@
         @keyframes sparklePop{0%{transform:scale(0) rotate(0deg);opacity:1}50%{transform:scale(1.4) rotate(180deg);opacity:1}100%{transform:scale(0) rotate(360deg);opacity:0}}
 
 
-        @media (display-mode: standalone) {
-            .toolbar{position:relative;top:auto;left:auto;transform:none;width:auto;margin:10px 0 0;z-index:auto}
-            .event-section{margin-top:12px}
-        }
-        @media (-webkit-display-mode: standalone) {
-            .toolbar{position:relative;top:auto;left:auto;transform:none;width:auto;margin:10px 0 0;z-index:auto}
-            .event-section{margin-top:12px}
-        }
+        body.standalone-mode .toolbar{position:fixed;top:var(--standalone-toolbar-top, 88px);left:50%;transform:translateX(-50%);width:min(calc(100% - 24px), 680px);margin:0;z-index:180}
+        body.standalone-mode .event-section{margin-top:calc(var(--standalone-toolbar-offset, 78px) + 12px)}
 
 </style>
     <script src="https://unpkg.com/html5-qrcode" defer></script>
@@ -774,6 +768,20 @@ function toggleEventPanel(){
     const g=document.getElementById('eventGrid');
     h.classList.toggle('shut');
     g.style.display=h.classList.contains('shut')?'none':'flex';
+}
+
+
+function setupStandaloneToolbar(){
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    document.body.classList.toggle('standalone-mode', standalone);
+    if(!standalone) return;
+    const header = document.querySelector('.header');
+    const toolbar = document.querySelector('.toolbar');
+    if(!header || !toolbar) return;
+    const top = header.offsetHeight + 10;
+    const offset = header.offsetHeight + toolbar.offsetHeight + 18;
+    document.documentElement.style.setProperty('--standalone-toolbar-top', top + 'px');
+    document.documentElement.style.setProperty('--standalone-toolbar-offset', offset + 'px');
 }
 
 function render(){
