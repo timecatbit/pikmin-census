@@ -744,7 +744,7 @@ function render(){
     const st=stats();
     document.getElementById('sOwn').textContent=st.o;
     document.getElementById('sTotal').textContent=st.t;
-    document.getElementById('sPct').textContent=st.p+'%';
+    document.getElementById('sPct').textContent=st.p===100?'✓':st.p+'%';
     const pct = parseFloat(st.p);
     const offset = 113 - (pct/100)*113;
     document.getElementById('progressCircle').style.strokeDashoffset = offset;
