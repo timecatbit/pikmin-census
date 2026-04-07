@@ -68,7 +68,10 @@
         
         .event-selected{margin-top:10px;padding-top:10px;border-top:1px dashed #ddd}
         .event-selected:empty{display:none}
+        .event-selected-wrap{position:relative}
         .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:95px;overflow-y:auto}
+        .scroll-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--accent);border-radius:2px;width:0;transition:width .1s;pointer-events:none;opacity:0}
+        .scroll-progress.visible{opacity:1}
         .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
         .event-tag:hover{background:#c8e6c9}
         .event-tag .x{margin-left:3px;opacity:.6}
@@ -589,7 +592,17 @@ function renderEvents(){
             const ev=EVENTS.find(e=>e.id===eid);
             if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')">${ev.i}${ev.n}<span class="x">✕</span></div>`;
         });
-        selBox.innerHTML=`<div class="event-selected-list">${tags}</div>`;
+        selBox.innerHTML=`<div class="event-selected-wrap"><div class="event-selected-list">${tags}</div><div class="scroll-progress" id="selScrollProgress"></div></div>`;
+        const listEl = selBox.querySelector('.event-selected-list');
+        const progressEl = selBox.querySelector('.scroll-progress');
+        function updateSelScroll(){
+            const max = listEl.scrollHeight - listEl.clientHeight;
+            if(max<=0){progressEl.classList.remove('visible');return;}
+            progressEl.classList.add('visible');
+            progressEl.style.width=(listEl.scrollTop/max*100)+'%';
+        }
+        listEl.addEventListener('scroll',updateSelScroll);
+        updateSelScroll();
     }else{
         selBox.innerHTML='';
     }
