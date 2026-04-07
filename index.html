@@ -267,8 +267,9 @@
         @keyframes sparklePop{0%{transform:scale(0) rotate(0deg);opacity:1}50%{transform:scale(1.4) rotate(180deg);opacity:1}100%{transform:scale(0) rotate(360deg);opacity:0}}
 
 
+        body.standalone-mode .header{position:fixed;top:0;left:0;right:0;z-index:181;padding-top:env(safe-area-inset-top, 0px);background:var(--bg)}
         body.standalone-mode .toolbar{position:fixed;top:var(--standalone-toolbar-top, 88px);left:50%;transform:translateX(-50%);width:min(calc(100% - 24px), 680px);margin:0;z-index:180}
-        body.standalone-mode .event-section{margin-top:calc(var(--standalone-toolbar-offset, 78px) + 12px)}
+        body.standalone-mode .event-section{margin-top:calc(var(--standalone-toolbar-offset, 140px) + 12px)}
 
 </style>
     <script src="https://unpkg.com/html5-qrcode" defer></script>
@@ -778,8 +779,8 @@ function setupStandaloneToolbar(){
     const header = document.querySelector('.header');
     const toolbar = document.querySelector('.toolbar');
     if(!header || !toolbar) return;
-    const top = header.offsetHeight + 10;
-    const offset = header.offsetHeight + toolbar.offsetHeight + 18;
+    const top = header.offsetHeight + 8;
+    const offset = header.offsetHeight + toolbar.offsetHeight + 20;
     document.documentElement.style.setProperty('--standalone-toolbar-top', top + 'px');
     document.documentElement.style.setProperty('--standalone-toolbar-offset', offset + 'px');
 }
