@@ -268,12 +268,12 @@
 
 
         @media (display-mode: standalone) {
-            .toolbar{position:fixed;top:76px;left:50%;transform:translateX(-50%);width:min(calc(100% - 24px), 680px);margin:0;z-index:180}
-            .event-section{margin-top:74px}
+            .toolbar{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 92px);left:50%;transform:translateX(-50%);width:min(calc(100% - 24px), 680px);margin:0;z-index:180}
+            .event-section{margin-top:126px}
         }
         @media (-webkit-display-mode: standalone) {
-            .toolbar{position:fixed;top:76px;left:50%;transform:translateX(-50%);width:min(calc(100% - 24px), 680px);margin:0;z-index:180}
-            .event-section{margin-top:74px}
+            .toolbar{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 92px);left:50%;transform:translateX(-50%);width:min(calc(100% - 24px), 680px);margin:0;z-index:180}
+            .event-section{margin-top:126px}
         }
 
 </style>
