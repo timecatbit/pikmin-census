@@ -70,10 +70,9 @@
         .event-selected:empty{display:none}
         .event-selected-wrap{position:relative}
         .event-selected-list{display:flex;flex-wrap:wrap;gap:4px;max-height:96px;overflow-y:auto;padding-bottom:3px}
-        .scroll-progress{position:relative;height:3px;background:rgba(92,184,96,.25);border-radius:2px;margin-top:0;transition:width .1s}
-        .scroll-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .1s}
-        .event-tag{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap}
-        .event-tag:hover{background:#c8e6c9}
+        .scroll-progress{position:relative;height:3px;background:rgba(92,184,96,.12);border-radius:2px;margin-top:2px}
+        .scroll-progress-bar{height:100%;background:rgba(92,184,96,.72);border-radius:2px;transition:width .12s ease}
+        .event-tag{display:inline-flex;align-items:center;max-width:100%;padding:2px 6px;border-radius:10px;background:#e8f5e9;color:var(--accent);font-size:.7rem;cursor:pointer;transition:all .15s;border:1px solid var(--accent2);white-space:nowrap;overflow:hidden}
         .event-tag .x{margin-left:3px;opacity:.6}
         
         .filters{margin-bottom:10px}
@@ -174,6 +173,10 @@
         .kbd{display:inline-block;padding:2px 6px;background:rgba(255,255,255,.1);border-radius:4px;font-size:.7rem;color:var(--muted);margin-left:6px}
         
         
+        @media(hover:hover){
+            .event-tag:hover{background:#c8e6c9}
+        }
+
         @media(max-width:600px){
             .app{padding:0 0 120px}
             .header{padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-radius:0 0 12px 12px}
@@ -590,7 +593,7 @@ function renderEvents(){
         let tags='';
         selectedEvents.forEach(eid=>{
             const ev=EVENTS.find(e=>e.id===eid);
-            if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')">${ev.i}${ev.n}<span class="x">✕</span></div>`;
+            if(ev) tags+=`<div class="event-tag" onclick="toggleEvent('${ev.id}')" onmousedown="event.preventDefault()"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${ev.i}${ev.n}</span><span class="x">✕</span></div>`;
         });
         const listEl = document.getElementById('eventSelList');
         const barEl = document.getElementById('selProgressBar');
@@ -598,15 +601,15 @@ function renderEvents(){
         listEl.innerHTML = tags;
         progressEl.style.display='block';
         selBox.style.display='block';
-        // Fixed visible ratio: always shows how much of the content is visible
-        const initMax = listEl.scrollHeight - listEl.clientHeight;
-        const visibleRatio = initMax>0 ? listEl.clientHeight/listEl.scrollHeight : 1;
-        barEl.style.width=(visibleRatio*100)+'%';
+        const scrollableMax = listEl.scrollHeight - listEl.clientHeight;
+        const minWidth = scrollableMax>0 ? (listEl.clientHeight/listEl.scrollHeight)*100 : 100;
         function updateSelScroll(){
-            // Don't reset to 0 when scrolled to top; keep the visible ratio
-            barEl.style.width=(visibleRatio*100)+'%';
+            const pct = scrollableMax>0 ? Math.min(1, listEl.scrollTop / scrollableMax) : 0;
+            // bar = minWidth + (100-minWidth)*pct, so at top: minWidth, at bottom: 100%
+            barEl.style.width = (minWidth + (100-minWidth)*pct) + '%';
         }
-        listEl.addEventListener('scroll',updateSelScroll);
+        updateSelScroll();
+        listEl.addEventListener('scroll', updateSelScroll);
     }else{
         document.getElementById('eventSelList').innerHTML='';
         document.getElementById('selProgress').style.display='none';
