@@ -574,6 +574,19 @@ function packEventCodes(events){
     return (events || []).map(id => SHARE_CODE_BY_ID[id]).filter(Boolean);
 }
 
+function packOwnMapForJson(ownMap){
+    const out = {};
+    packOwnMap(ownMap).forEach(entry=>{
+        out[entry.slice(0,2)] = entry.slice(2);
+    });
+    return out;
+}
+
+function unpackOwnMapFromJson(obj){
+    const arr = Object.entries(obj || {}).map(([code, digits]) => `${code}${digits}`);
+    return unpackOwnMapV6(arr);
+}
+
 function unpackEventCodesV6(codes){
     return (codes || []).map(code => SHARE_ID_BY_CODE[code]).filter(id => !!id && !!EVENT_SHARE_CODES[id]);
 }
@@ -1221,8 +1234,8 @@ async function scanQrImage(file){
 }
 
 async function exportData(fromShare=false){
-    const d={v:DATA_VERSION,d:packOwnMap(own),e:packEventCodes(selectedEvents)};
-    const j=JSON.stringify(d);
+    const d={v:DATA_VERSION,decor:packOwnMapForJson(own),events:packEventCodes(selectedEvents)};
+    const j=JSON.stringify(d,null,2);
     const b=new Blob([j],{type:'application/json'});
     const a=document.createElement('a');
     const href=URL.createObjectURL(b);
@@ -1260,9 +1273,9 @@ async function importFile(f){
         }catch(_){}
         // 舊 JSON 格式（v7 或更早）
         const j=JSON.parse(raw);
-        if(!(j && j.v === 6 && Array.isArray(j.d))) throw new Error('bad json');
-        own = unpackOwnMapV6(j.d);
-        selectedEvents = unpackEventCodesV6(j.e || []);
+        if(!(j && j.v === 6 && j.decor && typeof j.decor === 'object')) throw new Error('bad json');
+        own = unpackOwnMapFromJson(j.decor);
+        selectedEvents = unpackEventCodesV6(j.events || []);
         save();render();
         closeModal();
         toast('📥 匯入成功');
