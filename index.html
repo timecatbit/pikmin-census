@@ -271,6 +271,9 @@
         .ocean-easter{position:fixed;left:0;right:0;top:110px;height:140px;pointer-events:none;overflow:hidden;z-index:220}
         .ocean-float{position:absolute;opacity:0;animation:oceanFloat 2.8s ease-out forwards}
         @keyframes oceanFloat{0%{transform:translate3d(-10px,24px,0) scale(.8);opacity:0}15%{opacity:1}100%{transform:translate3d(var(--ocean-x,220px),-38px,0) scale(1.15);opacity:0}}
+        .logo-easter{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1300;background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.18), rgba(255,255,255,0) 45%)}
+        .logo-easter-piece{position:absolute;opacity:0;animation:logoBurst 2.8s ease-out forwards;filter:drop-shadow(0 4px 10px rgba(0,0,0,.12))}
+        @keyframes logoBurst{0%{transform:translate3d(0,0,0) scale(.5) rotate(0deg);opacity:0}12%{opacity:1}100%{transform:translate3d(var(--burst-x),var(--burst-y),0) scale(1.2) rotate(var(--burst-r));opacity:0}}
 
 
         body.standalone-mode .app{padding-top:12px;padding-bottom:120px}
@@ -483,6 +486,8 @@ let clearTimer = null;
 let pendingMissFill = null;
 let missFillTimer = null;
 let lastOceanEggAt = 0;
+let logoTapCount = 0;
+let logoTapTimer = null;
 
 const key = (d,c,i) => d+'_'+c+'_'+i;
 
@@ -803,6 +808,39 @@ function triggerOceanEaster(){
     document.body.appendChild(layer);
     centerToast('🐋 The ocean is calling', 1800);
     setTimeout(()=>{ try{layer.remove();}catch(e){} }, 3200);
+}
+
+function triggerLogoEaster(){
+    const layer = document.createElement('div');
+    layer.className = 'logo-easter';
+    const pieces = ['🌱','🌸','✨','🫧','🍀','🌼','💚','🐥'];
+    for(let i=0;i<30;i++){
+        const el = document.createElement('div');
+        el.className = 'logo-easter-piece';
+        el.textContent = pieces[Math.floor(Math.random()*pieces.length)];
+        el.style.left = (44 + Math.random()*12) + '%';
+        el.style.top = (12 + Math.random()*10) + '%';
+        el.style.fontSize = (18 + Math.random()*26) + 'px';
+        el.style.setProperty('--burst-x', (-180 + Math.random()*360) + 'px');
+        el.style.setProperty('--burst-y', (120 + Math.random()*520) + 'px');
+        el.style.setProperty('--burst-r', (-180 + Math.random()*360) + 'deg');
+        el.style.animationDelay = (i * 0.03) + 's';
+        layer.appendChild(el);
+    }
+    document.body.appendChild(layer);
+    centerToast('✨ secret bloom ✨', 1800);
+    setTimeout(()=>{ try{layer.remove();}catch(e){} }, 3200);
+}
+
+function handleLogoTap(){
+    logoTapCount++;
+    if(logoTapTimer) clearTimeout(logoTapTimer);
+    if(logoTapCount >= 5){
+        logoTapCount = 0;
+        triggerLogoEaster();
+        return;
+    }
+    logoTapTimer = setTimeout(()=>{ logoTapCount = 0; }, 1500);
 }
 
 function filterD(d){
@@ -1374,6 +1412,7 @@ document.getElementById('eventHeader').onclick=toggleEventPanel;
 document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal();};
+document.querySelector('.logo').onclick=handleLogoTap;
 
 
 
