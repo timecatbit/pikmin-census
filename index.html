@@ -336,7 +336,6 @@
 
 <script>
 const C = ['red','yellow','blue','white','purple','rock','winged','ice'];
-const FILTER_C = ['red','yellow','blue','purple','white','rock','winged','ice'];
 const CN = {red:'紅',yellow:'黃',blue:'藍',purple:'紫',white:'白',rock:'岩',winged:'翼',ice:'冰'};
 const C7 = ['red','yellow','blue','white','purple','rock','winged'];
 const C8 = C;
@@ -688,7 +687,7 @@ function renderEvents(){
 function renderFilters(){
     const cs=colorStats();
     let colors='';
-    FILTER_C.forEach(c=>{
+    C.forEach(c=>{
         const pct=cs[c].t>0?Math.round(cs[c].o/cs[c].t*100):0;
         colors+=`<div class="f-chip ${colorF===c?'on':''}" onclick="setColorF('${c}')"><span class="cdot" style="background:var(--${c})"></span>${pct===100?'✓':pct+'%'}</div>`;
     });
@@ -737,7 +736,12 @@ function renderList(){
 }
 
 function renderItem(d){
-    const entries=Object.entries(d.c);
+    let entries=Object.entries(d.c);
+    if(entries.length===7){
+        entries=C7.filter(c=>d.c[c]).map(c=>[c,d.c[c]]);
+    }else if(entries.length===8){
+        entries=C8.filter(c=>d.c[c]).map(c=>[c,d.c[c]]);
+    }
     const total=entries.reduce((s,[,max])=>s+max,0);
     // Each dot (index) counts as 1 if collected (value>0), regardless of cycle count
     const cnt=entries.reduce((s,[c,max])=>s+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0);
