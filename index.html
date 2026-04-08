@@ -498,91 +498,41 @@ async function decompressFromBase64Url(b64url) {
     return new TextDecoder().decode(buf);
 }
 
-const DATA_VERSION = 5;
-
-function makeCodeMap(list, prefix){
-    const out = {};
-    list.forEach((item, idx)=>{
-        out[item.id] = prefix + idx.toString(36);
-    });
-    return out;
-}
-
-const REGULAR_CODES = makeCodeMap(REGULAR, 'r');
-const EVENT_CODES = makeCodeMap(EVENTS, 'e');
-const DECOR_CODES = Object.assign({}, REGULAR_CODES, EVENT_CODES);
-const DECOR_IDS_BY_CODE = Object.fromEntries(Object.entries(DECOR_CODES).map(([id, code])=>[code, id]));
-const EVENT_IDS_BY_CODE = Object.fromEntries(Object.entries(EVENT_CODES).map(([id, code])=>[code, id]));
-const DECOR_BY_ID = Object.fromEntries([...REGULAR, ...EVENTS].map(decor => [decor.id, decor]));
-
-function getDisplayOrderForDecor(decor){
-    const colors = Object.keys(decor.c || {});
-    if(colors.length === 7) return C7.filter(c=>decor.c[c]);
-    if(colors.length === 8) return C8.filter(c=>decor.c[c]);
-    return colors;
-}
-
-function getDecorSlots(decor){
-    const order = getDisplayOrderForDecor(decor);
-    const slots = [];
-    order.forEach(color=>{
-        const max = decor.c[color] || 0;
-        for(let i=0;i<max;i++) slots.push({color, index:i});
-    });
-    return slots;
-}
+const DATA_VERSION = 4;
 
 function packOwnMap(ownMap){
-    return Object.values(DECOR_BY_ID).map(decor=>{
-        const code = DECOR_CODES[decor.id];
-        if(!code) return null;
-        const digits = getDecorSlots(decor).map(slot=>String(Math.max(0, Math.min(5, ownMap[key(decor.id, slot.color, slot.index)] || 0)))).join('');
-        return /[1-5]/.test(digits) ? code + digits : null;
-    }).filter(Boolean);
+    return Object.entries(ownMap)
+        .filter(([,v]) => (v||0) > 0)
+        .map(([k,v]) => `${k}:${v}`);
 }
 
 function unpackOwnMap(arr){
     const out = {};
     (arr || []).forEach(s => {
-        if(typeof s !== 'string' || s.length < 3) return;
-        const code = s.slice(0, 2);
-        const digits = s.slice(2);
-        const decorId = DECOR_IDS_BY_CODE[code];
-        const decor = DECOR_BY_ID[decorId];
-        if(!decor) return;
-        const slots = getDecorSlots(decor);
-        if(digits.length !== slots.length) return;
-        for(let i=0;i<digits.length;i++) {
-            const v = Number(digits[i]);
-            if(!Number.isFinite(v) || v <= 0) continue;
-            out[key(decor.id, slots[i].color, slots[i].index)] = v;
-        }
+        const i = s.lastIndexOf(':');
+        if(i <= 0) return;
+        const k = s.slice(0, i);
+        const v = Number(s.slice(i + 1));
+        if(k && Number.isFinite(v) && v > 0) out[k] = v;
     });
     return out;
 }
 
-function packEventCodes(events){
-    return (events || []).map(id=>EVENT_CODES[id]).filter(Boolean);
-}
-
-function unpackEventCodes(codes){
-    return (codes || []).map(code=>EVENT_IDS_BY_CODE[code]).filter(Boolean);
-}
-
 async function encode(data){
-    const payload = [DATA_VERSION, packOwnMap(data.o || {}), packEventCodes(data.e || [])];
+    const payload = [DATA_VERSION, packOwnMap(data.o || {}), data.e || []];
     return await compressToBase64Url(JSON.stringify(payload));
 }
 
 async function decode(str){
     try{
         const raw = JSON.parse(await decompressFromBase64Url(str));
-        if(!Array.isArray(raw) || raw[0] !== 5) return null;
-        const ownMap = unpackOwnMap(raw[1]);
-        const eventIds = unpackEventCodes(raw[2]);
-        return {o: ownMap, e: eventIds};
+        if(Array.isArray(raw)){
+            return {o: unpackOwnMap(raw[1]), e: raw[2] || []};
+        }
+        return {o: raw.o || {}, e: raw.e || raw.events || []};
     }catch(e){return null;}
 }
+
 async function load(){
     const hash = location.hash.startsWith('#d=') ? location.hash.slice(3) : '';
     if(hash){
