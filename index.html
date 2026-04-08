@@ -558,18 +558,6 @@ function unpackOwnMapV6(arr){
     return out;
 }
 
-function unpackOwnMapLegacy(arr){
-    const out = {};
-    (arr || []).forEach(s => {
-        const i = s.lastIndexOf(':');
-        if(i <= 0) return;
-        const k = s.slice(0, i);
-        const v = Number(s.slice(i + 1));
-        if(k && Number.isFinite(v) && v > 0) out[k] = v;
-    });
-    return out;
-}
-
 function packEventCodes(events){
     return (events || []).map(id => SHARE_CODE_BY_ID[id]).filter(Boolean);
 }
@@ -599,13 +587,10 @@ async function encode(data){
 async function decode(str){
     try{
         const raw = JSON.parse(await decompressFromBase64Url(str));
-        if(Array.isArray(raw)){
-            if(raw[0] === 6){
-                return {o: unpackOwnMapV6(raw[1]), e: unpackEventCodesV6(raw[2])};
-            }
-            return {o: unpackOwnMapLegacy(raw[1]), e: raw[2] || []};
+        if(Array.isArray(raw) && raw[0] === 6){
+            return {o: unpackOwnMapV6(raw[1]), e: unpackEventCodesV6(raw[2])};
         }
-        return {o: raw.o || {}, e: raw.e || raw.events || []};
+        return null;
     }catch(e){return null;}
 }
 async function load(){
@@ -630,15 +615,6 @@ async function load(){
         selectedEvents=d.events||[];
         render();
         return;
-    }
-    // 舊 v7 格式兼容
-    const s7 = localStorage.getItem('pik_v7');
-    if(s7){
-        const d=JSON.parse(s7);
-        own = migrateLocalOwn(d.own || {});
-        selectedEvents=d.events||[];
-        save();
-        render();
     }
 }
 
@@ -1177,7 +1153,9 @@ function setupLinkImport(){
 
 async function applySharedLink(url){
     try{
-        const raw = (url.split('#d=')[1] || '').trim();
+        const text = String(url || '').trim();
+        const match = text.match(/#d=([^\s]+)/);
+        const raw = match ? match[1].trim() : text;
         if(!raw) throw new Error('no data');
         const data = await decode(raw);
         if(!data) throw new Error('bad data');
@@ -1258,20 +1236,6 @@ async function importFile(f){
     const r=new FileReader();
     r.onload=async e=>{try{
         const raw=e.target.result;
-        // 嘗試 gzip 壓縮格式（v2）
-        try{
-            const j=await decompressFromBase64Url(raw.trim());
-            if(j){
-                const data=JSON.parse(j);
-                own=data.own||data.o||{};
-                selectedEvents=data.events||data.e||[];
-                save();render();
-                closeModal();
-                toast('📥 匯入成功');
-                return;
-            }
-        }catch(_){}
-        // 舊 JSON 格式（v7 或更早）
         const j=JSON.parse(raw);
         if(!(j && j.v === 6 && j.decor && typeof j.decor === 'object')) throw new Error('bad json');
         own = unpackOwnMapFromJson(j.decor);
