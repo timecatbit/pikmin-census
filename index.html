@@ -797,6 +797,7 @@ function triggerOceanEaster(word){
     const now = Date.now();
     if(now - lastOceanEggAt < 4000) return;
     lastOceanEggAt = now;
+    window._oceanEggWord = word;
     const layer = document.createElement('div');
     layer.className = 'ocean-easter';
     const items = ['🐋','🐟','🐠','🫧','✨','🌊','🐬'];
@@ -812,7 +813,6 @@ function triggerOceanEaster(word){
         layer.appendChild(el);
     }
     document.body.appendChild(layer);
-    toast(word === 'fish' ? '匹配到小可爱一只' : '捕魚達人！');
     setTimeout(()=>{ try{layer.remove();}catch(e){} }, 3200);
 }
 
@@ -882,7 +882,15 @@ function renderList(){
         special.forEach(d=>h+=renderItem(d));
         h+=`</div></div>`;
     }
-    if(!h)h='<div class="empty">沒有匹配項</div>';
+    if(!h){
+        if(window._oceanEggWord){
+            const w = window._oceanEggWord;
+            h='<div class="empty">'+(w==='fish'?'匹配到小可爱一只':'捕魚達人！')+'</div>';
+            window._oceanEggWord=null;
+        }else{
+            h='<div class="empty">沒有匹配項</div>';
+        }
+    }
     document.getElementById('listView').innerHTML=h;
 }
 
@@ -927,7 +935,15 @@ function renderMiss(){
         const pct=total>0?Math.round(owned/total*100):0;
         h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">${owned}/${total} (${pct}%)</span></div><div class="miss-grid">${miss.length?miss.map(item=>{const d=item.decor;const token=d.id+'::'+c;const suffix=item.max>1?` ${item.index+1}`:'';return `<div class="miss-chip ${pendingMissFill===token?'confirm':''}" onclick="fillMissingDecor('${d.id}','${c}')">${d.i} ${d.n}${suffix}</div>`;}).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
     });
-    if(!h)h='<div class="empty">沒有匹配項</div>';
+    if(!h){
+        if(window._oceanEggWord){
+            const w = window._oceanEggWord;
+            h='<div class="empty">'+(w==='fish'?'匹配到小可爱一只':'捕魚達人！')+'</div>';
+            window._oceanEggWord=null;
+        }else{
+            h='<div class="empty">沒有匹配項</div>';
+        }
+    }
     document.getElementById('missView').innerHTML=h;
 }
 
