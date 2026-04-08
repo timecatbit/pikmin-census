@@ -271,7 +271,7 @@
         @keyframes whaleSwim{0%{transform:translateX(-34px) scaleX(-1)}10%{transform:translateX(8px) scaleX(-1)}46%{transform:translateX(var(--whale-swim-right, 292px)) scaleX(-1)}54%{transform:translateX(var(--whale-swim-right, 292px)) scaleX(1)}90%{transform:translateX(8px) scaleX(1)}100%{transform:translateX(-34px) scaleX(1)}}
         .whale-sparkle{position:absolute;font-size:.75rem;animation:sparklePop .5s ease-out forwards;pointer-events:none}
         @keyframes sparklePop{0%{transform:scale(0) rotate(0deg);opacity:1}50%{transform:scale(1.4) rotate(180deg);opacity:1}100%{transform:scale(0) rotate(360deg);opacity:0}}
-        .ocean-easter{position:fixed;left:0;right:0;top:110px;height:140px;pointer-events:none;overflow:hidden;z-index:220}
+        .ocean-easter{position:fixed;left:0;right:0;top:0;bottom:0;pointer-events:none;overflow:hidden;z-index:220}
         .ocean-float{position:absolute;opacity:0;animation:oceanFloat 2.8s ease-out forwards}
         @keyframes oceanFloat{0%{transform:translate3d(-10px,24px,0) scale(.8);opacity:0}15%{opacity:1}100%{transform:translate3d(var(--ocean-x,220px),-38px,0) scale(1.15);opacity:0}}
         .logo-easter{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1300;background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.18), rgba(255,255,255,0) 45%)}
@@ -793,7 +793,7 @@ function renderFilters(){
 function setColorF(c){colorF=c;render();}
 function setStatusF(s){statusF=s;render();}
 
-function triggerOceanEaster(){
+function triggerOceanEaster(word){
     const now = Date.now();
     if(now - lastOceanEggAt < 4000) return;
     lastOceanEggAt = now;
@@ -805,14 +805,14 @@ function triggerOceanEaster(){
         el.className = 'ocean-float';
         el.textContent = items[Math.floor(Math.random()*items.length)];
         el.style.left = (6 + Math.random()*82) + '%';
-        el.style.top = (42 + Math.random()*55) + 'px';
-        el.style.fontSize = (18 + Math.random()*18) + 'px';
+        el.style.top = (Math.random() * window.innerHeight * 0.7) + 'px';
+        el.style.fontSize = (22 + Math.random()*22) + 'px';
         el.style.setProperty('--ocean-x', (-70 + Math.random()*140) + 'px');
         el.style.animationDelay = (i * 0.08) + 's';
         layer.appendChild(el);
     }
     document.body.appendChild(layer);
-    toast('🐋 捕魚達人！');
+    toast(word === 'fish' ? '匹配到小可爱一只' : '捕魚達人！');
     setTimeout(()=>{ try{layer.remove();}catch(e){} }, 3200);
 }
 
@@ -1413,7 +1413,7 @@ function releaseActionButtonState(){document.querySelectorAll('.share-action').f
 document.getElementById('search').oninput=e=>{
     searchQ=e.target.value;
     const q = searchQ.trim().toLowerCase();
-    if(q === 'whale' || q === 'fish') triggerOceanEaster();
+    if(q === 'whale' || q === 'fish') triggerOceanEaster(q);
     updateSearchClear();
     render();
 };
