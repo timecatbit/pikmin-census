@@ -812,7 +812,7 @@ function triggerOceanEaster(){
         layer.appendChild(el);
     }
     document.body.appendChild(layer);
-    centerToast('🐋 The ocean is calling', 1800);
+    toast('🐋 The ocean is calling');
     setTimeout(()=>{ try{layer.remove();}catch(e){} }, 3200);
 }
 
@@ -834,7 +834,7 @@ function triggerLogoEaster(){
         layer.appendChild(el);
     }
     document.body.appendChild(layer);
-    centerToast('✨ secret bloom ✨', 1800);
+    toast('✨ secret bloom ✨');
     setTimeout(()=>{ try{layer.remove();}catch(e){} }, 3200);
 }
 
