@@ -794,8 +794,6 @@ function setStatusF(s){statusF=s;render();}
 
 function triggerOceanEaster(word){
     window._oceanEggWord = word;
-    const existing = document.querySelector('.ocean-easter');
-    if(existing) existing.remove();
     const layer = document.createElement('div');
     layer.className = 'ocean-easter';
     const items = ['🐋','🐟','🐠','🫧','✨','🌊','🐬'];
