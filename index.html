@@ -52,8 +52,11 @@
         .progress-ring span{position:absolute;top:0;left:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
         
         .toolbar{position:sticky;top:78px;z-index:150;display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center;padding:8px 10px;border-radius:16px;background:rgba(249,253,249,.96);backdrop-filter:blur(10px);box-shadow:0 4px 18px rgba(0,0,0,.08)}
-        .search{flex:1;min-width:140px;padding:10px 14px;border-radius:12px;border:2px solid #e0e0e0;background:rgba(255,255,255,.96);color:var(--text);font-size:.9rem;box-shadow:var(--shadow)}
+        .search-wrap{position:relative;flex:1;min-width:140px}
+        .search{width:100%;padding:10px 40px 10px 14px;border-radius:12px;border:2px solid #e0e0e0;background:rgba(255,255,255,.96);color:var(--text);font-size:16px;box-shadow:var(--shadow)}
         .search:focus{outline:none;border-color:var(--accent)}
+        .search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:none;border-radius:50%;background:transparent;color:#8d8d8d;font-size:16px;line-height:1;display:none;align-items:center;justify-content:center;cursor:pointer}
+        .search-wrap.has-value .search-clear{display:flex}
         .btn{padding:10px 14px;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;background:var(--card);color:var(--text);border:2px solid #e0e0e0;transition:all .15s;box-shadow:var(--shadow)}
         .btn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(10,148,116,.15)}
         .btn:active{transform:translateY(0)}
@@ -304,7 +307,10 @@
     
     
     <div class="toolbar">
-        <input class="search" placeholder="🔍 搜尋..." id="search">
+        <div class="search-wrap" id="searchWrap">
+            <input class="search" placeholder="🔍 搜尋..." id="search">
+            <button class="search-clear" id="searchClear" type="button" aria-label="清除搜尋">×</button>
+        </div>
         <button class="btn" id="btnReset">🔄</button>
         <button class="btn" id="btnImport">📥</button>
         <button class="btn" id="btnShare">📤</button>
@@ -933,6 +939,13 @@ function toggleEventPanel(){
     g.style.display=h.classList.contains('shut')?'none':'flex';
 }
 
+function updateSearchClear(){
+    const wrap = document.getElementById('searchWrap');
+    const input = document.getElementById('search');
+    if(!wrap || !input) return;
+    wrap.classList.toggle('has-value', !!input.value.trim());
+}
+
 
 function setupStandaloneToolbar(){
     const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -1402,7 +1415,16 @@ document.getElementById('search').oninput=e=>{
     searchQ=e.target.value;
     const q = searchQ.trim().toLowerCase();
     if(q === 'whale' || q === 'fish') triggerOceanEaster();
+    updateSearchClear();
     render();
+};
+document.getElementById('searchClear').onclick=()=>{
+    const input = document.getElementById('search');
+    input.value='';
+    searchQ='';
+    updateSearchClear();
+    render();
+    input.focus();
 };
 document.getElementById('btnShare').onclick=async()=>{await showShareModal();};
 document.getElementById('btnImport').onclick=showImportModal;
@@ -1434,6 +1456,7 @@ window.addEventListener('pageshow', setupStandaloneToolbar);
 load().then(()=>{
     render();
     setupStandaloneToolbar();
+    updateSearchClear();
 });
 </script>
 </body>
