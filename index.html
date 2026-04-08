@@ -263,7 +263,7 @@
         .whale-bubble{position:absolute;border-radius:50%;background:rgba(255,255,255,.65);animation:bubbleRise .85s ease-in forwards;pointer-events:none}
         @keyframes bubbleRise{0%{transform:translateY(0) scale(1);opacity:.7}100%{transform:translateY(-48px) scale(.3);opacity:0}}
         .whale-swim{position:absolute;left:0;bottom:6px;font-size:1.3rem;pointer-events:none;display:inline-block;animation:whaleSwim 10s ease-in-out forwards}
-        @keyframes whaleSwim{0%{transform:translateX(-34px) scaleX(-1)}10%{transform:translateX(8px) scaleX(-1)}46%{transform:translateX(292px) scaleX(-1)}54%{transform:translateX(292px) scaleX(1)}90%{transform:translateX(8px) scaleX(1)}100%{transform:translateX(-34px) scaleX(1)}}
+        @keyframes whaleSwim{0%{transform:translateX(-34px) scaleX(-1)}10%{transform:translateX(8px) scaleX(-1)}46%{transform:translateX(var(--whale-swim-right, 292px)) scaleX(-1)}54%{transform:translateX(var(--whale-swim-right, 292px)) scaleX(1)}90%{transform:translateX(8px) scaleX(1)}100%{transform:translateX(-34px) scaleX(1)}}
         .whale-sparkle{position:absolute;font-size:.75rem;animation:sparklePop .5s ease-out forwards;pointer-events:none}
         @keyframes sparklePop{0%{transform:scale(0) rotate(0deg);opacity:1}50%{transform:scale(1.4) rotate(180deg);opacity:1}100%{transform:scale(0) rotate(360deg);opacity:0}}
 
@@ -832,6 +832,8 @@ function showWhaleDance(){
     w.className='whale-swim';
     w.textContent='🐳';
     w.style.bottom=(4+Math.random()*8)+'px';
+    var swimRight=Math.max(80, tank.clientWidth-36);
+    w.style.setProperty('--whale-swim-right', swimRight+'px');
     tank.appendChild(w);
     for(var i=0;i<6;i++){
         (function(ii){
