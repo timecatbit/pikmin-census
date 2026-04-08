@@ -834,8 +834,18 @@ function renderMiss(){
     const decors = getActiveDecors();
     // 計算每個顏色的缺失數並排序
     const colorData = C.map(c=>{
-        const miss=decors.filter(d=>{if(!d.c[c])return false;if(searchQ&&!d.n.includes(searchQ))return false;const max=d.c[c];for(let i=0;i<max;i++)if((own[key(d.id,c,i)]||0)>0)return false;return true;});
-        const total=decors.filter(d=>d.c[c]&&(!searchQ||!searchQ||d.n.includes(searchQ))).length;
+        const miss=[];
+        let total=0;
+        decors.forEach(d=>{
+            if(!d.c[c]) return;
+            if(searchQ && !d.n.includes(searchQ)) return;
+            const max=d.c[c]||0;
+            for(let i=0;i<max;i++){
+                total++;
+                if((own[key(d.id,c,i)]||0)>0) continue;
+                miss.push({decor:d, index:i, max});
+            }
+        });
         return {c, miss, total, owned:total-miss.length};
     }); // 固定顏色順序：紅→黃→藍→紫→白→岩→翼→冰
     
@@ -844,7 +854,7 @@ function renderMiss(){
         if(colorF!=='all'&&colorF!==c)return;
         if(statusF==='done')return;
         const pct=total>0?Math.round(owned/total*100):0;
-        h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">${owned}/${total} (${pct}%)</span></div><div class="miss-grid">${miss.length?miss.map(d=>{const token=d.id+'::'+c;return `<div class="miss-chip ${pendingMissFill===token?'confirm':''}" onclick="fillMissingDecor('${d.id}','${c}')">${d.i} ${d.n}</div>`;}).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
+        h+=`<div class="miss-sec"><div class="miss-head"><div class="dot ${c}"></div><h4>${CN[c]} Pikmin</h4><span style="color:var(--muted);font-size:.8rem;margin-left:8px">${owned}/${total} (${pct}%)</span></div><div class="miss-grid">${miss.length?miss.map(item=>{const d=item.decor;const token=d.id+'::'+c;const suffix=item.max>1?` ${item.index+1}`:'';return `<div class="miss-chip ${pendingMissFill===token?'confirm':''}" onclick="fillMissingDecor('${d.id}','${c}')">${d.i} ${d.n}${suffix}</div>`;}).join(''):'<span class="miss-none">✨ 全部收集完成！</span>'}</div></div>`;
     });
     if(!h)h='<div class="empty">沒有匹配項</div>';
     document.getElementById('missView').innerHTML=h;
