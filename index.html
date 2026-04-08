@@ -598,15 +598,16 @@ async function load(){
     const hash = location.hash.startsWith('#d=') ? location.hash.slice(3) : '';
     if(hash){
         const data = await decode(hash);
+        history.replaceState(null,'',location.pathname);
         if(data){
             own = migrateLocalOwn(data.o || {});
             selectedEvents = data.e || [];
             save();
             toast('📥 已從連結載入資料');
-            history.replaceState(null,'',location.pathname);
             render();
             return;
         }
+        centerToast('❌ 此分享連結無法使用\n請重新生成', 3000);
     }
     // 從 localStorage 載入（v2 格式）
     const s2 = localStorage.getItem('pik_v2');
@@ -1166,7 +1167,7 @@ async function applySharedLink(url){
         closeModal();
         toast('📥 匯入成功');
     }catch(e){
-        centerToast('❌ 無法識別分享碼，舊版二維碼請重新生成');
+        centerToast('❌ 無法識別分享碼');
     }
 }
 
@@ -1273,13 +1274,13 @@ function toast(m){
         },2500);
     });
 }
-function centerToast(m){
+function centerToast(m, duration=1600){
     // Use a completely separate element for center notifications
     let c=document.getElementById('centerToast');
     if(!c){
         c=document.createElement('div');
         c.id='centerToast';
-        c.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(30,30,30,.88);color:#fff;padding:14px 28px;border-radius:18px;font-weight:700;font-size:.95rem;z-index:1002;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 8px 28px rgba(0,0,0,.2)';
+        c.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);max-width:min(84vw,320px);background:rgba(24,24,24,.92);color:#fff;padding:14px 20px;border-radius:18px;font-weight:700;font-size:.92rem;line-height:1.5;z-index:1002;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 10px 30px rgba(0,0,0,.22);text-align:center;white-space:pre-line';
         document.body.appendChild(c);
     }
     const el=c;
@@ -1290,7 +1291,7 @@ function centerToast(m){
     window._centerToastTimer=setTimeout(()=>{
         el.style.opacity='0';
         setTimeout(()=>{ if(window._centerToastTimer)el.style.opacity='0'; },220);
-    },1600);
+    },duration);
 }
 function releaseActionButtonState(){document.querySelectorAll('.share-action').forEach(b=>b.blur());}
 
