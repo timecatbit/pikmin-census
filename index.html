@@ -491,7 +491,6 @@ let pendingClear = null;
 let clearTimer = null;
 let pendingMissFill = null;
 let missFillTimer = null;
-let lastOceanEggAt = 0;
 let logoTapCount = 0;
 let logoTapTimer = null;
 
@@ -794,10 +793,9 @@ function setColorF(c){colorF=c;render();}
 function setStatusF(s){statusF=s;render();}
 
 function triggerOceanEaster(word){
-    const now = Date.now();
-    if(now - lastOceanEggAt < 4000) return;
-    lastOceanEggAt = now;
     window._oceanEggWord = word;
+    const existing = document.querySelector('.ocean-easter');
+    if(existing) existing.remove();
     const layer = document.createElement('div');
     layer.className = 'ocean-easter';
     const items = ['🐋','🐟','🐠','🫧','✨','🌊','🐬'];
@@ -885,7 +883,7 @@ function renderList(){
     if(!h){
         if(window._oceanEggWord){
             const w = window._oceanEggWord;
-            h='<div class="empty">'+(w==='fish'?'匹配到小可爱一只':'捕魚達人！')+'</div>';
+            h='<div class="empty">'+(w==='fish'?'匹配到小可愛一隻':'捕魚達人！')+'</div>';
             window._oceanEggWord=null;
         }else{
             h='<div class="empty">沒有匹配項</div>';
@@ -938,7 +936,7 @@ function renderMiss(){
     if(!h){
         if(window._oceanEggWord){
             const w = window._oceanEggWord;
-            h='<div class="empty">'+(w==='fish'?'匹配到小可爱一只':'捕魚達人！')+'</div>';
+            h='<div class="empty">'+(w==='fish'?'匹配到小可愛一隻':'捕魚達人！')+'</div>';
             window._oceanEggWord=null;
         }else{
             h='<div class="empty">沒有匹配項</div>';
