@@ -1041,12 +1041,23 @@ function showImportModal(){
                 <div id="qrReader" style="width:100%;max-width:360px;margin:0 auto"></div>
                 <div class="scan-actions"><button class="btn" onclick="stopQrScan()">停止掃描</button></div>
             </div>
+            <div class="scan-box" id="linkImportBox" style="cursor:default;text-align:left">
+                <div style="font-size:1.6rem;text-align:center">🔗</div>
+                <strong style="display:block;text-align:center">連結匯入</strong>
+                <p style="text-align:center">貼上分享連結直接載入資料</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+                    <input id="linkImportInput" class="search" style="min-width:0;flex:1" placeholder="貼上分享連結...">
+                    <button class="btn primary" id="linkImportBtn" type="button">匯入</button>
+                    <button class="btn" id="linkPasteBtn" type="button">貼上</button>
+                </div>
+            </div>
             <div class="scan-box" id="drop"><div style="font-size:1.8rem">📁</div><strong>JSON 匯入</strong><p>點擊或拖曳 JSON 檔案</p><input type="file" id="fileIn" accept=".json"></div>
             <div class="scan-box" id="scanImageBtn"><div style="font-size:1.5rem">🖼️</div><strong>識別二維碼圖片</strong><p>從相冊選一張二維碼圖片</p><input type="file" id="qrImageIn" accept="image/*"></div>
         </div>`;
     openModal();
     setupDrop();
     setupQrImport();
+    setupLinkImport();
 }
 
 function setupDrop(){
@@ -1066,6 +1077,27 @@ function setupQrImport(){
     if(scanBtn) scanBtn.onclick = ()=>startQrScan();
     if(scanImageBtn) scanImageBtn.onclick = (e)=>{ if(e.target.id!=='qrImageIn') qrImageIn.click(); };
     if(qrImageIn) qrImageIn.onchange = async e=>{ if(e.target.files[0]) await scanQrImage(e.target.files[0]); };
+}
+
+function setupLinkImport(){
+    const input = document.getElementById('linkImportInput');
+    const importBtn = document.getElementById('linkImportBtn');
+    const pasteBtn = document.getElementById('linkPasteBtn');
+    if(importBtn) importBtn.onclick = ()=>applySharedLink((input && input.value || '').trim());
+    if(input) input.onkeydown = e=>{ if(e.key === 'Enter'){ e.preventDefault(); applySharedLink(input.value.trim()); } };
+    if(pasteBtn) pasteBtn.onclick = async ()=>{
+        if(!navigator.clipboard || !navigator.clipboard.readText){
+            if(input) input.focus();
+            toast('請手動貼上連結');
+            return;
+        }
+        try{
+            const text = await navigator.clipboard.readText();
+            if(input) input.value = text.trim();
+        }catch(e){
+            toast('❌ 無法讀取剪貼板');
+        }
+    };
 }
 
 async function applySharedLink(url){
