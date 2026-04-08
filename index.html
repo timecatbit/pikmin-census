@@ -274,6 +274,7 @@
         body.standalone-mode .event-section{margin-top:0}
 
 </style>
+    <script src="mapping-code.js"></script>
     <script src="https://unpkg.com/html5-qrcode" defer></script>
 </head>
 <body>
@@ -425,6 +426,11 @@ const EVENTS = [
   {id:'ev_荷蘭木鞋鑰匙圈',n:'荷蘭木鞋鑰匙圈',i:'🥿',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
 ];
 
+const { REGULAR_SHARE_CODES, EVENT_SHARE_CODES } = window.PIKMIN_SHARE_CODES;
+
+
+
+
 
 
 
@@ -498,15 +504,61 @@ async function decompressFromBase64Url(b64url) {
     return new TextDecoder().decode(buf);
 }
 
-const DATA_VERSION = 4;
+const DATA_VERSION = 6;
 
-function packOwnMap(ownMap){
-    return Object.entries(ownMap)
-        .filter(([,v]) => (v||0) > 0)
-        .map(([k,v]) => `${k}:${v}`);
+const SHARE_CODE_BY_ID = Object.assign({}, REGULAR_SHARE_CODES, EVENT_SHARE_CODES);
+const SHARE_ID_BY_CODE = Object.fromEntries(Object.entries(SHARE_CODE_BY_ID).map(([id, code]) => [code, id]));
+const DECOR_BY_ID = Object.fromEntries([...REGULAR, ...EVENTS].map(decor => [decor.id, decor]));
+
+function getShareOrderForDecor(decor){
+    const colors = Object.keys(decor.c || {});
+    if(colors.length === 7) return C7.filter(c => decor.c[c]);
+    if(colors.length === 8) return C8.filter(c => decor.c[c]);
+    return colors;
 }
 
-function unpackOwnMap(arr){
+function getShareSlotsForDecor(decor){
+    const slots = [];
+    getShareOrderForDecor(decor).forEach(color => {
+        const max = decor.c[color] || 0;
+        for(let i=0;i<max;i++) slots.push([color, i]);
+    });
+    return slots;
+}
+
+function packOwnMap(ownMap){
+    return Object.values(DECOR_BY_ID).map(decor => {
+        const code = SHARE_CODE_BY_ID[decor.id];
+        if(!code) return null;
+        const digits = getShareSlotsForDecor(decor).map(([color, idx]) => {
+            const v = ownMap[key(decor.id, color, idx)] || 0;
+            return String(Math.max(0, Math.min(5, v)));
+        }).join('');
+        return /[1-5]/.test(digits) ? `${code}${digits}` : null;
+    }).filter(Boolean);
+}
+
+function unpackOwnMapV6(arr){
+    const out = {};
+    (arr || []).forEach(entry => {
+        if(typeof entry !== 'string' || entry.length < 3) return;
+        const code = entry.slice(0, 2);
+        const digits = entry.slice(2);
+        const decorId = SHARE_ID_BY_CODE[code];
+        const decor = DECOR_BY_ID[decorId];
+        if(!decor) return;
+        const slots = getShareSlotsForDecor(decor);
+        if(digits.length !== slots.length) return;
+        for(let i=0;i<digits.length;i++){
+            const v = Number(digits[i]);
+            if(!Number.isFinite(v) || v <= 0 || v > 5) continue;
+            out[key(decor.id, slots[i][0], slots[i][1])] = v;
+        }
+    });
+    return out;
+}
+
+function unpackOwnMapLegacy(arr){
     const out = {};
     (arr || []).forEach(s => {
         const i = s.lastIndexOf(':');
@@ -518,8 +570,16 @@ function unpackOwnMap(arr){
     return out;
 }
 
+function packEventCodes(events){
+    return (events || []).map(id => SHARE_CODE_BY_ID[id]).filter(Boolean);
+}
+
+function unpackEventCodesV6(codes){
+    return (codes || []).map(code => SHARE_ID_BY_CODE[code]).filter(id => !!id && !!EVENT_SHARE_CODES[id]);
+}
+
 async function encode(data){
-    const payload = [DATA_VERSION, packOwnMap(data.o || {}), data.e || []];
+    const payload = [DATA_VERSION, packOwnMap(data.o || {}), packEventCodes(data.e || [])];
     return await compressToBase64Url(JSON.stringify(payload));
 }
 
@@ -527,12 +587,14 @@ async function decode(str){
     try{
         const raw = JSON.parse(await decompressFromBase64Url(str));
         if(Array.isArray(raw)){
-            return {o: unpackOwnMap(raw[1]), e: raw[2] || []};
+            if(raw[0] === 6){
+                return {o: unpackOwnMapV6(raw[1]), e: unpackEventCodesV6(raw[2])};
+            }
+            return {o: unpackOwnMapLegacy(raw[1]), e: raw[2] || []};
         }
         return {o: raw.o || {}, e: raw.e || raw.events || []};
     }catch(e){return null;}
 }
-
 async function load(){
     const hash = location.hash.startsWith('#d=') ? location.hash.slice(3) : '';
     if(hash){
@@ -1159,8 +1221,8 @@ async function scanQrImage(file){
 }
 
 async function exportData(fromShare=false){
-    const d={v:DATA_VERSION,date:new Date().toISOString(),own,events:selectedEvents};
-    const j=JSON.stringify(d,null,2);
+    const d={v:DATA_VERSION,d:packOwnMap(own),e:packEventCodes(selectedEvents)};
+    const j=JSON.stringify(d);
     const b=new Blob([j],{type:'application/json'});
     const a=document.createElement('a');
     const href=URL.createObjectURL(b);
@@ -1198,8 +1260,9 @@ async function importFile(f){
         }catch(_){}
         // 舊 JSON 格式（v7 或更早）
         const j=JSON.parse(raw);
-        own=j.own||j.data||j.collection||j;
-        selectedEvents=j.events||[];
+        if(!(j && j.v === 6 && Array.isArray(j.d))) throw new Error('bad json');
+        own = unpackOwnMapV6(j.d);
+        selectedEvents = unpackEventCodesV6(j.e || []);
         save();render();
         closeModal();
         toast('📥 匯入成功');
