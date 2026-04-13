@@ -608,8 +608,13 @@ async function decode(str){
         if(Array.isArray(raw) && raw[0] === 6){
             return {o: unpackOwnMapV6(raw[1]), e: unpackEventCodesV6(raw[2])};
         }
+        // Version mismatch or unexpected format
+        console.warn('[decode] Unexpected format:', JSON.stringify(raw)?.substring(0, 100));
         return null;
-    }catch(e){return null;}
+    }catch(e){
+        console.warn('[decode] Decompression/parse failed:', e.message);
+        return null;
+    }
 }
 async function load(){
     const hash = location.hash.startsWith('#d=') ? location.hash.slice(3) : '';
@@ -1281,9 +1286,24 @@ function setupLinkImport(){
 async function applySharedLink(url){
     try{
         const text = String(url || '').trim();
-        const match = text.match(/#d=([^\s]+)/);
-        const raw = match ? match[1].trim() : text;
+        console.log('[applySharedLink] input:', text.substring(0, 200));
+        
+        // Extract the data part after #d= (handles various URL formats)
+        // Try multiple patterns to be more robust
+        let raw = '';
+        const match1 = text.match(/#d=([A-Za-z0-9\-_=]+)/);
+        const match2 = text.match(/[?&]d=([A-Za-z0-9\-_=]+)/);
+        const match = match1 || match2;
+        
+        if(match && match[1]){
+            raw = match[1].trim();
+        }else{
+            // If no #d= found, try using the whole text as raw data
+            raw = text;
+        }
+        
         if(!raw) throw new Error('no data');
+        console.log('[applySharedLink] raw length:', raw.length, 'first chars:', raw.substring(0, 30));
         const data = await decode(raw);
         if(!data) throw new Error('bad data');
         own = migrateLocalOwn(data.o || {});
@@ -1293,7 +1313,12 @@ async function applySharedLink(url){
         closeModal();
         toast('📥 匯入成功');
     }catch(e){
-        centerToast('❌ 無法識別分享碼');
+        console.error('[applySharedLink] error:', e);
+        // Provide more specific error messages
+        const msg = e.message === 'no data' ? '❌ QR Code 數據為空' :
+                     e.message === 'bad data' ? '❌ 無法解析分享數據，請確認 QR Code 來自相同版本' :
+                     '❌ 無法識別分享碼';
+        centerToast(msg);
     }
 }
 
@@ -1334,8 +1359,10 @@ async function scanQrImage(file){
         const scanner = new Html5Qrcode('qrReader');
         const decoded = await scanner.scanFile(file, true);
         await scanner.clear();
+        console.log('[scanQrImage] decoded:', decoded);
         await applySharedLink(decoded);
     }catch(e){
+        console.error('[scanQrImage] error:', e);
         toast('❌ 無法識別圖片中的二維碼');
     }
 }
