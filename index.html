@@ -287,6 +287,7 @@
 </style>
     <script src="mapping-code.js"></script>
     <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" defer></script>
 </head>
 <body>
 <div class="app">
@@ -1354,15 +1355,51 @@ async function stopQrScan(){
 }
 
 async function scanQrImage(file){
-    if(!window.Html5Qrcode){ toast('❌ 掃碼器載入失敗'); return; }
+    if(!window.jsQR){
+        // Fallback to html5-qrcode if jsQR not loaded
+        try{
+            const scanner = new Html5Qrcode('qrReader');
+            const decoded = await scanner.scanFile(file, true);
+            await scanner.clear();
+            console.log('[scanQrImage] decoded:', decoded);
+            await applySharedLink(decoded);
+        }catch(e){
+            console.error('[scanQrImage] html5-qrcode error:', e);
+            toast('❌ 無法識別圖片中的二維碼');
+        }
+        return;
+    }
     try{
-        const scanner = new Html5Qrcode('qrReader');
-        const decoded = await scanner.scanFile(file, true);
-        await scanner.clear();
-        console.log('[scanQrImage] decoded:', decoded);
-        await applySharedLink(decoded);
+        const img = new Image();
+        const imgUrl = URL.createObjectURL(file);
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = imgUrl;
+        });
+        // Scale up small images to improve recognition
+        const canvas = document.createElement('canvas');
+        const maxDim = 1024;
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(imgUrl);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'dontInvert'
+        });
+        if(!code){
+            throw new Error('no QR found');
+        }
+        console.log('[scanQrImage] jsQR decoded:', code.data);
+        await applySharedLink(code.data);
     }catch(e){
-        console.error('[scanQrImage] error:', e);
+        console.error('[scanQrImage] jsQR error:', e);
         toast('❌ 無法識別圖片中的二維碼');
     }
 }
