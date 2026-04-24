@@ -1520,7 +1520,7 @@ function buildIndexList(){
     h+='</div>';
     list.innerHTML=h;
 }
-function closeIndexSheet(){ document.getElementById('indexSheet').classList.remove('show'); }
+function closeIndexSheet(){ document.getElementById('indexSheet').classList.remove('show'); document.body.classList.remove('modal-open'); }
 function scrollToDecor(id){
     closeIndexSheet();
     if(view!=='list') setView('list');
@@ -1557,7 +1557,14 @@ document.getElementById('searchClear').onclick=()=>{
 document.getElementById('btnShare').onclick=async()=>{await showShareModal();};
 document.getElementById('btnImport').onclick=showImportModal;
 document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
-document.getElementById('btnIndex').onclick=()=>{ buildIndexList(); document.getElementById('indexSheet').classList.add('show'); };
+document.getElementById('btnIndex').onclick=()=>{
+    buildIndexList();
+    const btn=document.getElementById('btnIndex').getBoundingClientRect();
+    const panel=document.querySelector('.idx-panel');
+    panel.style.top=(btn.bottom + 8)+'px';
+    document.getElementById('indexSheet').classList.add('show');
+    document.body.classList.add('modal-open');
+};
 document.getElementById('indexBackdrop').onclick=closeIndexSheet;
 document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('eventHeader').onclick=toggleEventPanel;
