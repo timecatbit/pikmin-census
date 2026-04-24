@@ -61,6 +61,17 @@
         .btn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(10,148,116,.15)}
         .btn:active{transform:translateY(0)}
         .btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+        .idx-sheet{display:none;position:fixed;inset:0;z-index:1100}
+        .idx-sheet.show{display:block}
+        .idx-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.24)}
+        .idx-panel{position:absolute;left:12px;right:12px;top:96px;max-height:min(72vh,620px);background:var(--card);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden}
+        .idx-head{padding:10px 12px 8px;font-size:.78rem;font-weight:800;color:var(--accent);border-bottom:1px solid var(--soft-border);background:#f7fbf7}
+        .idx-wrap{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;overflow-y:auto;max-height:min(calc(72vh - 44px),560px);-webkit-overflow-scrolling:touch}
+        .idx-group{width:100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+        .idx-item{padding:5px 8px;border-radius:16px;background:#f0f0f0;font-size:.72rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap}
+        .idx-item:hover{background:#e0e0e0}
+        @keyframes idxFlash{0%,100%{box-shadow:0 0 0 0 rgba(92,184,96,0);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(92,184,96,.58);transform:scale(1.03)}}
+        .idx-highlight{animation:idxFlash .45s ease 3}
         .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
         
         .event-section{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
@@ -232,6 +243,10 @@
             .toolbar{top:72px;gap:6px;margin:8px 10px;padding:8px;border-radius:14px}
             .search{padding:8px 40px 8px 12px;font-size:16px}
             .btn{padding:8px 10px;font-size:.8rem}
+            .idx-panel{left:10px;right:10px;top:84px;max-height:min(74vh,620px)}
+            .idx-head{padding:9px 10px 7px;font-size:.74rem}
+            .idx-wrap{padding:7px;gap:5px}
+            .idx-item{padding:4px 7px;font-size:.68rem}
             .views{margin:0 10px 10px}
             .view-btn{padding:10px 8px;font-size:.8rem}
             .filters{margin:0 10px 8px}
@@ -315,6 +330,13 @@
         <button class="btn" id="btnReset">🔄</button>
         <button class="btn" id="btnImport">📥</button>
         <button class="btn" id="btnShare">📤</button>
+        <button class="btn" id="btnIndex" title="快速索引">📑</button>
+    </div>
+    <div class="idx-sheet" id="indexSheet">
+        <div class="idx-backdrop" id="indexBackdrop"></div>
+        <div class="idx-panel">
+            <div id="indexList"></div>
+        </div>
     </div>
     
     <div class="event-section">
@@ -908,7 +930,7 @@ function renderItem(d){
     const cnt=entries.reduce((s,[c,max])=>s+Array.from({length:max},(_,i)=>(own[key(d.id,c,i)]||0)>0?1:0).reduce((a,b)=>a+b,0),0);
     const done=cnt===total;
     const cols=JSON.stringify(Object.keys(d.c)).replace(/"/g,"'");
-    return `<div class="item ${done?'done':''}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${total}</span></div><div class="item-btns"><span class="clear-btn ${pendingClear===d.id?'confirm':''}" onclick="event.stopPropagation();clearD('${d.id}',${cols})">${pendingClear===d.id?'確認':'清空'}</span></div></div><div class="piks">${entries.flatMap(([c,max])=>Array.from({length:max},(_,i)=>{const val=own[key(d.id,c,i)]||0;const has=val>0;return`<div class="pik ${has?'own':''}" data-id="${d.id}" data-color="${c}" data-idx="${i}" onclick="toggle('${d.id}','${c}',${i})" title="${CN[c]}"><div class="d dot ${c}">${max>1?'<span class="dot-num">'+(i+1)+'</span>':''}</div>${has?`<span class="bubble">${val}</span>`:''}</div>`;})).join('')}</div></div>`;
+    return `<div class="item ${done?'done':''}" data-decor-id="${d.id}"><div class="item-row"><span class="item-icon">${d.i}</span><div class="item-info"><span class="item-name">${d.n}</span>${d.note?`<span class="item-sub">${d.note}</span>`:''}<span class="item-prog">${cnt}/${total}</span></div><div class="item-btns"><span class="clear-btn ${pendingClear===d.id?'confirm':''}" onclick="event.stopPropagation();clearD('${d.id}',${cols})">${pendingClear===d.id?'確認':'清空'}</span></div></div><div class="piks">${entries.flatMap(([c,max])=>Array.from({length:max},(_,i)=>{const val=own[key(d.id,c,i)]||0;const has=val>0;return`<div class="pik ${has?'own':''}" data-id="${d.id}" data-color="${c}" data-idx="${i}" onclick="toggle('${d.id}','${c}',${i})" title="${CN[c]}"><div class="d dot ${c}">${max>1?'<span class="dot-num">'+(i+1)+'</span>':''}</div>${has?`<span class="bubble">${val}</span>`:''}</div>`;})).join('')}</div></div>`;
 }
 
 function renderMiss(){
@@ -1485,6 +1507,38 @@ function centerToast(m, duration=1600){
 }
 function releaseActionButtonState(){document.querySelectorAll('.share-action').forEach(b=>b.blur());}
 
+function buildIndexList(){
+    const list=document.getElementById('indexList');
+    let h='<div class="idx-head">📑 快速索引</div><div class="idx-wrap">';
+    h+='<div class="idx-group">🏠 常駐</div>';
+    REGULAR.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n.split('/')[1]||d.n}</div>`; });
+    const selectedEv=EVENTS.filter(ev=>selectedEvents.includes(ev.id));
+    if(selectedEv.length){
+        h+='<div class="idx-group">🎉 活動</div>';
+        selectedEv.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n}</div>`; });
+    }
+    h+='</div>';
+    list.innerHTML=h;
+}
+function closeIndexSheet(){ document.getElementById('indexSheet').classList.remove('show'); }
+function scrollToDecor(id){
+    closeIndexSheet();
+    if(view!=='list') setView('list');
+    const isRegular=REGULAR.find(d=>d.id===id);
+    const catKey=isRegular?'regular':'special';
+    if(shut[catKey]){ shut[catKey]=false; render(); }
+    setTimeout(()=>{
+        const el=document.querySelector(`[data-decor-id="${id}"]`);
+        if(!el) return;
+        const viewH=window.innerHeight;
+        const elH=el.offsetHeight;
+        const top=el.offsetTop-(viewH/2)+(elH/2);
+        window.scrollTo({top,behavior:'smooth'});
+        el.classList.add('idx-highlight');
+        el.addEventListener('animationend',()=>el.classList.remove('idx-highlight'),{once:true});
+    },60);
+}
+
 // 事件綁定
 document.getElementById('search').oninput=e=>{
     searchQ=e.target.value;
@@ -1503,6 +1557,8 @@ document.getElementById('searchClear').onclick=()=>{
 document.getElementById('btnShare').onclick=async()=>{await showShareModal();};
 document.getElementById('btnImport').onclick=showImportModal;
 document.getElementById('btnReset').onclick=()=>{if(confirm('確定重置所有資料？')){own={};selectedEvents=[];save();render();toast('🔄 已重置');}};
+document.getElementById('btnIndex').onclick=()=>{ buildIndexList(); document.getElementById('indexSheet').classList.add('show'); };
+document.getElementById('indexBackdrop').onclick=closeIndexSheet;
 document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('eventHeader').onclick=toggleEventPanel;
 document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
