@@ -63,6 +63,7 @@ window.PIKMIN_SHARE_CODES = {
     'ev_照片鈕扣徽章':'pb',
     'ev_奶嘴':'np',
     'ev_彩色粉末':'pw',
+    'ev_禮物貼紙金色':'gs',
     'ev_荷蘭木鞋鑰匙圈':'dc'
   }
 };
