@@ -66,7 +66,8 @@
         .idx-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.24)}
         .idx-panel{position:fixed;left:12px;right:12px;background:var(--card);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden;display:flex;flex-direction:column}
         .idx-head{padding:10px 12px 8px;font-size:.78rem;font-weight:800;color:var(--accent);border-bottom:1px solid var(--soft-border);background:#f7fbf7;flex-shrink:0}
-        .idx-wrap{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0}
+        .idx-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:manipulation}
+        .idx-wrap{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
         .idx-group{width:100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
         .idx-item{padding:5px 8px;border-radius:16px;background:#f0f0f0;font-size:.72rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap}
         .idx-item:hover{background:#e0e0e0}
@@ -335,7 +336,10 @@
     <div class="idx-sheet" id="indexSheet">
         <div class="idx-backdrop" id="indexBackdrop"></div>
         <div class="idx-panel">
-            <div id="indexList"></div>
+            <div class="idx-head" id="indexHead">📑 快速索引</div>
+            <div class="idx-scroll">
+                <div class="idx-wrap" id="indexList"></div>
+            </div>
         </div>
     </div>
     
@@ -1514,15 +1518,13 @@ function releaseActionButtonState(){document.querySelectorAll('.share-action').f
 
 function buildIndexList(){
     const list=document.getElementById('indexList');
-    let h='<div class="idx-head">📑 快速索引</div><div class="idx-wrap">';
-    h+='<div class="idx-group">🏠 常駐</div>';
+    let h='<div class="idx-group">🏠 常駐</div>';
     REGULAR.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n.split('/')[1]||d.n}</div>`; });
     const selectedEv=EVENTS.filter(ev=>selectedEvents.includes(ev.id));
     if(selectedEv.length){
         h+='<div class="idx-group">🎉 活動</div>';
         selectedEv.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n}</div>`; });
     }
-    h+='</div>';
     list.innerHTML=h;
 }
 function closeIndexSheet(){ document.getElementById('indexSheet').classList.remove('show'); document.body.classList.remove('modal-open'); }
