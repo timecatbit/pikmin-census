@@ -1581,28 +1581,31 @@ document.getElementById('btnIndex').onclick=()=>{
         const el=document.getElementById('indexScroll');
         const total=el.scrollHeight;
         const vis=el.clientHeight;
-        const pct=total>vis?Math.min(99,(vis/total*100)):100;
-        document.getElementById('indexProgressBar').style.width=pct+'%';
+        _idxInitRatio=total>vis?Math.min(99,(vis/total*100)):100;
+        document.getElementById('indexProgressBar').style.width=_idxInitRatio+'%';
     });
     document.body.classList.add('modal-open');
 };
 document.getElementById('indexBackdrop').onclick=closeIndexSheet;
 let _idxScrolled=false;
 let _idxBaseScrollTop=0;
+let _idxInitRatio=100;
 document.getElementById('indexScroll').addEventListener('scroll',()=>{
     const el=document.getElementById('indexScroll');
     const cur=el.scrollTop;
-    if(cur<=_idxBaseScrollTop+2){
-        // Near initial position — show how much content is offscreen
-        const total=el.scrollHeight;
-        const vis=el.clientHeight;
-        const pct=total>vis?Math.min(99,(vis/total*100)):100;
-        document.getElementById('indexProgressBar').style.width=pct+'%';
+    const total=el.scrollHeight;
+    const vis=el.clientHeight;
+    const remaining=total-vis;
+    const delta=cur-_idxBaseScrollTop;
+    if(delta<=2){
+        // At/near initial — show initial ratio (how much content fits in screen)
+        document.getElementById('indexProgressBar').style.width=_idxInitRatio+'%';
+    }else if(remaining<=0){
+        document.getElementById('indexProgressBar').style.width='100%';
     }else{
-        // Scrolled — show position relative to initial state
-        const max=el.scrollHeight-el.clientHeight;
-        const pct=max>0?Math.min(100,((cur-_idxBaseScrollTop)/(max-_idxBaseScrollTop)*100)):100;
-        document.getElementById('indexProgressBar').style.width=pct+'%';
+        // Grows from initial ratio toward 100% as you scroll to bottom
+        const pct=_idxInitRatio+(100-_idxInitRatio)*(delta/remaining);
+        document.getElementById('indexProgressBar').style.width=Math.min(100,pct)+'%';
     }
 });
 document.getElementById('modalClose').onclick=closeModal;
