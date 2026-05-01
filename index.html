@@ -1574,9 +1574,15 @@ document.getElementById('btnIndex').onclick=()=>{
     const maxH=window.innerHeight - topPos - 12;
     panel.style.top=topPos+'px';
     panel.style.maxHeight=maxH+'px';
-    document.getElementById('indexProgressBar').style.width='0%';
     document.getElementById('indexSheet').classList.add('show');
     document.getElementById('indexScroll').scrollTop=0;
+    requestAnimationFrame(()=>{
+        const el=document.getElementById('indexScroll');
+        const total=el.scrollHeight;
+        const vis=el.clientHeight;
+        const pct=total>vis?Math.min(99,(vis/total*100)):100;
+        document.getElementById('indexProgressBar').style.width=pct+'%';
+    });
     document.body.classList.add('modal-open');
 };
 document.getElementById('indexBackdrop').onclick=closeIndexSheet;
