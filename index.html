@@ -66,8 +66,10 @@
         .idx-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.24)}
         .idx-panel{position:fixed;left:12px;right:12px;background:var(--card);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden;display:flex;flex-direction:column}
         .idx-head{padding:10px 12px 8px;font-size:.78rem;font-weight:800;color:var(--accent);border-bottom:1px solid var(--soft-border);background:#f7fbf7;flex-shrink:0}
-        .idx-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:manipulation}
+        .idx-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:manipulation;position:relative}
         .idx-wrap{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+        .idx-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(92,184,96,.15);z-index:1;pointer-events:none}
+        .idx-progress-bar{height:100%;background:var(--accent);transition:width .1s;width:0}
         .idx-group{width:100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
         .idx-item{padding:5px 8px;border-radius:16px;background:#f0f0f0;font-size:.72rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap}
         .idx-item:hover{background:#e0e0e0}
@@ -337,8 +339,9 @@
         <div class="idx-backdrop" id="indexBackdrop"></div>
         <div class="idx-panel">
             <div class="idx-head" id="indexHead">📑 快速索引</div>
-            <div class="idx-scroll">
+            <div class="idx-scroll" id="indexScroll">
                 <div class="idx-wrap" id="indexList"></div>
+                <div class="idx-progress"><div class="idx-progress-bar" id="indexProgressBar"></div></div>
             </div>
         </div>
     </div>
@@ -1572,10 +1575,17 @@ document.getElementById('btnIndex').onclick=()=>{
     const maxH=window.innerHeight - topPos - 12;
     panel.style.top=topPos+'px';
     panel.style.maxHeight=maxH+'px';
+    document.getElementById('indexProgressBar').style.width='0%';
     document.getElementById('indexSheet').classList.add('show');
     document.body.classList.add('modal-open');
 };
 document.getElementById('indexBackdrop').onclick=closeIndexSheet;
+document.getElementById('indexScroll').addEventListener('scroll',()=>{
+    const el=document.getElementById('indexScroll');
+    const max=el.scrollHeight-el.clientHeight;
+    const pct=max>0?(el.scrollTop/max*100):100;
+    document.getElementById('indexProgressBar').style.width=pct+'%';
+});
 document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('eventHeader').onclick=toggleEventPanel;
 document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
