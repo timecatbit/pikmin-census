@@ -68,10 +68,11 @@
         .idx-head{padding:8px 12px 6px;font-size:.78rem;font-weight:800;color:var(--accent);border-bottom:1px solid var(--soft-border);background:#f7fbf7;flex-shrink:0}
         .idx-progress-bar{height:3px;background:var(--accent);transition:width .1s;width:0;min-width:20%;border-radius:2px;margin-top:6px}
         .idx-progress-track{height:3px;background:rgba(92,184,96,.12);border-radius:2px;margin:6px 12px 0;flex-shrink:0}
-        .idx-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:manipulation}
+        .idx-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:manipulation;display:flex;flex-direction:column}
         .idx-group{width:100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
         .idx-item{padding:5px 8px;border-radius:16px;background:#f0f0f0;font-size:.72rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap}
         .idx-item:hover{background:#e0e0e0}
+        .idx-wrap{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
         @keyframes idxFlash{0%,100%{box-shadow:0 0 0 0 rgba(92,184,96,0);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(92,184,96,.58);transform:scale(1.03)}}
         .idx-highlight{animation:idxFlash .45s ease 3}
         .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
