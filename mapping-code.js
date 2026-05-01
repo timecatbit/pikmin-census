@@ -65,6 +65,7 @@ window.PIKMIN_SHARE_CODES = {
     'ev_彩色粉末':'pw',
     'ev_禮物貼紙金色':'gs',
     'ev_遊戲卡匣':'gc',
+    'ev_起司':'ch',
     'ev_荷蘭木鞋鑰匙圈':'dc'
   }
 };
