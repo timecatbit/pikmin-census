@@ -1577,6 +1577,7 @@ document.getElementById('btnIndex').onclick=()=>{
     document.getElementById('indexSheet').classList.add('show');
     document.getElementById('indexScroll').scrollTop=0;
     requestAnimationFrame(()=>{
+        _idxBaseScrollTop=0;
         const el=document.getElementById('indexScroll');
         const total=el.scrollHeight;
         const vis=el.clientHeight;
@@ -1586,11 +1587,23 @@ document.getElementById('btnIndex').onclick=()=>{
     document.body.classList.add('modal-open');
 };
 document.getElementById('indexBackdrop').onclick=closeIndexSheet;
+let _idxScrolled=false;
+let _idxBaseScrollTop=0;
 document.getElementById('indexScroll').addEventListener('scroll',()=>{
     const el=document.getElementById('indexScroll');
-    const max=el.scrollHeight-el.clientHeight;
-    const pct=max>0?Math.min(100,(el.scrollTop/max*100)):100;
-    document.getElementById('indexProgressBar').style.width=pct+'%';
+    const cur=el.scrollTop;
+    if(cur<=_idxBaseScrollTop+2){
+        // Near initial position — show how much content is offscreen
+        const total=el.scrollHeight;
+        const vis=el.clientHeight;
+        const pct=total>vis?Math.min(99,(vis/total*100)):100;
+        document.getElementById('indexProgressBar').style.width=pct+'%';
+    }else{
+        // Scrolled — show position relative to initial state
+        const max=el.scrollHeight-el.clientHeight;
+        const pct=max>0?Math.min(100,((cur-_idxBaseScrollTop)/(max-_idxBaseScrollTop)*100)):100;
+        document.getElementById('indexProgressBar').style.width=pct+'%';
+    }
 });
 document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('eventHeader').onclick=toggleEventPanel;
