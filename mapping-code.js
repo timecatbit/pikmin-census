@@ -66,6 +66,7 @@ window.PIKMIN_SHARE_CODES = {
     'ev_禮物貼紙金色':'gs',
     'ev_遊戲卡匣':'gc',
     'ev_起司':'ch',
+    'ev_Nintendo遊戲機1980-1995':'ng',
     'ev_荷蘭木鞋鑰匙圈':'dc'
   }
 };
