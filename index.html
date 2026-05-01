@@ -801,15 +801,29 @@ function renderEvents(){
         listEl.innerHTML = tags;
         progressEl.style.display='block';
         selBox.style.display='block';
-        const scrollableMax = listEl.scrollHeight - listEl.clientHeight;
-        const minWidth = scrollableMax>0 ? (listEl.clientHeight/listEl.scrollHeight)*100 : 100;
-        function updateSelScroll(){
-            const pct = scrollableMax>0 ? Math.min(1, listEl.scrollTop / scrollableMax) : 0;
-            // bar = minWidth + (100-minWidth)*pct, so at top: minWidth, at bottom: 100%
-            barEl.style.width = (minWidth + (100-minWidth)*pct) + '%';
+        let _evtBaseScrollTop = 0;
+        let _evtInitRatio = 100;
+        function updateEvtScroll(){
+            const cur = listEl.scrollTop;
+            const scrollableMax = listEl.scrollHeight - listEl.clientHeight;
+            if(Math.abs(cur - _evtBaseScrollTop) <= 2){
+                const initRatio = scrollableMax>0 ? Math.min(99, (listEl.clientHeight/listEl.scrollHeight)*100) : 100;
+                barEl.style.width = initRatio + '%';
+            }else if(scrollableMax<=0){
+                barEl.style.width = '100%';
+            }else{
+                const pct = _evtInitRatio + (100-_evtInitRatio)*((cur-_evtBaseScrollTop)/scrollableMax);
+                barEl.style.width = Math.min(100, pct) + '%';
+            }
         }
-        updateSelScroll();
-        listEl.addEventListener('scroll', updateSelScroll);
+        listEl.scrollTop = 0;
+        requestAnimationFrame(()=>{
+            _evtBaseScrollTop = 0;
+            const scrollableMax = listEl.scrollHeight - listEl.clientHeight;
+            _evtInitRatio = scrollableMax>0 ? Math.min(99, (listEl.clientHeight/listEl.scrollHeight)*100) : 100;
+            barEl.style.width = _evtInitRatio + '%';
+        });
+        listEl.addEventListener('scroll', updateEvtScroll, {passive:true});
     }else{
         document.getElementById('eventSelList').innerHTML='';
         document.getElementById('selProgress').style.display='none';
