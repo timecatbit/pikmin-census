@@ -804,7 +804,7 @@ function renderEvents(){
         let _evtBaseScrollTop = 0;
         let _evtInitRatio = 100;
         function updateEvtScroll(){
-            const cur = listEl.scrollTop;
+            const cur = Math.max(0, listEl.scrollTop);
             const scrollableMax = listEl.scrollHeight - listEl.clientHeight;
             if(Math.abs(cur - _evtBaseScrollTop) <= 2){
                 const initRatio = scrollableMax>0 ? Math.min(99, (listEl.clientHeight/listEl.scrollHeight)*100) : 100;
@@ -1614,22 +1614,20 @@ let _idxBaseScrollTop=0;
 let _idxInitRatio=100;
 document.getElementById('indexScroll').addEventListener('scroll',()=>{
     const el=document.getElementById('indexScroll');
-    const cur=el.scrollTop;
+    const cur=Math.max(0,el.scrollTop);
     const total=el.scrollHeight;
     const vis=el.clientHeight;
     const remaining=total-vis;
     const delta=cur-_idxBaseScrollTop;
     if(delta<=2){
-        // At/near initial — show initial ratio (how much content fits in screen)
         document.getElementById('indexProgressBar').style.width=_idxInitRatio+'%';
     }else if(remaining<=0){
         document.getElementById('indexProgressBar').style.width='100%';
     }else{
-        // Grows from initial ratio toward 100% as you scroll to bottom
         const pct=_idxInitRatio+(100-_idxInitRatio)*(delta/remaining);
         document.getElementById('indexProgressBar').style.width=Math.min(100,pct)+'%';
     }
-});
+},{passive:true});
 document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('eventHeader').onclick=toggleEventPanel;
 document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>setView(b.dataset.v));
