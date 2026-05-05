@@ -31,7 +31,7 @@
         html{background:#5cb860}
         body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
         body.standalone-mode{background:linear-gradient(#5cb860 0 calc(env(safe-area-inset-top, 0px) + 12px), var(--bg) calc(env(safe-area-inset-top, 0px) + 12px))}
-        body.modal-open{overflow:hidden;touch-action:none}
+        body.modal-open{overflow:hidden;position:fixed;left:0;right:0;touch-action:none;-webkit-overflow-scrolling:auto}
         .app{max-width:1100px;margin:0 auto;padding:12px;padding-bottom:120px}
         
         .header{position:sticky;top:0;z-index:100;background:#5cb860;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(92,184,96,.25)}
@@ -1543,7 +1543,14 @@ function buildIndexList(){
     }
     list.innerHTML=h;
 }
-function closeIndexSheet(){ document.getElementById('indexSheet').classList.remove('show'); document.body.classList.remove('modal-open'); }
+let _savedScrollY=0;
+function closeIndexSheet(){
+    const savedY=window._idxSavedScrollY||0;
+    document.getElementById('indexSheet').classList.remove('show');
+    document.body.classList.remove('modal-open');
+    document.body.style.top='';
+    window.scrollTo(0,savedY);
+}
 function scrollToDecor(id){
     closeIndexSheet();
     if(view!=='list') setView('list');
@@ -1596,6 +1603,9 @@ document.getElementById('btnIndex').onclick=()=>{
     const width=right-left;
     panel.style.left=left+'px';
     panel.style.width=width+'px';
+    window._idxSavedScrollY=window.scrollY;
+    document.body.style.top=-window.scrollY+'px';
+    document.body.classList.add('modal-open');
     document.getElementById('indexSheet').classList.add('show');
     document.getElementById('indexScroll').scrollTop=0;
     requestAnimationFrame(()=>{
@@ -1606,7 +1616,6 @@ document.getElementById('btnIndex').onclick=()=>{
         _idxInitRatio=total>vis?Math.min(99,(vis/total*100)):100;
         document.getElementById('indexProgressBar').style.width=_idxInitRatio+'%';
     });
-    document.body.classList.add('modal-open');
 };
 document.getElementById('indexBackdrop').onclick=closeIndexSheet;
 let _idxScrolled=false;
