@@ -67,6 +67,7 @@ window.PIKMIN_SHARE_CODES = {
     'ev_遊戲卡匣':'gc',
     'ev_花冠':'cr',
     'ev_衝浪板鑰匙圈':'sb',
+    'ev_紫色玫瑰花結':'rb',
     'ev_起司':'ch',
     'ev_Nintendo遊戲機1980-1995':'ng',
     'ev_遊戲卡牌':'gcc',
