@@ -74,6 +74,9 @@ window.PIKMIN_SHARE_CODES = {
     'ev_起司':'ch',
     'ev_Nintendo遊戲機1980-1995':'ng',
     'ev_遊戲卡牌':'gcc',
-    'ev_荷蘭木鞋鑰匙圈':'dc'
+    'ev_荷蘭木鞋鑰匙圈':'dc',
+    'ev_迷你樂器：管弦樂團':'mo',
+    'ev_迷你樂器：銅管樂團':'mb',
+    'ev_冰激凌：經典':'ic'
   }
 };

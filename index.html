@@ -31,7 +31,7 @@
         html{background:#5cb860}
         body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
         body.standalone-mode{background:linear-gradient(#5cb860 0 calc(env(safe-area-inset-top, 0px) + 12px), var(--bg) calc(env(safe-area-inset-top, 0px) + 12px))}
-        body.modal-open{overflow:hidden;position:fixed;left:0;right:0;touch-action:none;-webkit-overflow-scrolling:auto}
+        body.modal-open{overflow:hidden;touch-action:none;-webkit-overflow-scrolling:auto}
         .app{max-width:1100px;margin:0 auto;padding:12px;padding-bottom:120px}
         
         .header{position:sticky;top:0;z-index:100;background:#5cb860;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));border-radius:0 0 16px 16px;box-shadow:0 2px 10px rgba(92,184,96,.25)}
@@ -63,7 +63,7 @@
         .btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
         .idx-sheet{display:none;position:fixed;inset:0;z-index:1100}
         .idx-sheet.show{display:block}
-        .idx-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.24)}
+        .idx-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.24);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
         .idx-panel{position:fixed;left:12px;right:12px;background:var(--card);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden;display:flex;flex-direction:column;max-width:1100px}
         .idx-head{padding:8px 12px 6px;font-size:.78rem;font-weight:800;color:var(--accent);border-bottom:1px solid var(--soft-border);background:#f7fbf7;flex-shrink:0}
         .idx-progress-bar{height:3px;background:var(--accent);transition:width .1s;width:0;min-width:20%;border-radius:2px;margin-top:6px}
@@ -344,6 +344,7 @@
             </div>
         </div>
     </div>
+    <div id="btnIndexClone" style="display:none" onclick="closeIndexSheet()">📑</div>
     
     <div class="event-section">
         <div class="event-header shut" id="eventHeader">
@@ -477,7 +478,10 @@ const EVENTS = [
   {id:'ev_衝浪板鑰匙圈',n:'衝浪板鑰匙圈',i:'🏄',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
   {id:'ev_紫色玫瑰花結',n:'紫色玫瑰花結',i:'🌸',c:{'purple':1}},
   {id:'ev_拼圖：2023夏日回憶',n:'拼圖：2023夏日回憶',i:'🧩',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
-  {id:'ev_拼圖：2022夏日回憶',n:'拼圖：2022夏日回憶',i:'🧩',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}}
+  {id:'ev_拼圖：2022夏日回憶',n:'拼圖：2022夏日回憶',i:'🧩',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_迷你樂器：管弦樂團',n:'迷你樂器：管弦樂團',i:'🎻',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
+  {id:'ev_迷你樂器：銅管樂團',n:'迷你樂器：銅管樂團',i:'🎺',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'ev_冰激凌：經典',n:'冰激凌：經典',i:'🍦',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}}
 ];
 
 const { REGULAR_SHARE_CODES, EVENT_SHARE_CODES } = window.PIKMIN_SHARE_CODES;
@@ -1058,6 +1062,8 @@ function showStatsModal(){
     document.getElementById('modalTitle').textContent = '📊 收集統計';
     document.getElementById('modalContent').innerHTML = `<div style="margin-bottom:10px">${rows}</div><div id="whaleTank" style="height:34px;position:relative;overflow:hidden;cursor:pointer;margin-top:4px" title="click!"></div>`;
     document.getElementById('whaleTank').onclick=showWhaleDance;
+    document.body._preventScroll=document.body._preventScroll||function(e){e.preventDefault();};
+    document.body.addEventListener('touchmove',document.body._preventScroll,{passive:false});
     document.getElementById('modal').classList.add('show');
 }
 
@@ -1065,6 +1071,8 @@ let cachedShareUrl = '';
 
 function openModal(){
     document.body.classList.add('modal-open');
+    document.body._preventScroll=document.body._preventScroll||function(e){e.preventDefault();};
+    document.body.addEventListener('touchmove',document.body._preventScroll,{passive:false});
     document.getElementById('modal').classList.add('show');
 }
 
@@ -1113,6 +1121,7 @@ function showWhaleDance(){
 
 function closeModal(){
     stopQrScan();
+    if(document.body._preventScroll){document.body.removeEventListener('touchmove',document.body._preventScroll,{passive:false});document.body._preventScroll=null;}
     document.body.classList.remove('modal-open');
     document.getElementById('modal').querySelector('.modal-box').classList.remove('stats-modal');
     document.getElementById('modal').classList.remove('show');
@@ -1553,8 +1562,10 @@ let _savedScrollY=0;
 function closeIndexSheet(){
     const savedY=window._idxSavedScrollY||0;
     document.getElementById('indexSheet').classList.remove('show');
+    document.getElementById('btnIndex').style.visibility='';
+    document.getElementById('btnIndexClone').style.cssText='display:none';
+    if(document.body._preventScroll){document.body.removeEventListener('touchmove',document.body._preventScroll,{passive:false});document.body._preventScroll=null;}
     document.body.classList.remove('modal-open');
-    document.body.style.top='';
     window.scrollTo(0,savedY);
 }
 function scrollToDecor(id){
@@ -1610,9 +1621,19 @@ document.getElementById('btnIndex').onclick=()=>{
     panel.style.left=left+'px';
     panel.style.width=width+'px';
     window._idxSavedScrollY=window.scrollY;
-    document.body.style.top=-window.scrollY+'px';
     document.body.classList.add('modal-open');
+    document.body._preventScroll=document.body._preventScroll||function(e){
+        var t=e.target;
+        if(t.closest('#indexScroll')||t.closest('.idx-panel'))return;
+        e.preventDefault();
+    };
+    document.body.addEventListener('touchmove',document.body._preventScroll,{passive:false});
     document.getElementById('indexSheet').classList.add('show');
+    const clone=document.getElementById('btnIndexClone');
+    const b=document.getElementById('btnIndex');
+    b.style.visibility='hidden';
+    const br=b.getBoundingClientRect();
+    clone.style.cssText='position:fixed;top:'+br.top+'px;left:'+br.left+'px;width:'+br.width+'px;height:'+br.height+'px;border-radius:12px;font-size:.85rem;font-weight:700;background:#fff;border:2px solid #e0e0e0;color:#222;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1101;';
     document.getElementById('indexScroll').scrollTop=0;
     requestAnimationFrame(()=>{
         _idxBaseScrollTop=0;
