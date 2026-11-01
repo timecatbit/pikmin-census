@@ -88,6 +88,7 @@ window.PIKMIN_SHARE_CODES = {
     'ev_香腸':'sg',
     'ev_萬聖節糖果':'hc',
     'ev_萬聖節燈':'hl',
-    'ev_萬聖節：彩繪玻璃':'hg'
+    'ev_萬聖節：彩繪玻璃':'hg',
+    'ev_五週年紀念玩具珠寶':'aj'
   }
 };
