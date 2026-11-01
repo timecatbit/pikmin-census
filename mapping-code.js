@@ -53,7 +53,8 @@ window.PIKMIN_SHARE_CODES = {
     'reg_塔可餅':'tc',
     'reg_洗衣用品':'ld',
     'reg_韓國泡菜':'kc',
-    'reg_文具':'ss'
+    'reg_文具':'ss',
+    'reg_糕點':'py'
   },
   EVENT_SHARE_CODES: {
     'ev_超級瑪利歐鑰匙圈':'sm',
