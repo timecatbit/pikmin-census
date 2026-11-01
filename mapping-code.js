@@ -85,6 +85,7 @@ window.PIKMIN_SHARE_CODES = {
     'ev_秋天貼紙':'as',
     'ev_月餅':'mc',
     'ev_香腸':'sg',
-    'ev_萬聖節糖果':'hc'
+    'ev_萬聖節糖果':'hc',
+    'ev_萬聖節燈':'hl'
   }
 };
