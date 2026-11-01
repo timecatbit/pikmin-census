@@ -54,7 +54,8 @@ window.PIKMIN_SHARE_CODES = {
     'reg_洗衣用品':'ld',
     'reg_韓國泡菜':'kc',
     'reg_文具':'ss',
-    'reg_糕點':'py'
+    'reg_糕點':'py',
+    'reg_機場行李吊牌':'lt'
   },
   EVENT_SHARE_CODES: {
     'ev_超級瑪利歐鑰匙圈':'sm',
