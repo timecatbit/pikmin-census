@@ -69,8 +69,8 @@
         .idx-progress-bar{height:3px;background:var(--accent);transition:width .1s;width:0;min-width:20%;border-radius:2px;margin-top:6px}
         .idx-progress-track{height:3px;background:rgba(92,184,96,.12);border-radius:2px;margin:6px 12px 0;flex-shrink:0}
         .idx-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:manipulation;display:flex;flex-direction:column}
-        .idx-group{flex:0 0 100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
-        .idx-item{padding:6px 4px;border-radius:10px;background:#f0f0f0;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap;text-align:center;overflow:hidden;flex:0 0 102px;box-sizing:border-box}
+        .idx-group{width:100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+        .idx-item{padding:5px 8px;border-radius:16px;background:#f0f0f0;font-size:.72rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap}
         .idx-item:hover{background:#e0e0e0}
         .idx-wrap{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
         @keyframes idxFlash{0%,100%{box-shadow:0 0 0 0 rgba(92,184,96,0);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(92,184,96,.58);transform:scale(1.03)}}
@@ -250,7 +250,7 @@
             .idx-panel{left:10px;right:10px}
             .idx-head{padding:8px 10px 6px;font-size:.74rem}
             .idx-wrap{padding:7px;gap:5px}
-            .idx-item{padding:5px 3px;font-size:.66rem;flex:0 0 88px}
+            .idx-item{padding:4px 7px;font-size:.68rem}
             .views{margin:0 10px 10px}
             .view-btn{padding:10px 8px;font-size:.8rem}
             .filters{margin:0 10px 8px}
@@ -1585,11 +1585,11 @@ function releaseActionButtonState(){document.querySelectorAll('.share-action').f
 function buildIndexList(){
     const list=document.getElementById('indexList');
     let h='<div class="idx-group">🏠 常駐</div>';
-    REGULAR.forEach(d=>{ h+=`<div class="idx-item" title="${d.n.split('/')[1]||d.n}" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n.split('/')[1]||d.n}${d.rare?'⭐':''}</div>`; });
+    REGULAR.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n.split('/')[1]||d.n}${d.rare?'⭐':''}</div>`; });
     const selectedEv=EVENTS.filter(ev=>selectedEvents.includes(ev.id));
     if(selectedEv.length){
         h+='<div class="idx-group">🎉 活動</div>';
-        selectedEv.forEach(d=>{ h+=`<div class="idx-item" title="${d.n}" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n}</div>`; });
+        selectedEv.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n}</div>`; });
     }
     list.innerHTML=h;
 }
