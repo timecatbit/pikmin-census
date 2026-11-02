@@ -69,8 +69,8 @@
         .idx-progress-bar{height:3px;background:var(--accent);transition:width .1s;width:0;min-width:20%;border-radius:2px;margin-top:6px}
         .idx-progress-track{height:3px;background:rgba(92,184,96,.12);border-radius:2px;margin:6px 12px 0;flex-shrink:0}
         .idx-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:manipulation;display:flex;flex-direction:column}
-        .idx-group{width:100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
-        .idx-item{padding:5px 8px;border-radius:16px;background:#f0f0f0;font-size:.72rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap}
+        .idx-group{flex:0 0 100%;padding:4px 2px 0;font-size:.63rem;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+        .idx-item{padding:6px 4px;border-radius:10px;background:#f0f0f0;font-size:.7rem;cursor:pointer;transition:all .15s;color:var(--text);white-space:nowrap;text-align:center;overflow:hidden;flex:0 0 102px;box-sizing:border-box}
         .idx-item:hover{background:#e0e0e0}
         .idx-wrap{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
         @keyframes idxFlash{0%,100%{box-shadow:0 0 0 0 rgba(92,184,96,0);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(92,184,96,.58);transform:scale(1.03)}}
@@ -250,7 +250,7 @@
             .idx-panel{left:10px;right:10px}
             .idx-head{padding:8px 10px 6px;font-size:.74rem}
             .idx-wrap{padding:7px;gap:5px}
-            .idx-item{padding:4px 7px;font-size:.68rem}
+            .idx-item{padding:5px 3px;font-size:.66rem;flex:0 0 88px}
             .views{margin:0 10px 10px}
             .view-btn{padding:10px 8px;font-size:.8rem}
             .filters{margin:0 10px 8px}
@@ -417,6 +417,7 @@ const REGULAR = [
   {id:'reg_郵票',n:'郵局/郵票',i:'📮',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
   {id:'reg_畫框',n:'美術館/畫框',i:'🖼️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
   {id:'reg_飛機玩具',n:'機場/飛機玩具',i:'✈️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
+  {id:'reg_機場行李吊牌',n:'機場/機場行李吊牌',i:'🏷️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
   {id:'reg_電車紙模型',n:'車站/電車紙模型',i:'🚃',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
   {id:'reg_票券',n:'車站/票券',i:'🎫',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
   {id:'reg_貝殼',n:'海灘/貝殼',i:'🐚',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
@@ -426,6 +427,7 @@ const REGULAR = [
   {id:'reg_蘑菇',n:'超市/蘑菇',i:'🍄',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
   {id:'reg_香蕉',n:'超市/香蕉',i:'🍌',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1},rare:true},
   {id:'reg_法国麵包',n:'麵包店/法國麵包',i:'🥖',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1},rare:true},
+  {id:'reg_糕點',n:'麵包店/糕點',i:'🧁',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
   {id:'reg_剪刀',n:'美容院/剪刀',i:'✂️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1},rare:true},
   {id:'reg_髮圈',n:'服装店/髮圈',i:'💇',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
   {id:'reg_幸運草',n:'公園/幸運草',i:'☘️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1},rare:true},
@@ -458,8 +460,6 @@ const REGULAR = [
   {id:'reg_洗衣用品',n:'自助洗衣店&乾洗店/洗衣用品',i:'🧺',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1}},
   {id:'reg_韓國泡菜',n:'韓國餐廳/韓國泡菜',i:'🥬',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
   {id:'reg_文具',n:'文具店/文具',i:'✏️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
-  {id:'reg_糕點',n:'麵包店/糕點',i:'🧁',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
-  {id:'reg_機場行李吊牌',n:'機場/機場行李吊牌',i:'🏷️',c:{'red':1,'yellow':1,'blue':1,'purple':1,'white':1,'rock':1,'winged':1,'ice':1}},
 ];
 
 const EVENTS = [
@@ -1585,11 +1585,11 @@ function releaseActionButtonState(){document.querySelectorAll('.share-action').f
 function buildIndexList(){
     const list=document.getElementById('indexList');
     let h='<div class="idx-group">🏠 常駐</div>';
-    REGULAR.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n.split('/')[1]||d.n}${d.rare?'⭐':''}</div>`; });
+    REGULAR.forEach(d=>{ h+=`<div class="idx-item" title="${d.n.split('/')[1]||d.n}" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n.split('/')[1]||d.n}${d.rare?'⭐':''}</div>`; });
     const selectedEv=EVENTS.filter(ev=>selectedEvents.includes(ev.id));
     if(selectedEv.length){
         h+='<div class="idx-group">🎉 活動</div>';
-        selectedEv.forEach(d=>{ h+=`<div class="idx-item" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n}</div>`; });
+        selectedEv.forEach(d=>{ h+=`<div class="idx-item" title="${d.n}" onclick="scrollToDecor('${d.id}')">${d.i} ${d.n}</div>`; });
     }
     list.innerHTML=h;
 }
