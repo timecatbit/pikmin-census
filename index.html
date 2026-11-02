@@ -582,7 +582,14 @@ async function decompressFromBase64Url(b64url) {
 const DATA_VERSION = 6;
 
 const SHARE_CODE_BY_ID = Object.assign({}, REGULAR_SHARE_CODES, EVENT_SHARE_CODES);
-const SHARE_ID_BY_CODE = Object.fromEntries(Object.entries(SHARE_CODE_BY_ID).map(([id, code]) => [code, id]));
+// 同一分享碼可能在 REGULAR / EVENT 兩個命名空間重複（如 ch、gs），
+// 所以反向表是 code -> [id, ...]，解析時再用「槽位數」區分，不能只留最後一個。
+const SHARE_IDS_BY_CODE = Object.entries(SHARE_CODE_BY_ID).reduce((map, [id, code]) => {
+    (map[code] = map[code] || []).push(id);
+    return map;
+}, {});
+// 分享碼長度不固定（多為 2 碼，遊戲卡牌為 3 碼 gcc），解析時必須由長到短比對
+const SHARE_CODES_BY_LENGTH = Object.keys(SHARE_IDS_BY_CODE).sort((a, b) => b.length - a.length);
 const DECOR_BY_ID = Object.fromEntries([...REGULAR, ...EVENTS].map(decor => [decor.id, decor]));
 
 function getShareOrderForDecor(decor){
@@ -613,21 +620,31 @@ function packOwnMap(ownMap){
     }).filter(Boolean);
 }
 
+function splitShareEntry(entry){
+    if(typeof entry !== 'string' || entry.length < 3) return null;
+    for(const code of SHARE_CODES_BY_LENGTH){
+        if(!entry.startsWith(code)) continue;
+        const digits = entry.slice(code.length);
+        if(!/^[0-9]+$/.test(digits)) continue;
+        const decor = (SHARE_IDS_BY_CODE[code] || [])
+            .map(id => DECOR_BY_ID[id])
+            .filter(Boolean)
+            .find(d => getShareSlotsForDecor(d).length === digits.length);
+        if(decor) return {decor, digits};
+    }
+    return null;
+}
+
 function unpackOwnMapV6(arr){
     const out = {};
     (arr || []).forEach(entry => {
-        if(typeof entry !== 'string' || entry.length < 3) return;
-        const code = entry.slice(0, 2);
-        const digits = entry.slice(2);
-        const decorId = SHARE_ID_BY_CODE[code];
-        const decor = DECOR_BY_ID[decorId];
-        if(!decor) return;
-        const slots = getShareSlotsForDecor(decor);
-        if(digits.length !== slots.length) return;
-        for(let i=0;i<digits.length;i++){
-            const v = Number(digits[i]);
+        const parsed = splitShareEntry(entry);
+        if(!parsed) return;
+        const slots = getShareSlotsForDecor(parsed.decor);
+        for(let i=0;i<parsed.digits.length;i++){
+            const v = Number(parsed.digits[i]);
             if(!Number.isFinite(v) || v <= 0 || v > 5) continue;
-            out[key(decor.id, slots[i][0], slots[i][1])] = v;
+            out[key(parsed.decor.id, slots[i][0], slots[i][1])] = v;
         }
     });
     return out;
@@ -638,20 +655,25 @@ function packEventCodes(events){
 }
 
 function packOwnMapForJson(ownMap){
-    const out = {};
-    packOwnMap(ownMap).forEach(entry=>{
-        out[entry.slice(0,2)] = entry.slice(2);
-    });
-    return out;
+    // 用陣列而不是 {碼:數字} 物件：ch / gs 兩個碼各對應兩個 decor，
+    // 舊物件格式會讓後寫的那個覆蓋掉前一個（例如廚師帽子被起司蓋掉）。
+    return packOwnMap(ownMap);
 }
 
-function unpackOwnMapFromJson(obj){
-    const arr = Object.entries(obj || {}).map(([code, digits]) => `${code}${digits}`);
+function unpackOwnMapFromJson(data){
+    if(Array.isArray(data)) return unpackOwnMapV6(data);
+    // 兼容舊版匯出的物件格式 {ch:'11111111', ...}
+    const arr = Object.entries(data || {}).map(([code, digits]) => `${code}${digits}`);
     return unpackOwnMapV6(arr);
 }
 
 function unpackEventCodesV6(codes){
-    return (codes || []).map(code => SHARE_ID_BY_CODE[code]).filter(id => !!id && !!EVENT_SHARE_CODES[id]);
+    const out = [];
+    (codes || []).forEach(code => {
+        const id = (SHARE_IDS_BY_CODE[code] || []).find(id => !!EVENT_SHARE_CODES[id]);
+        if(id && !out.includes(id)) out.push(id);
+    });
+    return out;
 }
 
 async function encode(data){
