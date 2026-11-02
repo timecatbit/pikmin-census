@@ -1644,7 +1644,12 @@ document.getElementById('btnIndex').onclick=()=>{
     const btn=document.getElementById('btnIndex').getBoundingClientRect();
     const panel=document.querySelector('.idx-panel');
     const topPos=btn.bottom + 8;
-    const maxH=window.innerHeight - topPos - 12;
+    const vh=window.innerHeight;
+    const available=vh - topPos - 12;
+    // 面板高度上限：不超过视口 60%，避免占掉大半屏；内容超出时由 .idx-scroll 内部滚动。
+    const cap=Math.round(vh*0.6);
+    let maxH=Math.min(available, cap);
+    if(maxH<200) maxH=available;   // 极小视口回退：保证可用
     panel.style.top=topPos+'px';
     panel.style.maxHeight=maxH+'px';
     const toolbar=document.querySelector('.toolbar');
@@ -1664,6 +1669,41 @@ document.getElementById('btnIndex').onclick=()=>{
     };
     document.body.addEventListener('touchmove',document.body._preventScroll,{passive:false});
     document.getElementById('indexSheet').classList.add('show');
+    // 面板已可见，此时测量才有效。用 offsetTop（布局坐标，不受滚动影响）找出每一行，
+    // 再把面板高度定在「第 N 行完整显示」的边界上，底部就不会露出半截胶囊。
+    (function snapIndexHeight(){
+        const headEl=panel.querySelector('.idx-head');
+        const scrollEl=document.getElementById('indexScroll');
+        const wrapEl=panel.querySelector('.idx-wrap');
+        if(!headEl || !scrollEl || !wrapEl) return;
+        // 所有可见子元素都要参与分行，否则分组标题（.idx-group）会被切掉半截
+        const items=[...wrapEl.querySelectorAll('.idx-item, .idx-group')];
+        if(!items.length) return;
+        const wrapCS=getComputedStyle(wrapEl);
+        const padBottom=parseFloat(wrapCS.paddingBottom)||0;
+        const itemH=items[0].offsetHeight;
+        // 按 offsetTop 分行（同一行的 top 相同）
+        // 用「相对滚动区顶部的视觉位置」分行，rowTop 即该行在 .idx-scroll 内的 y 坐标
+        const scTop=scrollEl.getBoundingClientRect().top;
+        const rows=[];
+        items.forEach(it=>{
+            const t=Math.round(it.getBoundingClientRect().top - scTop);
+            const last=rows[rows.length-1];
+            if(last && Math.abs(last.top-t)<2) last.count++;
+            else rows.push({top:t,count:1,h:it.offsetHeight});
+        });
+        if(rows.length<2) return;          // 只有一行，无需处理
+        // budget 是「滚动区」可用高度（不含头部）
+        const budget=maxH - headEl.offsetHeight;
+        let lastFull=-1;
+        for(let i=0;i<rows.length;i++){
+            if(rows[i].top + (rows[i].h||itemH) <= budget) lastFull=i; else break;
+        }
+        if(lastFull<0 || lastFull>=rows.length-1) return;   // 全部放得下就不用缩
+        // 可视区下边界 = 下一行行首在滚动区内的 y
+        const cut=rows[lastFull+1].top;
+        if(cut>0) panel.style.maxHeight=Math.min(maxH, headEl.offsetHeight + cut)+'px';
+    })();
     const clone=document.getElementById('btnIndexClone');
     const b=document.getElementById('btnIndex');
     b.style.visibility='hidden';
